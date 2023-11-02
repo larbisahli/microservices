@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package deliveryTime;
+
+import "google/protobuf/timestamp.proto";
+import "commons.proto";
+
+message DeliveryTime {
+    uint32 id = 1;
+    string name = 2;
+    commons.Unit unit = 3;
+    uint32 min = 4;
+    uint32 max = 5;
+    DeliveryTimeTranslation translated = 6;
+    optional google.protobuf.Timestamp createdAt = 7;
+    optional google.protobuf.Timestamp updatedAt = 8;
+    optional User createdBy = 9;
+    optional User updatedBy = 10;
+}
+
+message DeliveryTimeTranslation {
+    string name = 1;
+}
+
+// ---
+
+message DeliveryTimeResponse {
+    DeliveryTime deliveryTime = 1;
+}
+
+message DeliveryTimesResponse {
+    repeated DeliveryTime deliveryTimes = 1;
+    uint32 count = 2;
+}
+
+message CreateDeliveryTimeRequest {
+    DeliveryTime data = 1;
+}
+
+message UpdateDeliveryTimeRequest {
+    uint32 id = 1;
+    DeliveryTime data = 1;
+}
+
+service AttributeService {
+    rpc getDeliveryTime(commons.OneResourceRequest)        returns (DeliveryTimeResponse);
+    rpc getDeliveryTimes(commons.ResourcesRequest)         returns (DeliveryTimesResponse);
+    rpc getDeliveryTimeSelect(commons.ResourcesRequest)    returns (DeliveryTimeResponse);
+    rpc createDeliveryTime(CreateDeliveryTimeRequest)            returns (DeliveryTimeResponse);
+    rpc updateDeliveryTime(UpdateDeliveryTimeRequest)            returns (DeliveryTimeResponse);
+    rpc deleteDeliveryTime(commons.deleteRequest)          returns (DeliveryTimeResponse);
+  }

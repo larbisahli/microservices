@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+package product;
+
+import "media.proto";
+import "attribute.proto";
+import "tag.proto";
+import "category.proto";
+
+
+message ProductType {
+  string id = 1;
+}
+
+message Variation {
+  Attribute attribute = 1;
+  repeated AttributeValue values = 2;
+}
+
+message VariationOption {
+  uint32 id = 1;
+  string title = 2;
+  repeated Image thumbnail = 3;
+  repeated uint32 options = 4;
+  double salePrice = 5;
+  double comparePrice = 6;
+  uint32 quantity = 7;
+  string sku = 8;
+}
+
+message Unit {
+  string unit = 1;
+}
+
+message ProductShippingInfo {
+  uint32 id = 1;
+  uint32 weight = 2;
+  Unit weightUnit = 3;
+  uint32 volume = 4;
+  Unit volumeUnit = 5;
+  uint32 dimensionWidth = 6;
+  uint32 dimensionHeight = 7;
+  uint32 dimensionDepth = 8;
+  Unit dimensionUnit = 9;
+}
+
+message ProductSeo {
+  uint32 id = 1;
+  string slug = 2;
+  string metaTitle = 3;
+  string metaKeywords = 4;
+  string metaDescription = 5;
+  repeated Image metaImage = 6;
+}
+
+message Product {
+    uint32 id = 1;
+    string name = 2;
+    string sku = 3;
+    string slug = 4;
+    ProductType type = 5;
+    string description = 6;
+    repeated Image thumbnail = 7;
+    repeated Image gallery = 8;
+    bool inStock = 9;
+    double salePrice = 10;
+    double comparePrice = 11;
+    double maxPrice = 12;
+    double minPrice = 13;
+    uint32 quantity = 14;
+    bool disableOutOfStock = 15;
+    repeated Variation variations = 16;
+    repeated VariationOption variationOptions = 17;
+    ProductShippingInfo productShippingInfo = 18;
+    repeated Category categories = 19;
+    repeated Tag tags = 20;
+    ProductSeo productSeo = 21;
+    repeated Product relatedProducts = 22 [lazy = true];
+    repeated Product upsellProducts = 23 [lazy = true];
+    repeated Product crossSellProducts = 24 [lazy = true];
+}
+
+message PopularProductsRequest {
+  required string alias = 1;
+}
+
+message ProductsResponse {
+  repeated Product products = 1;
+}
+
+message CategoryProductsRequest {
+  required string alias = 1;
+  required string urlKey = 2;
+  required uint32 page = 3;
+}
+
+message ProductRequest {
+  required string alias = 1;
+  required string slug = 2;
+}
+
+message ProductResponse {
+  Product product = 1;
+}
+
+service ProductService {
+  rpc getPopularProducts(PopularProductsRequest)         returns (ProductsResponse);
+  rpc getCategoryProducts(CategoryProductsRequest)       returns (ProductsResponse);
+  rpc getProduct(ProductRequest)                         returns (ProductResponse);
+}

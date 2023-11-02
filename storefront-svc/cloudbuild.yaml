@@ -1,0 +1,22 @@
+steps:
+  # Docker Build
+  - name: 'gcr.io/cloud-builders/docker' # Use docker builder to build the image
+    args: [ # The image
+            'build',
+            '-t',
+            'europe-west9-docker.pkg.dev/calcium-tea-402520/servers/business:${SHORT_SHA}',
+            '-t',
+            'europe-west9-docker.pkg.dev/calcium-tea-402520/servers/business:latest',
+            '--cache-from',
+            'europe-west9-docker.pkg.dev/calcium-tea-402520/servers/business:latest',
+            '.'
+          ]
+
+  # Docker push to Google Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push',  'europe-west9-docker.pkg.dev/calcium-tea-402520/servers/business:${SHORT_SHA}'] # Url for the Artifact Registry
+
+# Store images in Google Artifact Registry
+images:
+  - europe-west9-docker.pkg.dev/calcium-tea-402520/servers/business:${SHORT_SHA}
+  - europe-west9-docker.pkg.dev/calcium-tea-402520/servers/business:latest

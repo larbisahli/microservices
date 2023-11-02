@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package categoryPackage;
+
+import "google/protobuf/timestamp.proto";
+import "photo.proto";
+
+/*
+  * Note that when a message contains a field of its own message type,
+  * it is important to use a "lazy" option in children when generating code for that message.
+*/
+
+message Breadcrumbs {
+  uint32 categoryLevel = 1;
+  string categoryName = 2;
+  string categoryUrl = 3;
+}
+
+message CategorySeo {
+  string urlKey = 1;
+  string metaTitle = 2;
+  string metaKeywords = 3;
+  string metaDescription = 4;
+  string metaRobots = 5;
+  uint32 breadcrumbsPriority = 6;
+  repeated Image metaImage = 7;
+  repeated Breadcrumbs breadcrumbs = 8;
+}
+
+message Category {
+    uint32 id = 1;
+    string name = 2;
+    uint32 parentId = 3;
+    string description = 4;
+    repeated Image thumbnail = 5;
+    bool active = 6;
+    uint32 level = 7;
+    uint32 position = 8;
+    bool includeInMenu = 9;
+    bool hasChildren = 10;
+    repeated Category children = 11 [lazy = true];
+    CategorySeo categorySeo = 12;
+    // google.protobuf.Timestamp createdAt = 13;
+    // google.protobuf.Timestamp updatedAt = 14;
+}
+
+message Menu {
+  uint32 id = 1;
+  string name = 2;
+  string url = 3;
+  repeated Image thumbnail = 4;
+  repeated Menu children = 5 [lazy = true];
+}
+
+
+message MenuRequest {
+  required string alias = 1;
+}
+
+message MenuResponse {
+  repeated Menu menu = 1;
+}
+
+message CategoryRequest {
+  required string urlKey = 1;
+  required string alias = 2;
+}
+
+message CategoryResponse {
+  Category category = 1;
+}

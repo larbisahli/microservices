@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package AttributePackage;
+
+message AttributeValue {
+    uint32 id = 1;
+    string value = 2;
+    string color = 3;
+}
+
+message Attribute {
+    uint32 id = 1;
+    string name = 2;
+}

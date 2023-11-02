@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package orderStatus;
+
+import "google/protobuf/timestamp.proto";
+import "commons.proto";
+import "media.proto";
+
+message OrderStatus {
+    uint32 id = 1;
+    string name = 3;
+    string color = 4;
+    bool privacy = 5;
+    optional OrderStatusTranslated translated = 5;
+    optional google.protobuf.Struct translation = 5;
+    optional google.protobuf.Timestamp createdAt = 7;
+    optional google.protobuf.Timestamp updatedAt = 8;
+    optional User createdBy = 9;
+    optional User updatedBy = 10;
+}
+
+message OrderStatusTranslated {
+    string name = 1;
+}
+
+// ---
+
+message DeliveryTimeResponse {
+    DeliveryTime deliveryTime = 1;
+}
+
+message DeliveryTimesResponse {
+    repeated DeliveryTime deliveryTimes = 1;
+    uint32 count = 2;
+}
+
+message CreateDeliveryTimeRequest {
+    DeliveryTime data = 1;
+}
+
+message UpdateDeliveryTimeRequest {
+    uint32 id = 1;
+    DeliveryTime data = 1;
+}
+
+service AttributeService {
+    rpc getOrderStatus(commons.OneResourceRequest)        returns (DeliveryTimeResponse);
+    rpc getOrderStatuses(commons.ResourcesRequest)         returns (DeliveryTimesResponse);
+    rpc createOrderStatus(CreateDeliveryTimeRequest)            returns (DeliveryTimeResponse);
+    rpc updateOrderStatus(UpdateDeliveryTimeRequest)            returns (DeliveryTimeResponse);
+    rpc deleteOrderStatus(commons.deleteRequest)          returns (DeliveryTimeResponse);
+  }

@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package settings;
+
+import "media.proto";
+import "common.proto";
+
+message Settings {
+    uint32 id = 1;
+    repeated Image logo = 2;
+    repeated Image favicon = 3;
+    string storeName = 4;
+    string storeEmail = 5;
+    string storeNumber = 6;
+    Currency currency = 7;
+    repeated Social socials = 9;
+    uint32 maxCheckoutQuantity = 10;
+    Seo seo = 11;
+}
+
+message StoreConfigRequest {
+    required string alias = 1;
+}
+
+message StoreConfigResponse {
+    Settings config = 1;
+}
+
+service ConfigService {
+    rpc getStoreConfig(StoreConfigRequest)     returns (StoreConfigResponse);
+  }

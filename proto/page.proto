@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package page;
+
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+import "media.proto";
+
+message Page {
+    string id = 1;
+    string slug = 2;
+    string name = 3;
+    string content = 4;
+    string metaTitle = 4;
+    string metaDescription = 4;
+    TranslatedPage translated = 4;
+    bool published = 4;
+    repeated media.Image ogMedia = 4;
+    optional google.protobuf.Timestamp updatedAt = 8;
+    optional User updatedBy = 10;
+}
+
+message TranslatedPage {
+    string name = 3;
+    string content = 4;
+    string metaTitle = 4;
+    string metaDescription = 4;
+}
+
+service AttributeService {
+    rpc getPage(commons.OneResourceRequest)        returns (DeliveryTimeResponse);
+    rpc updatePage(UpdateDeliveryTimeRequest)            returns (DeliveryTimeResponse);
+  }

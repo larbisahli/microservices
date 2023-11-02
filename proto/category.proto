@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package category;
+
+import "google/protobuf/timestamp.proto";
+import "media.proto";
+import "commons.proto";
+
+/*
+  * Note that when a message contains a field of its own message type,
+  * it is important to use a "lazy" option in children when generating code for that message.
+*/
+
+message Category {
+    uint32 id = 1;
+    uint32 parentId = 2;
+    Category parent = 3 [lazy = true];
+    string name = 4;
+    string description = 5;
+    repeated media.Image thumbnail = 6;
+    optional bool active = 7;
+    uint32 level = 8;
+    optional uint32 position = 9;
+    bool includeInMenu = 10;
+    optional bool hasChildren = 11;
+    repeated Category children = 12 [lazy = true];
+    string urlKey = 13;
+    string metaTitle = 14;
+    string metaKeywords = 15;
+    string metaDescription = 16;
+    string metaRobots = 17;
+    optional uint32 breadcrumbsPriority = 18;
+    repeated media.Image metaImage = 19;
+    optional CategoryTranslated translated = 20;
+    optional google.protobuf.Timestamp createdAt = 6;
+    optional google.protobuf.Timestamp updatedAt = 7;
+    optional User createdBy = 7;
+    optional User updatedBy = 8;
+}
+
+message CategoryTranslated {
+  string name = 1;
+  string description = 2;
+  string metaTitle = 3;
+  string metaKeywords = 4;
+  string metaDescription = 5;
+}
+
+// ---------
+
+message CategoryResponse {
+  Category category = 1;
+}
+
+message CategoriesResponse {
+  repeated Category categories = 1;
+  uint32 count = 2;
+}
+
+message CreateCategoryInput {
+  Category data = 2;
+}
+
+message UpdateCategoryInput {
+  uint32 id = 1;
+  Category data = 2;
+}
+
+service CategoryService {
+  rpc getCategory(commons.OneResourceRequest)          returns (MenuResponse);
+  rpc getCategories(commons.ResourcesRequest)          returns (CategoriesResponse);
+  rpc getCategorySelect(commons.ResourcesRequest)      returns (CategoriesResponse);
+  rpc getCreateCategory(CreateCategoryInput)           returns (CategoryResponse);
+  rpc getUpdateCategory(UpdateCategoryInput)           returns (CategoryResponse);
+}

@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package language;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "commons.proto";
+
+message Language {
+    uint32 id = 1;
+    string remoteFilePath = 2;
+    string name = 3;
+    string localeId = 4;
+    string iso2 = 5;
+    string direction = 5;
+    string active = 5;
+    bool isDefault = 5;
+    bool isSystem = 5;
+    optional google.protobuf.Struct translation = 5;
+    optional google.protobuf.Timestamp createdAt = 7;
+    optional google.protobuf.Timestamp updatedAt = 8;
+    optional User createdBy = 9;
+    optional User updatedBy = 10;
+}
+
+// ---
+
+message DeliveryTimeResponse {
+    DeliveryTime deliveryTime = 1;
+}
+
+message DeliveryTimesResponse {
+    repeated DeliveryTime deliveryTimes = 1;
+    uint32 count = 2;
+}
+
+message CreateDeliveryTimeRequest {
+    DeliveryTime data = 1;
+}
+
+message UpdateDeliveryTimeRequest {
+    uint32 id = 1;
+    DeliveryTime data = 1;
+}
+
+service AttributeService {
+    rpc getLanguage(commons.OneResourceRequest)        returns (DeliveryTimeResponse);
+    rpc getLanguages(commons.ResourcesRequest)         returns (DeliveryTimesResponse);
+    rpc createLanguage(UpdateDeliveryTimeRequest)            returns (DeliveryTimeResponse);
+    rpc updateLanguage(CreateDeliveryTimeRequest)            returns (DeliveryTimeResponse);
+    rpc setDefaultLanguage(commons.deleteRequest)          returns (DeliveryTimeResponse);
+    rpc deleteLanguage(commons.deleteRequest)          returns (DeliveryTimeResponse);
+  }

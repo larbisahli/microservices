@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package manufacturer;
+
+import "google/protobuf/timestamp.proto";
+import "commons.proto";
+import "media.proto";
+
+message Manufacturer {
+    uint32 id = 1;
+    string name = 3;
+    string description = 4;
+    string link = 5;
+    repeated media.Image logo = 5;
+    optional ManufacturerTranslated translated = 5;
+    optional google.protobuf.Struct translation = 5;
+    optional google.protobuf.Timestamp createdAt = 7;
+    optional google.protobuf.Timestamp updatedAt = 8;
+    optional User createdBy = 9;
+    optional User updatedBy = 10;
+}
+
+message ManufacturerTranslated {
+    string name = 1;
+    string description = 2;
+}
+
+// ---
+
+message DeliveryTimeResponse {
+    DeliveryTime deliveryTime = 1;
+}
+
+message DeliveryTimesResponse {
+    repeated DeliveryTime deliveryTimes = 1;
+    uint32 count = 2;
+}
+
+message CreateDeliveryTimeRequest {
+    DeliveryTime data = 1;
+}
+
+message UpdateDeliveryTimeRequest {
+    uint32 id = 1;
+    DeliveryTime data = 1;
+}
+
+service AttributeService {
+    rpc getManufacturer(commons.OneResourceRequest)        returns (DeliveryTimeResponse);
+    rpc getManufacturers(commons.ResourcesRequest)         returns (DeliveryTimesResponse);
+    rpc getManufacturersForSelect(commons.ResourcesRequest)         returns (DeliveryTimesResponse);
+    rpc createManufacturer(CreateDeliveryTimeRequest)            returns (DeliveryTimeResponse);
+    rpc updateManufacturer(UpdateDeliveryTimeRequest)            returns (DeliveryTimeResponse);
+    rpc deleteManufacturer(commons.deleteRequest)          returns (DeliveryTimeResponse);
+  }

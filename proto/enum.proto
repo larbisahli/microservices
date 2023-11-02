@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package enum;
+
+enum productTypeEnum {
+    simple = 0;
+    variable = 1;
+}
+
+enum attributeTypeEnum {
+    color = 0;
+    text = 1;
+}
+
+enum discountTypeEnum {
+    x = 1
+}

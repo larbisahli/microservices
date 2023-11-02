@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package media;
+
+message Image {
+    uint32 id = 1;
+    string image = 2;
+    string placeholder = 3;
+    uint32 width = 4;
+    uint32 height = 4;
+    string mimeType = 4;
+    uint32 size = 4;
+    google.protobuf.Timestamp createdAt = 5;
+}
+
+service AttributeService {
+    rpc getMedia(commons.OneResourceRequest)        returns (DeliveryTimeResponse);
+    rpc createMediaFolder(CreateDeliveryTimeRequest)            returns (DeliveryTimeResponse);
+    rpc deleteMediaImage(commons.deleteRequest)          returns (DeliveryTimeResponse);
+    rpc deleteMediaFolder(commons.deleteRequest)          returns (DeliveryTimeResponse);
+  }

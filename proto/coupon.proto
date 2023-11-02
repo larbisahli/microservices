@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package coupon;
+
+import "google/protobuf/timestamp.proto";
+import "commons.proto";
+import "enum.proto";
+
+message Coupon {
+    uint32 id = 1;
+    string code = 2;
+    uint32 discountValue = 3;
+    uint32 orderAmountLimit = 4;
+    enum.discountTypeEnum discountType = 5;
+    uint32 timesUsed = 6;
+    uint32 maxUsage = 7;
+    google.protobuf.Timestamp couponStartDate = 8;
+    google.protobuf.Timestamp couponEndDate = 9;
+    optional google.protobuf.Timestamp createdAt = 10;
+    optional google.protobuf.Timestamp updatedAt = 11;
+    optional User createdBy = 12;
+    optional User updatedBy = 13;
+}
+
+// ---
+
+message CouponResponse {
+    Coupon coupon = 1;
+}
+
+message CouponsResponse {
+    repeated Coupon coupons = 1;
+    uint32 count = 2;
+}
+
+message CreateCouponRequest {
+    Coupon data = 1;
+}
+
+message UpdateCouponRequest {
+    uint32 id = 1;
+    Coupon data = 1;
+}
+
+service AttributeService {
+    rpc getCoupon(commons.OneResourceRequest)        returns (CouponResponse);
+    rpc getCoupons(commons.ResourcesRequest)         returns (CouponsResponse);
+    rpc createCoupon(CreateCouponRequest)            returns (CouponResponse);
+    rpc updateCoupon(UpdateCouponRequest)            returns (CouponResponse);
+    rpc deleteCoupon(commons.deleteRequest)          returns (CouponResponse);
+  }

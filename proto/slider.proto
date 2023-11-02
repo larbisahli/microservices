@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package slider;
+
+import "google/protobuf/timestamp.proto";
+import "media.proto";
+
+message HeroBannerStyle {
+    string align = 1;
+    string textColor = 2;
+    string btnBgc = 3;
+    string btnTextColor = 4;
+}
+
+message HeroBanner {
+    required uint32 id = 1;
+    string destinationUrl = 2;
+    string title = 3;
+    string description = 4;
+    repeated Image thumbnail = 5;
+    bool published = 6;
+    string btnLabel = 7;
+    HeroBannerStyle styles = 8;
+    uint32 position = 9;
+    uint32 clicks = 10;
+    google.protobuf.Timestamp createdAt = 11;
+    google.protobuf.Timestamp updatedAt = 12;
+}
+
+message StoreHeroBanner {
+  required uint32 id = 1;
+  string destinationUrl = 2;
+  string title = 3;
+  string description = 4;
+  repeated Image thumbnail = 5;
+  bool published = 6;
+  string btnLabel = 7;
+  HeroBannerStyle styles = 8;
+  uint32 position = 9;
+}
+
+message Slider {
+  string destinationUrl = 1;
+  uint32 position = 2;
+  string text = 3;
+  string textColor = 4;
+}
+
+message StorePromoBanner {
+  string animationSpeed = 1;
+  string backgroundColor = 2;
+  string direction = 3;
+  repeated Slider sliders = 5;
+}
+
+message HeroBannerRequest {
+    required string alias = 1;
+  }
+
+message HeroBannerResponse {
+    repeated StoreHeroBanner sliders = 1;
+  }
+
+message PromoBannerRequest {
+  required string alias = 1;
+}
+
+message PromoBannerResponse {
+  StorePromoBanner banner = 1;
+}
+
+service SliderService {
+  rpc getStoreHeroBanner(HeroBannerRequest)        returns (HeroBannerResponse);
+  rpc getStorePromoBanner(PromoBannerRequest)      returns (PromoBannerResponse);
+}

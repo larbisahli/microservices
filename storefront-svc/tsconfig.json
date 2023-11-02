@@ -1,0 +1,67 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "target": "ESNext",
+    "module": "CommonJS",
+    "lib": [
+      "ESNext"
+    ],
+    "types": [
+      "reflect-metadata"
+    ],
+    "noImplicitAny": true,
+    "strict": true,
+    "allowJs": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "sourceMap": false,
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "paths": {
+      "@config": [
+        "src/config/index"
+      ],
+      "@repositories": [
+        "src/repositories/index"
+      ],
+      "@hooks": [
+        "src/hooks/index"
+      ],
+      "@database/*": [
+        "src/database/*"
+      ],
+      "@database": [
+        "src/database/index"
+      ],
+      "@ts-types/*": [
+        "src/ts-types/*"
+      ],
+      "@lib/*": [
+        "src/lib/*"
+      ],
+      "@core/*": [
+        "src/core/*"
+      ],
+      "@cache/*": [
+        "src/cache/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ],
+      "@proto/*": [
+        "src/proto/*"
+      ],
+      "@sql": [
+        "src/sql/index"
+      ],
+      "*": [
+        "node_modules/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "additional.d.ts"]
+}

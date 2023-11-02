@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package attribute;
+
+import "google/protobuf/timestamp.proto";
+import "commons.proto";
+import "enum.proto";
+
+message Attribute {
+    uint32 id = 1;
+    string name = 2;
+    enum.attributeTypeEnum type = 3;
+    repeated AttributeValue values = 4;
+    optional AttributeTranslated translated = 5;
+    optional google.protobuf.Timestamp createdAt = 6;
+    optional google.protobuf.Timestamp updatedAt = 7;
+    optional User createdBy = 7;
+    optional User updatedBy = 8;
+}
+
+message AttributeValue {
+    uint32 id = 1;
+    uint32 attributeId = 2;
+    string name = 3;
+    string value = 4;
+    AttributeValueTranslated translated = 5;
+}
+
+message AttributeTranslated {
+    string name = 1;
+}
+
+message AttributeValueTranslated {
+    string name = 1;
+    string value = 2;
+}
+
+// ---
+
+message AttributeResponse {
+    Attribute attribute = 1;
+}
+
+message AttributeValueResponse {
+    AttributeValue value = 1;
+}
+
+message AttributesResponse {
+    repeated Attribute attributes = 1;
+    uint32 count = 2;
+}
+
+message CreateAttributeRequest {
+    Attribute data = 1;
+}
+
+message UpdateAttributeRequest {
+    uint32 id = 1;
+    Attribute data = 1;
+}
+
+service AttributeService {
+    rpc getAttribute(commons.OneResourceRequest)        returns (AttributeResponse);
+    rpc getAttributes(commons.ResourcesRequest)         returns (AttributesResponse);
+    rpc createAttribute(CreateAttributeRequest)         returns (AttributeResponse);
+    rpc updateAttribute(UpdateAttributeRequest)         returns (AttributeResponse);
+    rpc deleteAttribute(commons.deleteRequest)          returns (AttributeValueResponse);
+  }

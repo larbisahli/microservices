@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package PagePackage;
+
+import "common.proto";
+
+message Page {
+    string id = 1;
+    string slug = 2;
+    string name = 3;
+    string content = 4;
+    Seo seo = 5;
+}
+
+message StorePageRequest {
+    required string alias = 1;
+    string slug = 2;
+}
+
+message StorePageResponse {
+    Page page = 1;
+}

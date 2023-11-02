@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package ServiceRoutes;
+
+import "product.proto";
+import "category.proto";
+import "slide.proto";
+import "settings.proto";
+import "page.proto";
+
+service CategoryServiceRoutes {
+  rpc getStoreMenu(MenuRequest)                          returns (MenuResponse);
+  rpc getStoreCategory(CategoryRequest)                  returns (CategoryResponse);
+}
+
+service SliderServiceRoutes {
+  rpc getStoreHeroBanner(HeroBannerRequest)              returns (HeroBannerResponse);
+  rpc getStorePromoBanner(PromoBannerRequest)            returns (PromoBannerResponse);
+}
+
+service ProductServiceRoutes {
+  rpc getPopularProducts(PopularProductsRequest)         returns (ProductsResponse);
+  rpc getCategoryProducts(CategoryProductsRequest)       returns (ProductsResponse);
+  rpc getProduct(ProductRequest)                         returns (ProductResponse);
+}
+
+service ConfigServiceRoutes {
+  rpc getStoreConfig(StoreConfigRequest)                 returns (StoreConfigResponse);
+}
+
+service PageServiceRoutes {
+  rpc getStorePage(StorePageRequest)                     returns (StorePageResponse);
+}
+
+service InvalidationServiceRoutes {
+  rpc invalidateResource(InvalidateResourceRequest)      returns (InvalidateResourceResponse);
+}
+
+message InvalidateResourceRequest {
+  required string alias = 1;
+  required string resourceName = 2;
+  required string packageName = 3;
+}
+
+message InvalidateResourceResponse {
+  bool success = 1;
+}

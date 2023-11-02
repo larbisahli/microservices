@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package commons;
+
+import "media.proto";
+
+message Currency {
+    string symbol = 1;
+    string name = 2;
+    string symbol_native = 3;
+    string decimal_digits = 4;
+    uint32 rounding = 5;
+    string code = 6;
+    string name_plural = 7;
+}
+
+message ResourcesRequest {
+    uint32 id = 1;
+    uint32 page = 2;
+    uint32 limit = 3;
+    string orderBy = 4;
+    string sortedBy = 5;
+    required Language language = 6;
+}
+
+message OneResourceRequest {
+    required uint32 id = 1;
+    required Language language = 2;
+}
+
+message deleteRequest {
+    required uint32 id = 1;
+}
+
+message Social {
+    string url = 1;
+    Icon icon = 2;
+}
+
+message Unit {
+    string unit = 1;
+}
+
+message Seo {
+    string metaTitle = 1;
+    string metaDescription = 2;
+    string ogTitle = 3;
+    string ogDescription = 4;
+    repeated Image ogImage = 5;
+    string twitterHandle = 6;
+    string twitterCardType = 7;
+    string metaTags = 8;
+    string canonicalUrl = 9;
+}
+
+message InvalidateResourceRequest {
+required string alias = 1;
+required string resourceName = 2;
+required string packageName = 3;
+}
+
+message InvalidateResourceResponse {
+bool success = 1;
+}
+
+service InvalidationServiceRoutes {
+rpc invalidateResource(InvalidateResourceRequest)      returns (InvalidateResourceResponse);
+}
