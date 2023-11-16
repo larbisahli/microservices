@@ -10,7 +10,6 @@ import byteSize from 'byte-size';
 import { MongoDBConfig } from '@config';
 import { Service } from 'typedi';
 import crypto from 'crypto';
-import { GraphQLContextType } from '@ts-types/index';
 
 const debug = Debug('cache-store');
 
@@ -99,7 +98,7 @@ export default class CacheStore {
   get<T>(
     collectionName: string,
     values: any,
-    context: GraphQLContextType
+    context: any
   ): Promise<InternalCacheType<T>> {
     return new Promise(async (resolve, reject) => {
       try {
@@ -129,12 +128,7 @@ export default class CacheStore {
    * Upsert a resource into the store given an ID and resource object.
    * @param _id resource ID
    */
-  set<T>(
-    collectionName: string,
-    data: T,
-    values: any,
-    context: GraphQLContextType
-  ) {
+  set<T>(collectionName: string, data: T, values: any, context: any) {
     return new Promise(async (resolve, reject) => {
       try {
         const {

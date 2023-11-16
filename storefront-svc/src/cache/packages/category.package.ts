@@ -6,7 +6,7 @@ import { Menu } from '@proto/generated/categoryPackage/Menu';
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
-const PROTO_PATH = './build/proto/category.proto';
+const PROTO_PATH = './dist/proto/category.proto';
 
 @Service()
 export default class CategoryPackage extends protobuf.Root {

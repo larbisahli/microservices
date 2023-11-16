@@ -5,7 +5,7 @@ import { Settings } from '@proto/generated/SettingsPackage/Settings';
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
-const PROTO_PATH = './build/proto/settings.proto';
+const PROTO_PATH = './dist/proto/settings.proto';
 
 @Service()
 export default class ConfigPackage extends protobuf.Root {

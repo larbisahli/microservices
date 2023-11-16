@@ -23,8 +23,8 @@
       "@config": [
         "src/config/index"
       ],
-      "@repositories": [
-        "src/repositories/index"
+      "@services": [
+        "src/services/index"
       ],
       "@hooks": [
         "src/hooks/index"
@@ -41,8 +41,8 @@
       "@lib/*": [
         "src/lib/*"
       ],
-      "@core/*": [
-        "src/core/*"
+      "@core": [
+        "src/core/index"
       ],
       "@cache/*": [
         "src/cache/*"

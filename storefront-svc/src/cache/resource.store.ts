@@ -1,4 +1,4 @@
-import Logger from '@core/Logger';
+import { Logger } from '@core';
 import { Service } from 'typedi';
 import CacheStore from './store';
 import { Binary } from 'mongodb';

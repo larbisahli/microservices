@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { ReadPoolConfig } from '@config';
-import Logger from '@core/Logger';
+import { Logger } from '@core';
 
 // **** POOL PERMISSIONS ****
 

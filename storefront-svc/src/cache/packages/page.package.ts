@@ -5,7 +5,7 @@ import { Page } from '@proto/generated/PagePackage/Page';
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
-const PROTO_PATH = './build/proto/page.proto';
+const PROTO_PATH = './dist/proto/page.proto';
 
 @Service()
 export default class PagePackage extends protobuf.Root {

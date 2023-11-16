@@ -1,5 +1,5 @@
 /**
- * Dropgala - Business Server
+ * Dropgala - Storefront gRPC Server
  *
  * Copyright © Dropgala, Inc. All rights reserved.
  * See LICENSE for license details.
@@ -8,11 +8,14 @@
  * @link https://github.com/dropgala/business-server
  * @author Larbi Sahli <larbisahli1905@gmail.com>
  */
+import 'reflect-metadata';
+import 'module-alias/register';
+
 import dotenv from 'dotenv';
 dotenv.config();
 
-import Logger from '@core/Logger';
-import gRPC, { createInsecure } from 'src/repositories/index';
+import { Logger } from '@core';
+import gRPC, { createInsecure } from '@services';
 import { RPCPort } from './config';
 
 /**

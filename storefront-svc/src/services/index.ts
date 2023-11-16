@@ -1,5 +1,5 @@
 /**
- * Serves the storefront website (SSR)
+ * Serves storefront-server
  */
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
@@ -10,38 +10,34 @@ import { ProtoGrpcType } from '@proto/generated/serviceRoutes';
 import { Menu__Output } from '@proto/generated/categoryPackage/Menu';
 import { HeroBannerRequest } from '@proto/generated/slidePackage/HeroBannerRequest';
 import { HeroBannerResponse } from '@proto/generated/slidePackage/HeroBannerResponse';
-import { StoreHeroBanner__Output } from '@proto/generated/slidePackage/StoreHeroBanner';
-import CategoryHandler from './handler/category';
-import SlideHandler from './handler/slider';
-import ProductHandler from './handler/product';
+import { HeroBanner__Output } from '@proto/generated/slidePackage/HeroBanner';
 import { Product__Output } from '@proto/generated/productPackage/Product';
 import { PopularProductsRequest } from '@proto/generated/productPackage/PopularProductsRequest';
 import { ProductRequest } from '@proto/generated/productPackage/ProductRequest';
+import { ProductType } from '@ts-types/interfaces';
 import { ProductResponse } from '@proto/generated/productPackage/ProductResponse';
-import ConfigHandler from './handler/config';
 import { Settings__Output } from '@proto/generated/SettingsPackage/Settings';
 import { StoreConfigResponse } from '@proto/generated/SettingsPackage/StoreConfigResponse';
 import { StoreConfigRequest } from '@proto/generated/SettingsPackage/StoreConfigRequest';
-import {
-  InvalidateResourceResponse,
-  InvalidateResourceResponse__Output,
-} from '@proto/generated/ServiceRoutes/InvalidateResourceResponse';
-import { InvalidateResourceRequest } from '@proto/generated/ServiceRoutes/InvalidateResourceRequest';
-import InvalidationHandler from './handler/invalidation';
 import { CategoryRequest } from '@proto/generated/categoryPackage/CategoryRequest';
 import { CategoryResponse } from '@proto/generated/categoryPackage/CategoryResponse';
 import { Category } from '@proto/generated/categoryPackage/Category';
-import { ProductsResponse } from '@proto/generated/productPackage/ProductsResponse';
 import { CategoryProductsRequest } from '@proto/generated/productPackage/CategoryProductsRequest';
+import { ProductsResponse } from '@proto/generated/productPackage/ProductsResponse';
 import { PromoBannerRequest } from '@proto/generated/slidePackage/PromoBannerRequest';
 import { PromoBannerResponse } from '@proto/generated/slidePackage/PromoBannerResponse';
 import { StorePromoBanner } from '@proto/generated/slidePackage/StorePromoBanner';
-import PageHandler from './handler/page';
 import { Page } from '@proto/generated/PagePackage/Page';
 import { StorePageRequest } from '@proto/generated/PagePackage/StorePageRequest';
 import { StorePageResponse } from '@proto/generated/PagePackage/StorePageResponse';
+// ---------------
+import SlideHandler from './slider';
+import ProductHandler from './product';
+import ConfigHandler from './config';
+import CategoryHandler from './category';
+import PageHandler from './page';
 
-const PROTO_PATH = './build/proto/serviceRoutes.proto';
+const PROTO_PATH = './dist/proto/serviceRoutes.proto';
 
 export const { createInsecure } = grpc.ServerCredentials;
 
@@ -50,9 +46,11 @@ export const { createInsecure } = grpc.ServerCredentials;
  */
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
-  arrays: true,
   defaults: false,
+  arrays: true,
   oneofs: true,
+  longs: String,
+  enums: String,
 });
 
 /**
@@ -67,23 +65,24 @@ const {
   SliderServiceRoutes,
   ProductServiceRoutes,
   ConfigServiceRoutes,
-  InvalidationServiceRoutes,
   PageServiceRoutes,
 } = ServiceRoutes;
 
 @Service()
 class gRPC extends grpc.Server {
   /**
+   * @param {ProductHandler} productHandler
    * @param {CategoryHandler} categoryHandler
    * @param {SlideHandler} slideHandler
+   * @param {ConfigHandler} configHandler
+   * @param {PageHandler} pageHandler
    */
   constructor(
     protected productHandler: ProductHandler,
     protected categoryHandler: CategoryHandler,
     protected slideHandler: SlideHandler,
     protected configHandler: ConfigHandler,
-    protected pageHandler: PageHandler,
-    protected invalidationHandler: InvalidationHandler
+    protected pageHandler: PageHandler
   ) {
     super();
 
@@ -107,158 +106,155 @@ class gRPC extends grpc.Server {
       getStoreConfig: this.getStoreConfig,
     });
 
-    this.addService(InvalidationServiceRoutes.service, {
-      invalidateResource: this.invalidateResource,
-    });
-
     this.addService(PageServiceRoutes.service, {
       getStorePage: this.getStorePage,
     });
   }
 
   /**
-   * Invalidate cached requests from the mongo store.
-   * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, Settings__Output)} callback Response callback
-   */
-  protected invalidateResource = async (
-    call: grpc.ServerUnaryCall<
-      InvalidateResourceRequest,
-      InvalidateResourceResponse
-    >,
-    callback: grpc.sendUnaryData<InvalidateResourceResponse__Output>
-  ) => {
-    const { error, response } = await this.invalidationHandler.invalidateCache(
-      call
-    );
-    callback(error, response);
-  };
-
-  /**
    * Store config request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, Settings__Output)} callback Response callback
+   * @param {function(Error, {config: Settings__Output})} callback Response callback
    */
   protected getStoreConfig = async (
     call: grpc.ServerUnaryCall<StoreConfigRequest, StoreConfigResponse>,
-    callback: grpc.sendUnaryData<{
-      config: Settings__Output | null | undefined;
-    }>
+    callback: grpc.sendUnaryData<{ config: Settings__Output | null }>
   ) => {
-    const { error, response } = await this.configHandler.getStoreConfig(call);
-    callback(error, response);
+    const {
+      error,
+      response: { config },
+    } = await this.configHandler.getStoreConfig(call);
+    callback(error, { config });
   };
 
   /**
    * Store page request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, Page)} callback Response callback
+   * @param {function(Error, {page: Page})} callback Response callback
    */
   protected getStorePage = async (
     call: grpc.ServerUnaryCall<StorePageRequest, StorePageResponse>,
-    callback: grpc.sendUnaryData<{
-      page: Page | null | undefined;
-    }>
+    callback: grpc.sendUnaryData<{ page: Page | null }>
   ) => {
-    const { error, response } = await this.pageHandler.getPage(call);
-    callback(error, response);
+    const {
+      error,
+      response: { page },
+    } = await this.pageHandler.getStorePage(call);
+    callback(error, { page });
   };
 
   /**
    * Store product request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, Product__Output[])} callback Response callback
+   * @param {function(Error, {products: Product__Output[]})} callback Response callback
    */
   protected getPopularProducts = async (
     call: grpc.ServerUnaryCall<PopularProductsRequest, ProductsResponse>,
     callback: grpc.sendUnaryData<{ products: Product__Output[] | null }>
   ) => {
-    const { error, response } = await this.productHandler.getPopularProducts(
-      call
-    );
-    callback(error, response);
+    const {
+      error,
+      response: { products },
+    } = await this.productHandler.getPopularProducts(call);
+    callback(error, { products });
   };
 
   /**
    * Store category products request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, Product__Output[])} callback Response callback
+   * @param {function(Error, {products: Product__Output[]})} callback Response callback
    */
   protected getCategoryProducts = async (
     call: grpc.ServerUnaryCall<CategoryProductsRequest, ProductsResponse>,
     callback: grpc.sendUnaryData<{ products: Product__Output[] | null }>
   ) => {
-    const { error, response } = await this.productHandler.getCategoryProducts(
-      call
-    );
-    callback(error, response);
+    const {
+      error,
+      response: { products },
+    } = await this.productHandler.getCategoryProducts(call);
+    callback(error, { products });
   };
 
   /**
    * Store product request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, CategoryType[])} callback Response callback
+   * @param {function(Error, {products: Product__Output})} callback Response callback
    */
   protected getProduct = async (
     call: grpc.ServerUnaryCall<ProductRequest, ProductResponse>,
-    callback: grpc.sendUnaryData<{ product: Product__Output | null }>
+    callback: grpc.sendUnaryData<{
+      product: Product__Output | ProductType | null;
+    }>
   ) => {
-    const { error, response } = await this.productHandler.getProduct(call);
-    callback(error, response);
+    const {
+      error,
+      response: { product },
+    } = await this.productHandler.getProduct(call);
+    callback(error, { product });
   };
 
   /**
    * Store menu request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, CategoryType[])} callback Response callback
+   * @param {function(Error, {menu: Menu__Output[]})} callback Response callback
    */
   protected getStoreMenu = async (
     call: grpc.ServerUnaryCall<MenuRequest, MenuResponse>,
-    callback: grpc.sendUnaryData<{ menu: Menu__Output[] | null }>
+    callback: grpc.sendUnaryData<{ menu: Menu__Output[] }>
   ) => {
-    const { error, response } = await this.categoryHandler.getMenu(call);
-    callback(error, response);
+    const {
+      error,
+      response: { menu },
+    } = await this.categoryHandler.getMenu(call);
+    callback(error, { menu });
   };
 
   /**
    * Store category request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, CategoryType[])} callback Response callback
+   * @param {function(Error, {category: Category})} callback Response callback
    */
   protected getStoreCategory = async (
     call: grpc.ServerUnaryCall<CategoryRequest, CategoryResponse>,
     callback: grpc.sendUnaryData<{ category: Category | null }>
   ) => {
-    const { error, response } = await this.categoryHandler.getStoreCategory(
-      call
-    );
-    callback(error, response);
+    const {
+      error,
+      response: { category },
+    } = await this.categoryHandler.getStoreCategory(call);
+    callback(error, { category });
   };
 
   /**
-   * Store banner request handler.
+   * Store hero slider request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, CategoryType[])} callback Response callback
+   * @param {function(Error, {sliders: HeroBanner__Output[]})} callback Response callback
    */
   protected getStoreHeroBanner = async (
     call: grpc.ServerUnaryCall<HeroBannerRequest, HeroBannerResponse>,
-    callback: grpc.sendUnaryData<{ sliders: StoreHeroBanner__Output[] | null }>
+    callback: grpc.sendUnaryData<{ sliders: HeroBanner__Output[] | null }>
   ) => {
-    const { error, response } = await this.slideHandler.getHeroSlide(call);
-    callback(error, response);
+    const {
+      error,
+      response: { sliders },
+    } = await this.slideHandler.getHeroSlider(call);
+    callback(error, { sliders });
   };
 
   /**
-   * Store banner request handler.
+   * Store Promo slider request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, CategoryType[])} callback Response callback
+   * @param {function(Error, {banner: StorePromoBanner})} callback Response callback
    */
   protected getStorePromoBanner = async (
     call: grpc.ServerUnaryCall<PromoBannerRequest, PromoBannerResponse>,
     callback: grpc.sendUnaryData<{ banner: StorePromoBanner | null }>
   ) => {
-    const { error, response } = await this.slideHandler.getPromoSlide(call);
-    callback(error, response);
+    const {
+      error,
+      response: { banner },
+    } = await this.slideHandler.getPromoSlider(call);
+    callback(error, { banner });
   };
 }
 

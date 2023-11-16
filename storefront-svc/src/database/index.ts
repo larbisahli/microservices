@@ -1,21 +1,19 @@
 import { PoolClient, QueryConfig, QueryResult, QueryResultRow } from 'pg';
-import {  ReadPool } from './pools';
-import type { PermissionType, GraphQLContextType } from '@ts-types/index';
+import { ReadPool } from './pools';
 import { StoreType, UserType } from '@ts-types/interfaces';
 import { ACTION_PRIVILEGES, RESOURCES } from '@ts-types/enums';
-import {
-  ExtendedGraphQlError,
-  ForbiddenError,
-  TransactionError,
-} from '@core/Errors';
-import Logger from '@core/Logger';
+// import {
+//   ExtendedGraphQlError,
+//   ForbiddenError,
+//   TransactionError,
+// } from '@core/Errors';
+import { Logger } from '@core';
 import {
   getStoreIdByAlias,
   setSessionAlias,
   setSessionStoreId,
   setSessionUserId,
   setSessionEmail,
-  getDefaultLanguageId,
 } from '@sql';
 
 declare module 'pg' {
@@ -43,7 +41,7 @@ export default class PostgresClient {
    * @param QueryPermissionType
    * @returns {Promise<PoolClient>}
    */
-  protected transaction = async ({alias, storeId}:{alias: string, storeId:string}): Promise<PoolClient> => {
+  protected transaction = async (alias: string): Promise<PoolClient> => {
     try {
       const client: PoolClient = await ReadPool.connect();
 
@@ -57,6 +55,8 @@ export default class PostgresClient {
           `The last executed query on this client was: ${client.lastQuery}`
         );
       }, 5000);
+
+      const storeId = '';
 
       /** Set the alias session */
       await client.query(setSessionAlias(alias));
@@ -82,7 +82,7 @@ export default class PostgresClient {
     } catch (error) {
       console.log(error);
       Logger.database.error(error);
-      throw new TransactionError('Unknown error!', { error, location: 'A1' });
+      throw error; //TransactionError('Unknown error!', { error, location: 'A1' });
     }
   };
 

@@ -6,7 +6,7 @@ import { StorePromoBanner } from '@proto/generated/slidePackage/StorePromoBanner
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
-const PROTO_PATH = './build/proto/slide.proto';
+const PROTO_PATH = './dist/proto/slide.proto';
 
 @Service()
 export default class SlidePackage extends protobuf.Root {

@@ -1,15 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
 import { ACTION_PRIVILEGES, CookieNames, RESOURCES } from './enums';
-import { StoreType, UserType } from './interfaces';
 
 export interface ErrorHandler extends Error {
   code?: string;
-}
-
-export interface GraphRequest extends Request {
-  cookies: any;
-  user: UserType;
-  store: StoreType;
 }
 
 export type CookieNamesTypes =
@@ -31,21 +23,6 @@ export type PrivilegesType = {
     };
   };
 };
-
-export type ExpressMiddleware = (
-  req: GraphRequest,
-  res: Response,
-  next: NextFunction
-) => void;
-
-export interface GraphQLContextType {
-  req: GraphRequest;
-  res?: Response;
-  ip?: string;
-  info: {
-    fieldName: string;
-  };
-}
 
 export type PermissionType = {
   actions: ACTION_PRIVILEGES[];

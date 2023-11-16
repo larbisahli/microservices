@@ -7,8 +7,8 @@ import {
   Binary,
 } from 'mongodb';
 import Debug from 'debug';
-import cron from 'node-cron';
-import Logger from '@core/Logger';
+// import cron from 'node-cron';
+import { Logger } from '@core';
 import byteSize, { ByteSizeResult } from 'byte-size';
 
 const debug = Debug('cache-store');
@@ -52,7 +52,7 @@ export default class CacheStore {
       mongoOptions: {
         maxPoolSize: 10,
         minPoolSize: 1,
-        ...mongoOptions
+        ...mongoOptions,
       },
       ...required,
     };
@@ -72,14 +72,14 @@ export default class CacheStore {
     this.client = _client;
     this.options = options;
 
-    cron.schedule('0 0 * * *', () => {
-      try {
-        this.removeEmptyCollections();
-        Logger.system.info(`Cronjob running... | ${new Date()}`);
-      } catch (error) {
-        Logger.system.error(error);
-      }
-    });
+    // cron.schedule('0 0 * * *', () => {
+    //   try {
+    //     this.removeEmptyCollections();
+    //     Logger.system.info(`Cronjob running... | ${new Date()}`);
+    //   } catch (error) {
+    //     Logger.system.error(error);
+    //   }
+    // });
   }
 
   /**
@@ -217,7 +217,9 @@ export default class CacheStore {
           {
             $set: {
               expires: new Date(Date.now() + this.options.ttl! * 1000),
-              expireAfterSeconds: new Date(Date.now() + this.options.ttl! * 1000)
+              expireAfterSeconds: new Date(
+                Date.now() + this.options.ttl! * 1000
+              ),
             },
           },
           {

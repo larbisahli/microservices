@@ -1,41 +1,48 @@
-import { ServerErrorResponse, StatusObject } from '@grpc/grpc-js';
-import * as grpc from '@grpc/grpc-js';
-import { Service } from 'typedi';
-import { PageRpcService } from '@gRPC/client/services';
+import PostgresClient from '@database';
+import {
+  ServerErrorResponse,
+  ServerUnaryCall,
+  StatusObject,
+} from '@grpc/grpc-js';
 import { ResourceHandler } from '@cache/resource.store';
+import { Service } from 'typedi';
+import { PageQueries } from '@sql';
 import { StorePageRequest } from '@proto/generated/PagePackage/StorePageRequest';
 import { StorePageResponse } from '@proto/generated/PagePackage/StorePageResponse';
 import { Page } from '@proto/generated/PagePackage/Page';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 
 @Service()
-export default class PageHandler {
+export default class PageHandler extends PostgresClient {
   /**
-   * @param {PageRpcService} pageRpcService
+   * @param {PageQueries} pageQueries
    * @param {ResourceHandler} resourceHandler
    */
   constructor(
-    protected pageRpcService: PageRpcService,
+    protected pageQueries: PageQueries,
     protected resourceHandler: ResourceHandler
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * @param { ServerUnaryCall<StorePageRequest, StorePageResponse>} call
    * @returns {Promise<Page>}
    */
-  public getPage = async (
-    call: grpc.ServerUnaryCall<StorePageRequest, StorePageResponse>
+  public getStorePage = async (
+    call: ServerUnaryCall<StorePageRequest, StorePageResponse>
   ): Promise<{
     error: ServerErrorResponse | Partial<StatusObject> | null;
-    response: { page: Page | null | undefined };
+    response: { page: Page | null };
   }> => {
+    const { getStorePage } = this.pageQueries;
     const { alias, slug } = call.request;
 
     if (!alias || !slug) {
       return {
         error: {
           code: Status.CANCELLED,
-          details: 'Unknown error',
+          details: 'Store identifier or slug are not defined',
         },
         response: { page: null },
       };
@@ -52,20 +59,51 @@ export default class PageHandler {
       return { error: null, response: resource };
     }
 
-    /** Remote procedure call to get menu from the business server */
-    const response = await this.pageRpcService.getPage(alias, slug);
-    const { page, error } = response;
+    const client = await this.transaction(alias);
 
-    /** Set the resources in the cache store */
-    if (page && alias) {
-      this.resourceHandler.setResource({
-        alias,
-        resourceName: slug,
-        packageName: 'page',
-        resource: page,
-      });
+    try {
+      await client.query('BEGIN');
+
+      const { error } = await this.setupClientSessions(client, { alias });
+
+      if (error) {
+        return {
+          error: {
+            code: Status.NOT_FOUND,
+            details: error?.message,
+          },
+          response: { page: null },
+        };
+      }
+      const { rows } = await client.query<Page>(getStorePage(slug));
+
+      const page = rows[0];
+
+      /** Set the resources in the cache store */
+      if (page && alias) {
+        this.resourceHandler.setResource({
+          alias,
+          resourceName: slug,
+          packageName: 'page',
+          resource: page,
+        });
+      }
+
+      await client.query('COMMIT');
+
+      return { response: { page }, error: null };
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      const message = error?.message as string;
+      return {
+        error: {
+          code: Status.FAILED_PRECONDITION,
+          details: message,
+        },
+        response: { page: null },
+      };
+    } finally {
+      client.release();
     }
-
-    return { error, response: { page } };
   };
 }

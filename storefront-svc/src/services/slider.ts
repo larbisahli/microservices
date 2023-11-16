@@ -1,44 +1,51 @@
-import { ServerErrorResponse, StatusObject } from '@grpc/grpc-js';
-import * as grpc from '@grpc/grpc-js';
+import PostgresClient from '@database';
+import {
+  ServerErrorResponse,
+  ServerUnaryCall,
+  StatusObject,
+} from '@grpc/grpc-js';
 import { Service } from 'typedi';
-import { SliderRpcService } from '@gRPC/client/services';
-import { StoreHeroBanner__Output } from '@proto/generated/slidePackage/StoreHeroBanner';
+import { SliderQueries } from '@sql';
+import { ResourceHandler } from '@cache/resource.store';
+import { HeroBanner__Output } from '@proto/generated/slidePackage/HeroBanner';
 import { HeroBannerRequest } from '@proto/generated/slidePackage/HeroBannerRequest';
 import { HeroBannerResponse } from '@proto/generated/slidePackage/HeroBannerResponse';
-import { ResourceHandler } from '@cache/resource.store';
 import { PromoBannerRequest } from '@proto/generated/slidePackage/PromoBannerRequest';
 import { PromoBannerResponse } from '@proto/generated/slidePackage/PromoBannerResponse';
 import { StorePromoBanner } from '@proto/generated/slidePackage/StorePromoBanner';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 
 @Service()
-export default class SlideHandler {
+export default class SlideHandler extends PostgresClient {
   /**
-   * @param {SliderRpcService} sliderRpcService
+   * @param {SliderQueries} sliderQueries
    * @param {ResourceHandler} resourceHandler
    */
   constructor(
-    protected sliderRpcService: SliderRpcService,
+    protected sliderQueries: SliderQueries,
     protected resourceHandler: ResourceHandler
-  ) {}
+  ) {
+    super();
+  }
 
   /**
-   * @param { ServerUnaryCall<HeroBannerRequest, HeroBannerResponse>} call
-   * @returns {Promise<StoreHeroBanner__Output[]>}
+   * @param { ServerUnaryCall<StaffRequest, Staff>} call
+   * @returns {Promise<Menu__Output[]>}
    */
-  public getHeroSlide = async (
-    call: grpc.ServerUnaryCall<HeroBannerRequest, HeroBannerResponse>
+  public getHeroSlider = async (
+    call: ServerUnaryCall<HeroBannerRequest, HeroBannerResponse>
   ): Promise<{
     error: ServerErrorResponse | Partial<StatusObject> | null;
-    response: { sliders: StoreHeroBanner__Output[] | null };
+    response: { sliders: HeroBanner__Output[] | null };
   }> => {
+    const { getHeroSlider } = this.sliderQueries;
     const { alias } = call.request;
 
     if (!alias) {
       return {
         error: {
           code: Status.CANCELLED,
-          details: 'Unknown error',
+          details: 'Store identifier is not defined',
         },
         response: { sliders: [] },
       };
@@ -49,47 +56,79 @@ export default class SlideHandler {
       alias,
       resourceName: 'heroSlide',
       packageName: 'heroSlide',
-    })) as { sliders: StoreHeroBanner__Output[] | null };
+    })) as { sliders: HeroBanner__Output[] | null };
 
     if (resource) {
       return { error: null, response: resource };
     }
 
-    /** Remote procedure call to get menu from business server */
-    const response = await this.sliderRpcService.getStoreHeroSlide(alias);
+    const client = await this.transaction(alias);
 
-    const { sliders = [], error } = response;
+    try {
+      await client.query('BEGIN');
 
-    /** Set the resources in the cache store */
-    if (sliders && alias) {
-      this.resourceHandler.setResource({
-        alias,
-        resource: sliders,
-        resourceName: 'heroSlide',
-        packageName: 'heroSlide',
-      });
+      const { error } = await this.setupClientSessions(client, { alias });
+
+      if (error) {
+        return {
+          error: {
+            code: Status.NOT_FOUND,
+            details: error?.message,
+          },
+          response: { sliders: [] },
+        };
+      }
+
+      const { rows } = await client.query<HeroBanner__Output>(getHeroSlider());
+
+      const sliders = rows;
+
+      /** Set the resources in the cache store */
+      if (sliders && alias) {
+        this.resourceHandler.setResource({
+          alias,
+          resource: sliders,
+          resourceName: 'heroSlide',
+          packageName: 'heroSlide',
+        });
+      }
+
+      await client.query('COMMIT');
+
+      return { response: { sliders }, error: null };
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      const message = error?.message as string;
+      return {
+        error: {
+          code: Status.FAILED_PRECONDITION,
+          details: message,
+        },
+        response: { sliders: [] },
+      };
+    } finally {
+      client.release();
     }
-
-    return { error, response: { sliders } };
   };
 
   /**
-   * @param { ServerUnaryCall<HeroBannerRequest, HeroBannerResponse>} call
-   * @returns {Promise<StorePromoBanner>}
+   * @param { ServerUnaryCall<StaffRequest, Staff>} call
+   * @returns {Promise<Menu__Output[]>}
    */
-  public getPromoSlide = async (
-    call: grpc.ServerUnaryCall<PromoBannerRequest, PromoBannerResponse>
+  public getPromoSlider = async (
+    call: ServerUnaryCall<PromoBannerRequest, PromoBannerResponse>
   ): Promise<{
     error: ServerErrorResponse | Partial<StatusObject> | null;
     response: { banner: StorePromoBanner | null };
   }> => {
+    const { getStorePromoSlide } = this.sliderQueries;
     const { alias } = call.request;
 
     if (!alias) {
       return {
         error: {
           code: Status.CANCELLED,
-          details: 'Unknown error',
+          details: 'Store identifier is not defined',
         },
         response: { banner: null },
       };
@@ -106,21 +145,54 @@ export default class SlideHandler {
       return { error: null, response: resource };
     }
 
-    /** Remote procedure call to get menu from business server */
-    const response = await this.sliderRpcService.getStorePromoSlide(alias);
+    const client = await this.transaction(alias);
 
-    const { banner = null, error } = response;
+    try {
+      await client.query('BEGIN');
 
-    /** Set the resources in the cache store */
-    if (banner && alias) {
-      this.resourceHandler.setResource({
-        alias,
-        resource: banner,
-        resourceName: 'promoSlide',
-        packageName: 'promoSlide',
-      });
+      const { error } = await this.setupClientSessions(client, { alias });
+
+      if (error) {
+        return {
+          error: {
+            code: Status.NOT_FOUND,
+            details: error?.message,
+          },
+          response: { banner: null },
+        };
+      }
+
+      const { rows } = await client.query<StorePromoBanner>(
+        getStorePromoSlide()
+      );
+
+      const banner = rows[0];
+
+      /** Set the resources in the cache store */
+      if (banner && alias) {
+        this.resourceHandler.setResource({
+          alias,
+          resource: banner,
+          resourceName: 'promoSlide',
+          packageName: 'promoSlide',
+        });
+      }
+
+      await client.query('COMMIT');
+
+      return { response: { banner }, error: null };
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      const message = error?.message as string;
+      return {
+        error: {
+          code: Status.FAILED_PRECONDITION,
+          details: message,
+        },
+        response: { banner: null },
+      };
+    } finally {
+      client.release();
     }
-
-    return { error, response: { banner } };
   };
 }

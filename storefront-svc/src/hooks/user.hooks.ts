@@ -1,5 +1,4 @@
-import EventsBus from '@core/EventBus';
-import { MailQueue } from '@core/Queue';
+import { EventsBus } from '@core';
 import { Service, Container } from 'typedi';
 
 @Service()
@@ -18,7 +17,7 @@ export class UserHooks {
       console.log('UserHooks#onSignup.call %o');
 
       const { storeName } = result;
-      MailQueue.add({ storeName }, { removeOnComplete: true });
+      // MailQueue.add({ storeName }, { removeOnComplete: true });
     };
   }
 

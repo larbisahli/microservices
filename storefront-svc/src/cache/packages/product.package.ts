@@ -5,7 +5,7 @@ import { Product } from '@proto/generated/productPackage/Product';
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
-const PROTO_PATH = './build/proto/product.proto';
+const PROTO_PATH = './dist/proto/product.proto';
 
 @Service()
 export default class ProductPackage extends protobuf.Root {

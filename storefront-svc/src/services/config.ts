@@ -1,7 +1,11 @@
-import { ServerErrorResponse, StatusObject } from '@grpc/grpc-js';
-import * as grpc from '@grpc/grpc-js';
+import PostgresClient from '@database';
+import {
+  ServerErrorResponse,
+  ServerUnaryCall,
+  StatusObject,
+} from '@grpc/grpc-js';
 import { Service } from 'typedi';
-import { ConfigRpcService } from '@gRPC/client/services';
+import { SettingsQueries } from '@sql';
 import { ResourceHandler } from '@cache/resource.store';
 import { StoreConfigRequest } from '@proto/generated/SettingsPackage/StoreConfigRequest';
 import { StoreConfigResponse } from '@proto/generated/SettingsPackage/StoreConfigResponse';
@@ -9,33 +13,36 @@ import { Settings__Output } from '@proto/generated/SettingsPackage/Settings';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 
 @Service()
-export default class ConfigHandler {
+export default class ConfigHandler extends PostgresClient {
   /**
-   * @param {ConfigRpcService} configRpcService
+   * @param {SettingsQueries} settingsQueries
    * @param {ResourceHandler} resourceHandler
    */
   constructor(
-    protected configRpcService: ConfigRpcService,
+    protected settingsQueries: SettingsQueries,
     protected resourceHandler: ResourceHandler
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * @param { ServerUnaryCall<StoreConfigRequest, StoreConfigResponse>} call
    * @returns {Promise<Settings__Output>}
    */
   public getStoreConfig = async (
-    call: grpc.ServerUnaryCall<StoreConfigRequest, StoreConfigResponse>
+    call: ServerUnaryCall<StoreConfigRequest, StoreConfigResponse>
   ): Promise<{
     error: ServerErrorResponse | Partial<StatusObject> | null;
-    response: { config: Settings__Output | null | undefined };
+    response: { config: Settings__Output | null };
   }> => {
+    const { getStoreSettings } = this.settingsQueries;
     const { alias } = call.request;
 
     if (!alias) {
       return {
         error: {
           code: Status.CANCELLED,
-          details: 'Unknown error',
+          details: 'Store identifier is not defined',
         },
         response: { config: null },
       };
@@ -46,26 +53,57 @@ export default class ConfigHandler {
       alias,
       resourceName: 'storeConfig',
       packageName: 'storeConfig',
-    })) as { config: Settings__Output | null | undefined };
+    })) as { config: Settings__Output | null };
 
     if (resource) {
       return { error: null, response: resource };
     }
 
-    /** Remote procedure call to get menu from the business server */
-    const response = await this.configRpcService.getConfig(alias);
-    const { config, error } = response;
+    const client = await this.transaction(alias);
 
-    /** Set the resources in the cache store */
-    if (config && alias) {
-      this.resourceHandler.setResource({
-        alias,
-        resourceName: 'storeConfig',
-        packageName: 'storeConfig',
-        resource: config,
-      });
+    try {
+      await client.query('BEGIN');
+
+      const { error } = await this.setupClientSessions(client, { alias });
+
+      if (error) {
+        return {
+          error: {
+            code: Status.NOT_FOUND,
+            details: error?.message,
+          },
+          response: { config: null },
+        };
+      }
+      const { rows } = await client.query<Settings__Output>(getStoreSettings());
+
+      const config = rows[0];
+
+      /** Set the resources in the cache store */
+      if (config && alias) {
+        this.resourceHandler.setResource({
+          alias,
+          resourceName: 'storeConfig',
+          packageName: 'storeConfig',
+          resource: config,
+        });
+      }
+
+      await client.query('COMMIT');
+
+      return { response: { config }, error: null };
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      const message = error?.message as string;
+      return {
+        error: {
+          code: Status.FAILED_PRECONDITION,
+          details: message,
+        },
+        response: { config: null },
+      };
+    } finally {
+      client.release();
     }
-
-    return { error, response: { config } };
   };
 }

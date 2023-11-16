@@ -1,5 +1,3 @@
-import { ApolloServerErrorCode } from '@apollo/server/errors';
-
 export enum ACTION_PRIVILEGES {
   READ = 'read',
   WRITE = 'write',
@@ -77,10 +75,3 @@ enum CustomErrorCode {
   VALUE_IN_USE = 'VALUE_IN_USE',
   STORE_LINK_IN_USE = 'STORE_LINK_IN_USE',
 }
-
-export type GraphQlErrorCodeType = CustomErrorCode | ApolloServerErrorCode;
-
-export const GraphQlErrorCode = {
-  ...ApolloServerErrorCode,
-  ...CustomErrorCode,
-};
