@@ -3,70 +3,67 @@
 import type * as grpc from '@grpc/grpc-js';
 import type { MethodDefinition } from '@grpc/proto-loader';
 import type {
-  StorePageRequest as _PagePackage_StorePageRequest,
-  StorePageRequest__Output as _PagePackage_StorePageRequest__Output,
-} from '../PagePackage/StorePageRequest';
+  PageRequest as _page_PageRequest,
+  PageRequest__Output as _page_PageRequest__Output,
+} from '../page/PageRequest';
 import type {
-  StorePageResponse as _PagePackage_StorePageResponse,
-  StorePageResponse__Output as _PagePackage_StorePageResponse__Output,
-} from '../PagePackage/StorePageResponse';
+  PageResponse as _page_PageResponse,
+  PageResponse__Output as _page_PageResponse__Output,
+} from '../page/PageResponse';
 
 export interface PageServiceRoutesClient extends grpc.Client {
-  getStorePage(
-    argument: _PagePackage_StorePageRequest,
+  getPage(
+    argument: _page_PageRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_PagePackage_StorePageResponse__Output>
+    callback: grpc.requestCallback<_page_PageResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePage(
-    argument: _PagePackage_StorePageRequest,
+  getPage(
+    argument: _page_PageRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_PagePackage_StorePageResponse__Output>
+    callback: grpc.requestCallback<_page_PageResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePage(
-    argument: _PagePackage_StorePageRequest,
+  getPage(
+    argument: _page_PageRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_PagePackage_StorePageResponse__Output>
+    callback: grpc.requestCallback<_page_PageResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePage(
-    argument: _PagePackage_StorePageRequest,
-    callback: grpc.requestCallback<_PagePackage_StorePageResponse__Output>
+  getPage(
+    argument: _page_PageRequest,
+    callback: grpc.requestCallback<_page_PageResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePage(
-    argument: _PagePackage_StorePageRequest,
+  getPage(
+    argument: _page_PageRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_PagePackage_StorePageResponse__Output>
+    callback: grpc.requestCallback<_page_PageResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePage(
-    argument: _PagePackage_StorePageRequest,
+  getPage(
+    argument: _page_PageRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_PagePackage_StorePageResponse__Output>
+    callback: grpc.requestCallback<_page_PageResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePage(
-    argument: _PagePackage_StorePageRequest,
+  getPage(
+    argument: _page_PageRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_PagePackage_StorePageResponse__Output>
+    callback: grpc.requestCallback<_page_PageResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePage(
-    argument: _PagePackage_StorePageRequest,
-    callback: grpc.requestCallback<_PagePackage_StorePageResponse__Output>
+  getPage(
+    argument: _page_PageRequest,
+    callback: grpc.requestCallback<_page_PageResponse__Output>
   ): grpc.ClientUnaryCall;
 }
 
 export interface PageServiceRoutesHandlers
   extends grpc.UntypedServiceImplementation {
-  getStorePage: grpc.handleUnaryCall<
-    _PagePackage_StorePageRequest__Output,
-    _PagePackage_StorePageResponse
-  >;
+  getPage: grpc.handleUnaryCall<_page_PageRequest__Output, _page_PageResponse>;
 }
 
 export interface PageServiceRoutesDefinition extends grpc.ServiceDefinition {
-  getStorePage: MethodDefinition<
-    _PagePackage_StorePageRequest,
-    _PagePackage_StorePageResponse,
-    _PagePackage_StorePageRequest__Output,
-    _PagePackage_StorePageResponse__Output
+  getPage: MethodDefinition<
+    _page_PageRequest,
+    _page_PageResponse,
+    _page_PageRequest__Output,
+    _page_PageResponse__Output
   >;
 }

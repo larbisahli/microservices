@@ -3,131 +3,131 @@
 import type * as grpc from '@grpc/grpc-js';
 import type { MethodDefinition } from '@grpc/proto-loader';
 import type {
-  CategoryRequest as _categoryPackage_CategoryRequest,
-  CategoryRequest__Output as _categoryPackage_CategoryRequest__Output,
-} from '../categoryPackage/CategoryRequest';
+  CategoryRequest as _category_CategoryRequest,
+  CategoryRequest__Output as _category_CategoryRequest__Output,
+} from '../category/CategoryRequest';
 import type {
-  CategoryResponse as _categoryPackage_CategoryResponse,
-  CategoryResponse__Output as _categoryPackage_CategoryResponse__Output,
-} from '../categoryPackage/CategoryResponse';
+  CategoryResponse as _category_CategoryResponse,
+  CategoryResponse__Output as _category_CategoryResponse__Output,
+} from '../category/CategoryResponse';
 import type {
-  MenuRequest as _categoryPackage_MenuRequest,
-  MenuRequest__Output as _categoryPackage_MenuRequest__Output,
-} from '../categoryPackage/MenuRequest';
+  MenuRequest as _category_MenuRequest,
+  MenuRequest__Output as _category_MenuRequest__Output,
+} from '../category/MenuRequest';
 import type {
-  MenuResponse as _categoryPackage_MenuResponse,
-  MenuResponse__Output as _categoryPackage_MenuResponse__Output,
-} from '../categoryPackage/MenuResponse';
+  MenuResponse as _category_MenuResponse,
+  MenuResponse__Output as _category_MenuResponse__Output,
+} from '../category/MenuResponse';
 
 export interface CategoryServiceRoutesClient extends grpc.Client {
-  getStoreCategory(
-    argument: _categoryPackage_CategoryRequest,
+  getCategory(
+    argument: _category_CategoryRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_categoryPackage_CategoryResponse__Output>
+    callback: grpc.requestCallback<_category_CategoryResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreCategory(
-    argument: _categoryPackage_CategoryRequest,
+  getCategory(
+    argument: _category_CategoryRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_categoryPackage_CategoryResponse__Output>
+    callback: grpc.requestCallback<_category_CategoryResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreCategory(
-    argument: _categoryPackage_CategoryRequest,
+  getCategory(
+    argument: _category_CategoryRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_categoryPackage_CategoryResponse__Output>
+    callback: grpc.requestCallback<_category_CategoryResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreCategory(
-    argument: _categoryPackage_CategoryRequest,
-    callback: grpc.requestCallback<_categoryPackage_CategoryResponse__Output>
+  getCategory(
+    argument: _category_CategoryRequest,
+    callback: grpc.requestCallback<_category_CategoryResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreCategory(
-    argument: _categoryPackage_CategoryRequest,
+  getCategory(
+    argument: _category_CategoryRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_categoryPackage_CategoryResponse__Output>
+    callback: grpc.requestCallback<_category_CategoryResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreCategory(
-    argument: _categoryPackage_CategoryRequest,
+  getCategory(
+    argument: _category_CategoryRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_categoryPackage_CategoryResponse__Output>
+    callback: grpc.requestCallback<_category_CategoryResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreCategory(
-    argument: _categoryPackage_CategoryRequest,
+  getCategory(
+    argument: _category_CategoryRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_categoryPackage_CategoryResponse__Output>
+    callback: grpc.requestCallback<_category_CategoryResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreCategory(
-    argument: _categoryPackage_CategoryRequest,
-    callback: grpc.requestCallback<_categoryPackage_CategoryResponse__Output>
+  getCategory(
+    argument: _category_CategoryRequest,
+    callback: grpc.requestCallback<_category_CategoryResponse__Output>
   ): grpc.ClientUnaryCall;
 
-  getStoreMenu(
-    argument: _categoryPackage_MenuRequest,
+  getMenu(
+    argument: _category_MenuRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_categoryPackage_MenuResponse__Output>
+    callback: grpc.requestCallback<_category_MenuResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreMenu(
-    argument: _categoryPackage_MenuRequest,
+  getMenu(
+    argument: _category_MenuRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_categoryPackage_MenuResponse__Output>
+    callback: grpc.requestCallback<_category_MenuResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreMenu(
-    argument: _categoryPackage_MenuRequest,
+  getMenu(
+    argument: _category_MenuRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_categoryPackage_MenuResponse__Output>
+    callback: grpc.requestCallback<_category_MenuResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreMenu(
-    argument: _categoryPackage_MenuRequest,
-    callback: grpc.requestCallback<_categoryPackage_MenuResponse__Output>
+  getMenu(
+    argument: _category_MenuRequest,
+    callback: grpc.requestCallback<_category_MenuResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreMenu(
-    argument: _categoryPackage_MenuRequest,
+  getMenu(
+    argument: _category_MenuRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_categoryPackage_MenuResponse__Output>
+    callback: grpc.requestCallback<_category_MenuResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreMenu(
-    argument: _categoryPackage_MenuRequest,
+  getMenu(
+    argument: _category_MenuRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_categoryPackage_MenuResponse__Output>
+    callback: grpc.requestCallback<_category_MenuResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreMenu(
-    argument: _categoryPackage_MenuRequest,
+  getMenu(
+    argument: _category_MenuRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_categoryPackage_MenuResponse__Output>
+    callback: grpc.requestCallback<_category_MenuResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreMenu(
-    argument: _categoryPackage_MenuRequest,
-    callback: grpc.requestCallback<_categoryPackage_MenuResponse__Output>
+  getMenu(
+    argument: _category_MenuRequest,
+    callback: grpc.requestCallback<_category_MenuResponse__Output>
   ): grpc.ClientUnaryCall;
 }
 
 export interface CategoryServiceRoutesHandlers
   extends grpc.UntypedServiceImplementation {
-  getStoreCategory: grpc.handleUnaryCall<
-    _categoryPackage_CategoryRequest__Output,
-    _categoryPackage_CategoryResponse
+  getCategory: grpc.handleUnaryCall<
+    _category_CategoryRequest__Output,
+    _category_CategoryResponse
   >;
 
-  getStoreMenu: grpc.handleUnaryCall<
-    _categoryPackage_MenuRequest__Output,
-    _categoryPackage_MenuResponse
+  getMenu: grpc.handleUnaryCall<
+    _category_MenuRequest__Output,
+    _category_MenuResponse
   >;
 }
 
 export interface CategoryServiceRoutesDefinition
   extends grpc.ServiceDefinition {
-  getStoreCategory: MethodDefinition<
-    _categoryPackage_CategoryRequest,
-    _categoryPackage_CategoryResponse,
-    _categoryPackage_CategoryRequest__Output,
-    _categoryPackage_CategoryResponse__Output
+  getCategory: MethodDefinition<
+    _category_CategoryRequest,
+    _category_CategoryResponse,
+    _category_CategoryRequest__Output,
+    _category_CategoryResponse__Output
   >;
-  getStoreMenu: MethodDefinition<
-    _categoryPackage_MenuRequest,
-    _categoryPackage_MenuResponse,
-    _categoryPackage_MenuRequest__Output,
-    _categoryPackage_MenuResponse__Output
+  getMenu: MethodDefinition<
+    _category_MenuRequest,
+    _category_MenuResponse,
+    _category_MenuRequest__Output,
+    _category_MenuResponse__Output
   >;
 }

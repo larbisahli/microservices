@@ -4,38 +4,45 @@
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import { Service, Container } from 'typedi';
-import { MenuRequest } from '@proto/generated/categoryPackage/MenuRequest';
-import { MenuResponse } from '@proto/generated/categoryPackage/MenuResponse';
 import { ProtoGrpcType } from '@proto/generated/serviceRoutes';
-import { Menu__Output } from '@proto/generated/categoryPackage/Menu';
-import { HeroBannerRequest } from '@proto/generated/slidePackage/HeroBannerRequest';
-import { HeroBannerResponse } from '@proto/generated/slidePackage/HeroBannerResponse';
-import { HeroBanner__Output } from '@proto/generated/slidePackage/HeroBanner';
-import { Product__Output } from '@proto/generated/productPackage/Product';
-import { PopularProductsRequest } from '@proto/generated/productPackage/PopularProductsRequest';
-import { ProductRequest } from '@proto/generated/productPackage/ProductRequest';
-import { ProductType } from '@ts-types/interfaces';
-import { ProductResponse } from '@proto/generated/productPackage/ProductResponse';
-import { Settings__Output } from '@proto/generated/SettingsPackage/Settings';
-import { StoreConfigResponse } from '@proto/generated/SettingsPackage/StoreConfigResponse';
-import { StoreConfigRequest } from '@proto/generated/SettingsPackage/StoreConfigRequest';
-import { CategoryRequest } from '@proto/generated/categoryPackage/CategoryRequest';
-import { CategoryResponse } from '@proto/generated/categoryPackage/CategoryResponse';
-import { Category } from '@proto/generated/categoryPackage/Category';
-import { CategoryProductsRequest } from '@proto/generated/productPackage/CategoryProductsRequest';
-import { ProductsResponse } from '@proto/generated/productPackage/ProductsResponse';
-import { PromoBannerRequest } from '@proto/generated/slidePackage/PromoBannerRequest';
-import { PromoBannerResponse } from '@proto/generated/slidePackage/PromoBannerResponse';
-import { StorePromoBanner } from '@proto/generated/slidePackage/StorePromoBanner';
-import { Page } from '@proto/generated/PagePackage/Page';
-import { StorePageRequest } from '@proto/generated/PagePackage/StorePageRequest';
-import { StorePageResponse } from '@proto/generated/PagePackage/StorePageResponse';
-// ---------------
 import SlideHandler from './slider';
 import ProductHandler from './product';
 import ConfigHandler from './config';
 import CategoryHandler from './category';
 import PageHandler from './page';
+// --------------- <TYPES> ---------------
+import { PromoBanner } from '@proto/generated/slides/PromoBanner';
+import { ConfigRequest } from '@proto/generated/settings/ConfigRequest';
+import { ConfigResponse } from '@proto/generated/settings/ConfigResponse';
+import { Settings } from '@proto/generated/settings/Settings';
+import { PageRequest } from '@proto/generated/page/PageRequest';
+import { PageResponse } from '@proto/generated/page/PageResponse';
+import { Page } from '@proto/generated/page/Page';
+import { PopularProductsRequest } from '@proto/generated/product/PopularProductsRequest';
+import { ProductsResponse } from '@proto/generated/product/ProductsResponse';
+import { Product } from '@proto/generated/product/Product';
+import { CategoryProductsRequest } from '@proto/generated/product/CategoryProductsRequest';
+import { ProductRequest } from '@proto/generated/product/ProductRequest';
+import { ProductResponse } from '@proto/generated/product/ProductResponse';
+import { ProductType } from '@ts-types/interfaces';
+import {
+  MenuRequest,
+  MenuRequest__Output,
+} from '@proto/generated/category/MenuRequest';
+import { MenuResponse } from '@proto/generated/category/MenuResponse';
+import { Menu, Menu__Output } from '@proto/generated/category/Menu';
+import { CategoryRequest } from '@proto/generated/category/CategoryRequest';
+import { CategoryResponse } from '@proto/generated/category/CategoryResponse';
+import { Category } from '@proto/generated/category/Category';
+import { HeroSlidesRequest } from '@proto/generated/slides/HeroSlidesRequest';
+import { HeroSlidesResponse } from '@proto/generated/slides/HeroSlidesResponse';
+import { HeroSlide } from '@proto/generated/slides/HeroSlide';
+import { PromoBannerRequest } from '@proto/generated/slides/PromoBannerRequest';
+import { PromoBannerResponse } from '@proto/generated/slides/PromoBannerResponse';
+import { Status } from '@grpc/grpc-js/build/src/constants';
+import { Language } from '@proto/generated/language/Language';
+import { LanguageRequest } from '@proto/generated/language/LanguageRequest';
+import { LanguageResponse } from '@proto/generated/language/LanguageResponse';
 
 const PROTO_PATH = './dist/proto/serviceRoutes.proto';
 
@@ -61,6 +68,7 @@ const { ServiceRoutes } = grpc.loadPackageDefinition(
 ) as unknown as ProtoGrpcType;
 
 const {
+  LanguageServiceRoutes,
   CategoryServiceRoutes,
   SliderServiceRoutes,
   ProductServiceRoutes,
@@ -92,33 +100,37 @@ class gRPC extends grpc.Server {
       getProduct: this.getProduct,
     });
 
+    this.addService(LanguageServiceRoutes.service, {
+      getLanguage: this.getLanguage,
+    });
+
     this.addService(CategoryServiceRoutes.service, {
-      getStoreMenu: this.getStoreMenu,
-      getStoreCategory: this.getStoreCategory,
+      getMenu: this.getMenu,
+      getCategory: this.getCategory,
     });
 
     this.addService(SliderServiceRoutes.service, {
-      getStoreHeroBanner: this.getStoreHeroBanner,
-      getStorePromoBanner: this.getStorePromoBanner,
+      getHeroSlides: this.getHeroSlides,
+      getPromoBanner: this.getPromoBanner,
     });
 
     this.addService(ConfigServiceRoutes.service, {
-      getStoreConfig: this.getStoreConfig,
+      getConfig: this.getConfig,
     });
 
     this.addService(PageServiceRoutes.service, {
-      getStorePage: this.getStorePage,
+      getPage: this.getPage,
     });
   }
 
   /**
    * Store config request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {config: Settings__Output})} callback Response callback
+   * @param {function(Error, {config: Settings})} callback Response callback
    */
-  protected getStoreConfig = async (
-    call: grpc.ServerUnaryCall<StoreConfigRequest, StoreConfigResponse>,
-    callback: grpc.sendUnaryData<{ config: Settings__Output | null }>
+  protected getConfig = async (
+    call: grpc.ServerUnaryCall<ConfigRequest, ConfigResponse>,
+    callback: grpc.sendUnaryData<{ config: Settings | null }>
   ) => {
     const {
       error,
@@ -128,12 +140,28 @@ class gRPC extends grpc.Server {
   };
 
   /**
+   * Store Language request handler.
+   * @param {EventEmitter} call Call object for the handler to process
+   * @param {function(Error, {config: Settings})} callback Response callback
+   */
+  protected getLanguage = async (
+    call: grpc.ServerUnaryCall<LanguageRequest, LanguageResponse>,
+    callback: grpc.sendUnaryData<{ language: Language | null }>
+  ) => {
+    const {
+      error,
+      response: { language },
+    } = await this.configHandler.getStoreLanguage(call);
+    callback(error, { language });
+  };
+
+  /**
    * Store page request handler.
    * @param {EventEmitter} call Call object for the handler to process
    * @param {function(Error, {page: Page})} callback Response callback
    */
-  protected getStorePage = async (
-    call: grpc.ServerUnaryCall<StorePageRequest, StorePageResponse>,
+  protected getPage = async (
+    call: grpc.ServerUnaryCall<PageRequest, PageResponse>,
     callback: grpc.sendUnaryData<{ page: Page | null }>
   ) => {
     const {
@@ -146,11 +174,11 @@ class gRPC extends grpc.Server {
   /**
    * Store product request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {products: Product__Output[]})} callback Response callback
+   * @param {function(Error, {products: Product[]})} callback Response callback
    */
   protected getPopularProducts = async (
     call: grpc.ServerUnaryCall<PopularProductsRequest, ProductsResponse>,
-    callback: grpc.sendUnaryData<{ products: Product__Output[] | null }>
+    callback: grpc.sendUnaryData<{ products: Product[] | null }>
   ) => {
     const {
       error,
@@ -162,11 +190,11 @@ class gRPC extends grpc.Server {
   /**
    * Store category products request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {products: Product__Output[]})} callback Response callback
+   * @param {function(Error, {products: Product[]})} callback Response callback
    */
   protected getCategoryProducts = async (
     call: grpc.ServerUnaryCall<CategoryProductsRequest, ProductsResponse>,
-    callback: grpc.sendUnaryData<{ products: Product__Output[] | null }>
+    callback: grpc.sendUnaryData<{ products: Product[] | null }>
   ) => {
     const {
       error,
@@ -183,7 +211,7 @@ class gRPC extends grpc.Server {
   protected getProduct = async (
     call: grpc.ServerUnaryCall<ProductRequest, ProductResponse>,
     callback: grpc.sendUnaryData<{
-      product: Product__Output | ProductType | null;
+      product: Product | ProductType | null;
     }>
   ) => {
     const {
@@ -198,8 +226,8 @@ class gRPC extends grpc.Server {
    * @param {EventEmitter} call Call object for the handler to process
    * @param {function(Error, {menu: Menu__Output[]})} callback Response callback
    */
-  protected getStoreMenu = async (
-    call: grpc.ServerUnaryCall<MenuRequest, MenuResponse>,
+  protected getMenu = async (
+    call: grpc.ServerUnaryCall<MenuRequest__Output, MenuResponse>,
     callback: grpc.sendUnaryData<{ menu: Menu__Output[] }>
   ) => {
     const {
@@ -214,7 +242,7 @@ class gRPC extends grpc.Server {
    * @param {EventEmitter} call Call object for the handler to process
    * @param {function(Error, {category: Category})} callback Response callback
    */
-  protected getStoreCategory = async (
+  protected getCategory = async (
     call: grpc.ServerUnaryCall<CategoryRequest, CategoryResponse>,
     callback: grpc.sendUnaryData<{ category: Category | null }>
   ) => {
@@ -228,27 +256,27 @@ class gRPC extends grpc.Server {
   /**
    * Store hero slider request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {sliders: HeroBanner__Output[]})} callback Response callback
+   * @param {function(Error, {sliders: HeroBanner[]})} callback Response callback
    */
-  protected getStoreHeroBanner = async (
-    call: grpc.ServerUnaryCall<HeroBannerRequest, HeroBannerResponse>,
-    callback: grpc.sendUnaryData<{ sliders: HeroBanner__Output[] | null }>
+  protected getHeroSlides = async (
+    call: grpc.ServerUnaryCall<HeroSlidesRequest, HeroSlidesResponse>,
+    callback: grpc.sendUnaryData<{ sliders: HeroSlide[] | null }>
   ) => {
     const {
       error,
       response: { sliders },
-    } = await this.slideHandler.getHeroSlider(call);
+    } = await this.slideHandler.getHeroSlides(call);
     callback(error, { sliders });
   };
 
   /**
    * Store Promo slider request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {banner: StorePromoBanner})} callback Response callback
+   * @param {function(Error, {banner: PromoBanner})} callback Response callback
    */
-  protected getStorePromoBanner = async (
+  protected getPromoBanner = async (
     call: grpc.ServerUnaryCall<PromoBannerRequest, PromoBannerResponse>,
-    callback: grpc.sendUnaryData<{ banner: StorePromoBanner | null }>
+    callback: grpc.sendUnaryData<{ banner: PromoBanner | null }>
   ) => {
     const {
       error,

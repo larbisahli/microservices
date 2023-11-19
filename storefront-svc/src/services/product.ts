@@ -6,10 +6,6 @@ import {
 } from '@grpc/grpc-js';
 import { Service } from 'typedi';
 import { CategoryQueries, ProductQueries } from '@sql';
-import { Product__Output } from '@proto/generated/productPackage/Product';
-import { PopularProductsRequest } from '@proto/generated/productPackage/PopularProductsRequest';
-import { ProductRequest } from '@proto/generated/productPackage/ProductRequest';
-import { ProductResponse } from '@proto/generated/productPackage/ProductResponse';
 import {
   CategoryType,
   ImageType,
@@ -21,11 +17,15 @@ import {
   TagType,
   VariationType,
 } from '@ts-types/interfaces';
-import { CategoryProductsRequest } from '@proto/generated/productPackage/CategoryProductsRequest';
-import { ProductsResponse } from '@proto/generated/productPackage/ProductsResponse';
 import { offset } from '@utils/index';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 import { ResourceHandler } from '@cache/resource.store';
+import { PopularProductsRequest } from '@proto/generated/product/PopularProductsRequest';
+import { ProductsResponse } from '@proto/generated/product/ProductsResponse';
+import { Product__Output } from '@proto/generated/product/Product';
+import { CategoryProductsRequest } from '@proto/generated/product/CategoryProductsRequest';
+import { ProductRequest } from '@proto/generated/product/ProductRequest';
+import { ProductResponse } from '@proto/generated/product/ProductResponse';
 
 @Service()
 export default class ProductHandler extends PostgresClient {
@@ -52,7 +52,7 @@ export default class ProductHandler extends PostgresClient {
     response: { products: Product__Output[] | null };
   }> => {
     const { getPopularProducts } = this.productQueries;
-    const { alias } = call.request;
+    const { alias, storeId, storeLanguageId } = call.request;
 
     if (!alias) {
       return {
@@ -75,22 +75,12 @@ export default class ProductHandler extends PostgresClient {
       return { error: null, response: resource };
     }
 
-    const client = await this.transaction(alias);
+    const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      const { error } = await this.setupClientSessions(client, { alias });
-
-      if (error) {
-        return {
-          error: {
-            code: Status.NOT_FOUND,
-            details: error?.message,
-          },
-          response: { products: [] },
-        };
-      }
+      await this.setupStoreSessions(client, { alias, storeId });
 
       const { rows } = await client.query<Product__Output>(
         getPopularProducts()
@@ -140,11 +130,11 @@ export default class ProductHandler extends PostgresClient {
     const { getCategoryProducts } = this.productQueries;
     const { getStoreCategoryIdByUrlKey } = this.categoryQueries;
 
-    const { alias, urlKey, page = 0 } = call.request;
+    const { alias, storeId, storeLanguageId, urlKey, page = 0 } = call.request;
 
     const limit = 5;
 
-    if (!alias || !urlKey) {
+    if (!alias || !urlKey || !storeLanguageId) {
       return {
         error: {
           code: Status.CANCELLED,
@@ -166,22 +156,12 @@ export default class ProductHandler extends PostgresClient {
       return { error: null, response: resource };
     }
 
-    const client = await this.transaction(alias);
+    const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      const { error } = await this.setupClientSessions(client, { alias });
-
-      if (error) {
-        return {
-          error: {
-            code: Status.NOT_FOUND,
-            details: error?.message,
-          },
-          response: { products: [] },
-        };
-      }
+      await this.setupStoreSessions(client, { alias, storeId });
 
       const { rows: category } = await client.query<{ categoryId: number }>(
         getStoreCategoryIdByUrlKey(urlKey)
@@ -247,7 +227,7 @@ export default class ProductHandler extends PostgresClient {
       getStoreProductRelatedProducts,
       getStoreProductUpsellProducts,
     } = this.productQueries;
-    const { alias, slug } = call.request;
+    const { alias, storeId, storeLanguageId, slug } = call.request;
 
     if (!alias || !slug) {
       return {
@@ -270,22 +250,12 @@ export default class ProductHandler extends PostgresClient {
       return { error: null, response: resource };
     }
 
-    const client = await this.transaction(alias);
+    const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      const { error } = await this.setupClientSessions(client, { alias });
-
-      if (error) {
-        return {
-          error: {
-            code: Status.NOT_FOUND,
-            details: error?.message,
-          },
-          response: { product: null },
-        };
-      }
+      await this.setupStoreSessions(client, { alias, storeId });
 
       // Seo
       const { rows: productSeoRows } = await client.query<ProductSeoType>(

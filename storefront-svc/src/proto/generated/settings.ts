@@ -1,8 +1,5 @@
 import type * as grpc from '@grpc/grpc-js';
-import type {
-  EnumTypeDefinition,
-  MessageTypeDefinition,
-} from '@grpc/proto-loader';
+import type { MessageTypeDefinition } from '@grpc/proto-loader';
 
 type SubtypeConstructor<
   Constructor extends new (...args: any) => any,
@@ -12,24 +9,31 @@ type SubtypeConstructor<
 };
 
 export interface ProtoGrpcType {
-  CommonPackage: {
+  commons: {
     Currency: MessageTypeDefinition;
+    GoogleAnalytics: MessageTypeDefinition;
     Icon: MessageTypeDefinition;
     Seo: MessageTypeDefinition;
     Social: MessageTypeDefinition;
-    productTypeEnum: EnumTypeDefinition;
-  };
-  SettingsPackage: {
-    Settings: MessageTypeDefinition;
-    StoreConfigRequest: MessageTypeDefinition;
-    StoreConfigResponse: MessageTypeDefinition;
+    Unit: MessageTypeDefinition;
   };
   google: {
     protobuf: {
       Timestamp: MessageTypeDefinition;
     };
   };
-  photoPackage: {
+  language: {
+    Language: MessageTypeDefinition;
+    LanguageRequest: MessageTypeDefinition;
+    LanguageResponse: MessageTypeDefinition;
+    Translation: MessageTypeDefinition;
+  };
+  media: {
     Image: MessageTypeDefinition;
+  };
+  settings: {
+    ConfigRequest: MessageTypeDefinition;
+    ConfigResponse: MessageTypeDefinition;
+    Settings: MessageTypeDefinition;
   };
 }

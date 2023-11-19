@@ -1,5 +1,8 @@
 import type * as grpc from '@grpc/grpc-js';
-import type { MessageTypeDefinition } from '@grpc/proto-loader';
+import type {
+  EnumTypeDefinition,
+  MessageTypeDefinition,
+} from '@grpc/proto-loader';
 
 type SubtypeConstructor<
   Constructor extends new (...args: any) => any,
@@ -9,32 +12,28 @@ type SubtypeConstructor<
 };
 
 export interface ProtoGrpcType {
-  AttributePackage: {
+  attribute: {
     Attribute: MessageTypeDefinition;
     AttributeValue: MessageTypeDefinition;
   };
-  TagPackage: {
-    Tag: MessageTypeDefinition;
-  };
-  categoryPackage: {
+  category: {
     Breadcrumbs: MessageTypeDefinition;
     Category: MessageTypeDefinition;
     CategoryRequest: MessageTypeDefinition;
     CategoryResponse: MessageTypeDefinition;
-    CategorySeo: MessageTypeDefinition;
     Menu: MessageTypeDefinition;
     MenuRequest: MessageTypeDefinition;
     MenuResponse: MessageTypeDefinition;
   };
-  google: {
-    protobuf: {
-      Timestamp: MessageTypeDefinition;
-    };
+  enum: {
+    attributeTypeEnum: EnumTypeDefinition;
+    discountTypeEnum: EnumTypeDefinition;
+    productTypeEnum: EnumTypeDefinition;
   };
-  photoPackage: {
+  media: {
     Image: MessageTypeDefinition;
   };
-  productPackage: {
+  product: {
     CategoryProductsRequest: MessageTypeDefinition;
     PopularProductsRequest: MessageTypeDefinition;
     Product: MessageTypeDefinition;
@@ -42,10 +41,12 @@ export interface ProtoGrpcType {
     ProductResponse: MessageTypeDefinition;
     ProductSeo: MessageTypeDefinition;
     ProductShippingInfo: MessageTypeDefinition;
-    ProductType: MessageTypeDefinition;
     ProductsResponse: MessageTypeDefinition;
     Unit: MessageTypeDefinition;
     Variation: MessageTypeDefinition;
     VariationOption: MessageTypeDefinition;
+  };
+  tag: {
+    Tag: MessageTypeDefinition;
   };
 }

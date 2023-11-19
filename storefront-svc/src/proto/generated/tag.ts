@@ -9,7 +9,7 @@ type SubtypeConstructor<
 };
 
 export interface ProtoGrpcType {
-  TagPackage: {
+  tag: {
     Tag: MessageTypeDefinition;
   };
 }

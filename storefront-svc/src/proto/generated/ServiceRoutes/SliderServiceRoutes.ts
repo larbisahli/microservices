@@ -3,130 +3,130 @@
 import type * as grpc from '@grpc/grpc-js';
 import type { MethodDefinition } from '@grpc/proto-loader';
 import type {
-  HeroBannerRequest as _slidePackage_HeroBannerRequest,
-  HeroBannerRequest__Output as _slidePackage_HeroBannerRequest__Output,
-} from '../slidePackage/HeroBannerRequest';
+  HeroSlidesRequest as _slides_HeroSlidesRequest,
+  HeroSlidesRequest__Output as _slides_HeroSlidesRequest__Output,
+} from '../slides/HeroSlidesRequest';
 import type {
-  HeroBannerResponse as _slidePackage_HeroBannerResponse,
-  HeroBannerResponse__Output as _slidePackage_HeroBannerResponse__Output,
-} from '../slidePackage/HeroBannerResponse';
+  HeroSlidesResponse as _slides_HeroSlidesResponse,
+  HeroSlidesResponse__Output as _slides_HeroSlidesResponse__Output,
+} from '../slides/HeroSlidesResponse';
 import type {
-  PromoBannerRequest as _slidePackage_PromoBannerRequest,
-  PromoBannerRequest__Output as _slidePackage_PromoBannerRequest__Output,
-} from '../slidePackage/PromoBannerRequest';
+  PromoBannerRequest as _slides_PromoBannerRequest,
+  PromoBannerRequest__Output as _slides_PromoBannerRequest__Output,
+} from '../slides/PromoBannerRequest';
 import type {
-  PromoBannerResponse as _slidePackage_PromoBannerResponse,
-  PromoBannerResponse__Output as _slidePackage_PromoBannerResponse__Output,
-} from '../slidePackage/PromoBannerResponse';
+  PromoBannerResponse as _slides_PromoBannerResponse,
+  PromoBannerResponse__Output as _slides_PromoBannerResponse__Output,
+} from '../slides/PromoBannerResponse';
 
 export interface SliderServiceRoutesClient extends grpc.Client {
-  getStoreHeroBanner(
-    argument: _slidePackage_HeroBannerRequest,
+  getHeroSlides(
+    argument: _slides_HeroSlidesRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_slidePackage_HeroBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_HeroSlidesResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreHeroBanner(
-    argument: _slidePackage_HeroBannerRequest,
+  getHeroSlides(
+    argument: _slides_HeroSlidesRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_slidePackage_HeroBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_HeroSlidesResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreHeroBanner(
-    argument: _slidePackage_HeroBannerRequest,
+  getHeroSlides(
+    argument: _slides_HeroSlidesRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_slidePackage_HeroBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_HeroSlidesResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreHeroBanner(
-    argument: _slidePackage_HeroBannerRequest,
-    callback: grpc.requestCallback<_slidePackage_HeroBannerResponse__Output>
+  getHeroSlides(
+    argument: _slides_HeroSlidesRequest,
+    callback: grpc.requestCallback<_slides_HeroSlidesResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreHeroBanner(
-    argument: _slidePackage_HeroBannerRequest,
+  getHeroSlides(
+    argument: _slides_HeroSlidesRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_slidePackage_HeroBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_HeroSlidesResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreHeroBanner(
-    argument: _slidePackage_HeroBannerRequest,
+  getHeroSlides(
+    argument: _slides_HeroSlidesRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_slidePackage_HeroBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_HeroSlidesResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreHeroBanner(
-    argument: _slidePackage_HeroBannerRequest,
+  getHeroSlides(
+    argument: _slides_HeroSlidesRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_slidePackage_HeroBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_HeroSlidesResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreHeroBanner(
-    argument: _slidePackage_HeroBannerRequest,
-    callback: grpc.requestCallback<_slidePackage_HeroBannerResponse__Output>
+  getHeroSlides(
+    argument: _slides_HeroSlidesRequest,
+    callback: grpc.requestCallback<_slides_HeroSlidesResponse__Output>
   ): grpc.ClientUnaryCall;
 
-  getStorePromoBanner(
-    argument: _slidePackage_PromoBannerRequest,
+  getPromoBanner(
+    argument: _slides_PromoBannerRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_slidePackage_PromoBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_PromoBannerResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePromoBanner(
-    argument: _slidePackage_PromoBannerRequest,
+  getPromoBanner(
+    argument: _slides_PromoBannerRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_slidePackage_PromoBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_PromoBannerResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePromoBanner(
-    argument: _slidePackage_PromoBannerRequest,
+  getPromoBanner(
+    argument: _slides_PromoBannerRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_slidePackage_PromoBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_PromoBannerResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePromoBanner(
-    argument: _slidePackage_PromoBannerRequest,
-    callback: grpc.requestCallback<_slidePackage_PromoBannerResponse__Output>
+  getPromoBanner(
+    argument: _slides_PromoBannerRequest,
+    callback: grpc.requestCallback<_slides_PromoBannerResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePromoBanner(
-    argument: _slidePackage_PromoBannerRequest,
+  getPromoBanner(
+    argument: _slides_PromoBannerRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_slidePackage_PromoBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_PromoBannerResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePromoBanner(
-    argument: _slidePackage_PromoBannerRequest,
+  getPromoBanner(
+    argument: _slides_PromoBannerRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_slidePackage_PromoBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_PromoBannerResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePromoBanner(
-    argument: _slidePackage_PromoBannerRequest,
+  getPromoBanner(
+    argument: _slides_PromoBannerRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_slidePackage_PromoBannerResponse__Output>
+    callback: grpc.requestCallback<_slides_PromoBannerResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStorePromoBanner(
-    argument: _slidePackage_PromoBannerRequest,
-    callback: grpc.requestCallback<_slidePackage_PromoBannerResponse__Output>
+  getPromoBanner(
+    argument: _slides_PromoBannerRequest,
+    callback: grpc.requestCallback<_slides_PromoBannerResponse__Output>
   ): grpc.ClientUnaryCall;
 }
 
 export interface SliderServiceRoutesHandlers
   extends grpc.UntypedServiceImplementation {
-  getStoreHeroBanner: grpc.handleUnaryCall<
-    _slidePackage_HeroBannerRequest__Output,
-    _slidePackage_HeroBannerResponse
+  getHeroSlides: grpc.handleUnaryCall<
+    _slides_HeroSlidesRequest__Output,
+    _slides_HeroSlidesResponse
   >;
 
-  getStorePromoBanner: grpc.handleUnaryCall<
-    _slidePackage_PromoBannerRequest__Output,
-    _slidePackage_PromoBannerResponse
+  getPromoBanner: grpc.handleUnaryCall<
+    _slides_PromoBannerRequest__Output,
+    _slides_PromoBannerResponse
   >;
 }
 
 export interface SliderServiceRoutesDefinition extends grpc.ServiceDefinition {
-  getStoreHeroBanner: MethodDefinition<
-    _slidePackage_HeroBannerRequest,
-    _slidePackage_HeroBannerResponse,
-    _slidePackage_HeroBannerRequest__Output,
-    _slidePackage_HeroBannerResponse__Output
+  getHeroSlides: MethodDefinition<
+    _slides_HeroSlidesRequest,
+    _slides_HeroSlidesResponse,
+    _slides_HeroSlidesRequest__Output,
+    _slides_HeroSlidesResponse__Output
   >;
-  getStorePromoBanner: MethodDefinition<
-    _slidePackage_PromoBannerRequest,
-    _slidePackage_PromoBannerResponse,
-    _slidePackage_PromoBannerRequest__Output,
-    _slidePackage_PromoBannerResponse__Output
+  getPromoBanner: MethodDefinition<
+    _slides_PromoBannerRequest,
+    _slides_PromoBannerResponse,
+    _slides_PromoBannerRequest__Output,
+    _slides_PromoBannerResponse__Output
   >;
 }

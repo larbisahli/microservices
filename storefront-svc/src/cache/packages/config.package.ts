@@ -1,7 +1,7 @@
 /**
  * This package helps us encode and decode resources to a binary blob (Uint8Array)
  */
-import { Settings } from '@proto/generated/SettingsPackage/Settings';
+import { Settings } from '@proto/generated/settings/Settings';
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
@@ -24,7 +24,7 @@ export default class ConfigPackage extends protobuf.Root {
   constructor() {
     super();
     this.root = this.loadSync(PROTO_PATH);
-    this.Config = this.root.lookupType('SettingsPackage.StoreConfigResponse');
+    this.Config = this.root.lookupType('settings.ConfigResponse');
     this.decodeOptions = {
       enums: String,
       longs: String,

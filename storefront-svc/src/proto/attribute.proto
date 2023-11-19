@@ -1,14 +1,18 @@
 syntax = "proto3";
 
-package AttributePackage;
+package attribute;
 
-message AttributeValue {
-    uint32 id = 1;
-    string value = 2;
-    string color = 3;
-}
+import "enum.proto";
 
 message Attribute {
     uint32 id = 1;
     string name = 2;
+    enum.attributeTypeEnum type = 3;
+    repeated AttributeValue values = 4;
+}
+
+message AttributeValue {
+    uint32 id = 1;
+    string name = 2;
+    string value = 3;
 }

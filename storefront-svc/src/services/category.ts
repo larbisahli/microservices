@@ -6,16 +6,16 @@ import {
 } from '@grpc/grpc-js';
 import { Service } from 'typedi';
 import { CategoryQueries } from '@sql';
-import { MenuRequest } from '@proto/generated/categoryPackage/MenuRequest';
-import { MenuResponse } from '@proto/generated/categoryPackage/MenuResponse';
-import { Menu__Output } from '@proto/generated/categoryPackage/Menu';
-import { CategoryRequest } from '@proto/generated/categoryPackage/CategoryRequest';
-import { CategoryResponse } from '@proto/generated/categoryPackage/CategoryResponse';
-import { Category } from '@proto/generated/categoryPackage/Category';
-import { CategorySeo } from '@proto/generated/categoryPackage/CategorySeo';
-import { Breadcrumbs } from '@proto/generated/categoryPackage/Breadcrumbs';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 import { ResourceHandler } from '@cache/resource.store';
+import { MenuRequest__Output } from '@proto/generated/category/MenuRequest';
+import { MenuResponse } from '@proto/generated/category/MenuResponse';
+import { Menu__Output } from '@proto/generated/category/Menu';
+import { CategoryResponse } from '@proto/generated/category/CategoryResponse';
+import { CategoryRequest } from '@proto/generated/category/CategoryRequest';
+import { Category } from '@proto/generated/category/Category';
+import { Breadcrumbs } from '@proto/generated/category/Breadcrumbs';
+import { isEmpty } from 'underscore';
 
 @Service()
 export default class CategoryHandler extends PostgresClient {
@@ -31,21 +31,19 @@ export default class CategoryHandler extends PostgresClient {
   }
 
   /**
-   * @param { ServerUnaryCall<MenuRequest, MenuResponse>} call
+   * @param { ServerUnaryCall<MenuRequest__Output, MenuResponse>} call
    * @returns {Promise<Menu__Output[]>}
    */
   public getMenu = async (
-    call: ServerUnaryCall<MenuRequest, MenuResponse>
+    call: ServerUnaryCall<MenuRequest__Output, MenuResponse>
   ): Promise<{
     error: ServerErrorResponse | Partial<StatusObject> | null;
     response: { menu: Menu__Output[] | [] };
   }> => {
     const { getMenu } = this.categoryQueries;
-    const { alias } = call.request;
+    const { alias, storeLanguageId, storeId } = call.request;
 
-    console.log('============>', { alias });
-
-    if (!alias) {
+    if (!alias || !storeLanguageId) {
       return {
         error: {
           code: Status.CANCELLED,
@@ -55,46 +53,39 @@ export default class CategoryHandler extends PostgresClient {
       };
     }
 
-    /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
-      alias,
-      resourceName: 'menu',
-      packageName: 'menu',
-    })) as { menu: Menu__Output[] | [] };
+    // /** Check if resource is in the cache store */
+    // const resource = (await this.resourceHandler.getResource({
+    //   alias,
+    //   resourceName: 'menu',
+    //   packageName: 'menu',
+    // })) as { menu: Menu__Output[] | [] };
 
-    if (resource) {
-      return { error: null, response: resource };
-    }
+    // if (resource) {
+    //   return { error: null, response: resource };
+    // }
 
-    const client = await this.transaction(alias);
+    const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      const { error } = await this.setupClientSessions(client, { alias });
+      await this.setupStoreSessions(client, { alias, storeId });
 
-      if (error) {
-        return {
-          error: {
-            code: Status.NOT_FOUND,
-            details: error?.message,
-          },
-          response: { menu: [] },
-        };
-      }
-      const { rows } = await client.query<Menu__Output>(getMenu());
+      const { rows } = await client.query<Menu__Output>(
+        getMenu(storeLanguageId)
+      );
 
       const menu = rows;
 
       /** Set the resources in the cache store */
-      if (menu && alias) {
-        this.resourceHandler.setResource({
-          alias,
-          resourceName: 'menu',
-          resource: menu,
-          packageName: 'menu',
-        });
-      }
+      // if (menu && alias) {
+      //   this.resourceHandler.setResource({
+      //     alias,
+      //     resourceName: 'menu',
+      //     resource: menu,
+      //     packageName: 'menu',
+      //   });
+      // }
 
       await client.query('COMMIT');
 
@@ -131,9 +122,9 @@ export default class CategoryHandler extends PostgresClient {
       getCategoryUrlKeyById,
     } = this.categoryQueries;
 
-    const { alias, urlKey } = call.request;
+    const { alias, storeLanguageId, storeId, urlKey } = call.request;
 
-    if (!alias || !urlKey) {
+    if (!alias || !urlKey || !storeLanguageId) {
       return {
         error: {
           code: Status.CANCELLED,
@@ -154,36 +145,23 @@ export default class CategoryHandler extends PostgresClient {
       return { error: null, response: resource };
     }
 
-    const client = await this.transaction(alias);
+    const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      const { error } = await this.setupClientSessions(client, { alias });
-
-      if (error) {
-        return {
-          error: {
-            code: Status.NOT_FOUND,
-            details: error?.message,
-          },
-          response: { category: null },
-        };
-      }
+      await this.setupStoreSessions(client, { alias, storeId });
 
       let breadcrumbs = [] as Breadcrumbs[];
 
-      interface CategorySeoOutput extends CategorySeo {
-        categoryId: number;
-      }
-
-      const { rows: categorySeoRows } = await client.query<CategorySeoOutput>(
+      const { rows: categorySeoRows } = await client.query<Category>(
         getStoreCategorySeo(urlKey)
       );
 
       const categorySeo = categorySeoRows[0] ?? {};
 
       const { rows: categoryRows } = await client.query<Category>(
+        // @ts-ignore
         getStoreCategory(categorySeo?.categoryId)
       );
 
@@ -193,6 +171,7 @@ export default class CategoryHandler extends PostgresClient {
 
       // *** Current ***
       breadcrumbs.push({
+        // @ts-ignore
         categoryLevel: category?.level,
         categoryName: category.name,
         categoryUrl: categorySeo?.urlKey,
@@ -206,13 +185,14 @@ export default class CategoryHandler extends PostgresClient {
 
         const categoryParent = categoryParentRows[0] ?? {};
 
-        const { rows: categoryParentSeoRows } = await client.query<CategorySeo>(
+        const { rows: categoryParentSeoRows } = await client.query<Category>(
           getCategoryUrlKeyById(categoryParent?.id!)
         );
 
         const categoryParentSeo = categoryParentSeoRows[0] ?? {};
 
         breadcrumbs.push({
+          // @ts-ignore
           categoryLevel: categoryParent.level,
           categoryName: categoryParent.name,
           categoryUrl: categoryParentSeo?.urlKey,
@@ -227,13 +207,14 @@ export default class CategoryHandler extends PostgresClient {
           const categoryAncestors = categoryAncestorsRows[0] ?? {};
 
           const { rows: categoryAncestorsSeoRows } =
-            await client.query<CategorySeo>(
+            await client.query<Category>(
               getCategoryUrlKeyById(categoryAncestors?.id!)
             );
 
           const categoryAncestorsSeo = categoryAncestorsSeoRows[0] ?? {};
 
           breadcrumbs.push({
+            // @ts-ignore
             categoryLevel: categoryAncestors.level,
             categoryName: categoryAncestors.name,
             categoryUrl: categoryAncestorsSeo?.urlKey,

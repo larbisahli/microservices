@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package language;
+
+message Translation {
+    map<string, string> pages = 1;
+    map<string, string> common = 2;
+    map<string, string> emails = 3;
+    map<string, string> actions = 4;
+    map<string, string> billing = 5;
+    map<string, string> reviews = 6;
+    map<string, string> category = 7;
+    map<string, string> checkout = 8;
+    map<string, string> gateways = 9;
+    map<string, string> messages = 10;
+    map<string, string> shipping = 11;
+    map<string, string> exception = 12;
+    map<string, string> marketing = 13;
+    map<string, string> collection = 14;
+    map<string, string> error_codes = 15;
+    map<string, string> print_order = 16;
+}
+
+message Language {
+    required uint32 id = 1;
+    required string name = 2;
+    required bool isDefault = 3;
+    required string localeId = 4;
+    string direction = 6;
+    Translation translation = 7;
+}
+
+message LanguageRequest {
+    required uint32 id = 1;
+    required string alias = 2;
+    optional string storeId = 3;
+}
+
+message LanguageResponse {
+    Language language = 1;
+}

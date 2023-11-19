@@ -1,7 +1,7 @@
 /**
  * This package helps us encode and decode resources to a binary blob (Uint8Array)
  */
-import { Page } from '@proto/generated/PagePackage/Page';
+import { Page } from '@proto/generated/page/Page';
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
@@ -24,7 +24,7 @@ export default class PagePackage extends protobuf.Root {
   constructor() {
     super();
     this.root = this.loadSync(PROTO_PATH);
-    this.Page = this.root.lookupType('PagePackage.StorePageResponse');
+    this.Page = this.root.lookupType('page.PageResponse');
 
     this.decodeOptions = {
       enums: String,

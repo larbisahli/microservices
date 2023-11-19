@@ -32,17 +32,19 @@ export default class SliderQueryString extends CommonQueryString {
     };
   }
 
-  public getHeroSlider() {
+  public getHeroSlides(storeLanguageId: number) {
     const text = `SELECT slide.id, slide.url, slide.styles,
+    -- Translation
+    (SELECT hst.title FROM hero_slider_translation AS hst WHERE hst.store_id = current_setting('app.current_store_id')::uuid AND hst.hero_slider_id = slide.id AND hst.language_id = $1),
     -- Thumbnail
     ARRAY((SElECT json_build_object('id', media.id, 'image', media.image_path, 'placeholder', media.placeholder_path) FROM media AS media
     WHERE media.store_id = current_setting('app.current_store_id')::uuid AND media.id = slide.media_id)) AS thumbnail
     FROM hero_slider AS slide WHERE slide.store_id = current_setting('app.current_store_id')::uuid AND slide.published IS TRUE ORDER BY slide.position ASC`;
 
     return {
-      name: 'get-hero-slider',
+      name: 'get-hero-slides',
       text,
-      values: [],
+      values: [storeLanguageId],
     };
   }
 

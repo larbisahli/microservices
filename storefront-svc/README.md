@@ -97,3 +97,5 @@ store_view
 # docker stats --no-stream
 
 # https://phoenixnap.com/kb/docker-memory-and-cpu-limit
+
+https://www.section.io/engineering-education/data-encryption-and-decryption-in-node-js-using-crypto/

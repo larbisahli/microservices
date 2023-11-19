@@ -4,18 +4,23 @@ package ServiceRoutes;
 
 import "product.proto";
 import "category.proto";
-import "slide.proto";
+import "slides.proto";
 import "settings.proto";
+import "language.proto";
 import "page.proto";
 
+service LanguageServiceRoutes {
+  rpc getLanguage(LanguageRequest)                       returns (LanguageResponse);
+}
+
 service CategoryServiceRoutes {
-  rpc getStoreMenu(MenuRequest)                          returns (MenuResponse);
-  rpc getStoreCategory(CategoryRequest)                  returns (CategoryResponse);
+  rpc getMenu(MenuRequest)                               returns (MenuResponse);
+  rpc getCategory(CategoryRequest)                       returns (CategoryResponse);
 }
 
 service SliderServiceRoutes {
-  rpc getStoreHeroBanner(HeroBannerRequest)              returns (HeroBannerResponse);
-  rpc getStorePromoBanner(PromoBannerRequest)            returns (PromoBannerResponse);
+  rpc getHeroSlides(HeroSlidesRequest)                   returns (HeroSlidesResponse);
+  rpc getPromoBanner(PromoBannerRequest)                 returns (PromoBannerResponse);
 }
 
 service ProductServiceRoutes {
@@ -24,24 +29,10 @@ service ProductServiceRoutes {
   rpc getProduct(ProductRequest)                         returns (ProductResponse);
 }
 
-service ConfigServiceRoutes {
-  rpc getStoreConfig(StoreConfigRequest)                 returns (StoreConfigResponse);
-}
-
 service PageServiceRoutes {
-  rpc getStorePage(StorePageRequest)                     returns (StorePageResponse);
+  rpc getPage(PageRequest)                               returns (PageResponse);
 }
 
-service InvalidationServiceRoutes {
-  rpc invalidateResource(InvalidateResourceRequest)      returns (InvalidateResourceResponse);
-}
-
-message InvalidateResourceRequest {
-  required string alias = 1;
-  required string resourceName = 2;
-  required string packageName = 3;
-}
-
-message InvalidateResourceResponse {
-  bool success = 1;
+service ConfigServiceRoutes {
+  rpc getConfig(ConfigRequest)                           returns (ConfigResponse);
 }

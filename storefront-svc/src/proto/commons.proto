@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package commons;
+
+import "google/protobuf/timestamp.proto";
+import "media.proto";
+
+message Currency {
+    string symbol = 1;
+    string name = 2;
+    string symbol_native = 3;
+    string decimal_digits = 4;
+    uint32 rounding = 5;
+    string code = 6;
+    string name_plural = 7;
+}
+
+message Icon {
+    string value = 1;
+}
+
+message Social {
+    string url = 1;
+    Icon icon = 2;
+}
+
+
+message Unit {
+    string unit = 1;
+}
+
+message Seo {
+    string metaTitle = 1;
+    string metaDescription = 2;
+    string ogTitle = 3;
+    string ogDescription = 4;
+    repeated Image ogImage = 5;
+    string twitterHandle = 6;
+    string twitterCardType = 7;
+    string metaTags = 8;
+    string canonicalUrl = 9;
+}
+
+message GoogleAnalytics {
+    string trackingId = 1;
+    bool isEnabled = 2;
+    bool isTrackOrders = 3;
+    bool isTrackCheckout = 4;
+    bool isTrackVisitors = 5;
+    bool isTrackUserLogin = 6;
+    bool isTrackUserRegister = 7;
+    bool isTrackCheckoutOptions = 8;
+    bool isTrackProductAddToCart = 9;
+    bool isTrackProductRemoveToCart = 10;
+}

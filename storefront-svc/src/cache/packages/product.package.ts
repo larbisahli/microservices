@@ -1,7 +1,7 @@
 /**
  * This package helps us encode and decode resources to a binary blob (Uint8Array)
  */
-import { Product } from '@proto/generated/productPackage/Product';
+import { Product } from '@proto/generated/product/Product';
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
@@ -26,9 +26,9 @@ export default class ProductPackage extends protobuf.Root {
     super();
     this.root = this.loadSync(PROTO_PATH);
 
-    this.Products = this.root.lookupType('productPackage.ProductsResponse');
+    this.Products = this.root.lookupType('product.ProductsResponse');
 
-    this.Product = this.root.lookupType('productPackage.ProductResponse');
+    this.Product = this.root.lookupType('product.ProductResponse');
 
     this.decodeOptions = {
       enums: String,

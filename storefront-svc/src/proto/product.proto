@@ -1,15 +1,12 @@
 syntax = "proto3";
 
-package productPackage;
+package product;
 
-import "photo.proto";
+import "media.proto";
 import "attribute.proto";
 import "tag.proto";
 import "category.proto";
-
-message ProductType {
-  string id = 1;
-}
+import "enum.proto";
 
 message Variation {
   Attribute attribute = 1;
@@ -35,9 +32,11 @@ message ProductShippingInfo {
   uint32 id = 1;
   uint32 weight = 2;
   Unit weightUnit = 3;
+  uint32 volume = 4;
+  Unit volumeUnit = 5;
   uint32 dimensionWidth = 6;
   uint32 dimensionHeight = 7;
-  uint32 dimensionLength = 8;
+  uint32 dimensionLenght = 8;
   Unit dimensionUnit = 9;
 }
 
@@ -55,7 +54,7 @@ message Product {
     string name = 2;
     string sku = 3;
     string slug = 4;
-    ProductType type = 5;
+    enum.productTypeEnum type = 5;
     string description = 6;
     repeated Image thumbnail = 7;
     repeated Image gallery = 8;
@@ -79,6 +78,8 @@ message Product {
 
 message PopularProductsRequest {
   required string alias = 1;
+  required uint32 storeLanguageId = 2;
+  optional string storeId = 3;
 }
 
 message ProductsResponse {
@@ -87,13 +88,17 @@ message ProductsResponse {
 
 message CategoryProductsRequest {
   required string alias = 1;
-  required string urlKey = 2;
-  required uint32 page = 3;
+  required uint32 storeLanguageId = 2;
+  optional string storeId = 3;
+  required string urlKey = 4;
+  required uint32 page = 5;
 }
 
 message ProductRequest {
   required string alias = 1;
-  required string slug = 2;
+  required uint32 storeLanguageId = 2;
+  optional string storeId = 3;
+  required string slug = 4;
 }
 
 message ProductResponse {

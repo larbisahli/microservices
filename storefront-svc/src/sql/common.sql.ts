@@ -26,28 +26,10 @@ export default class CommonQueryString {
     };
   }
 
-  public setSessionEmail(email: string) {
-    const text = `SELECT set_config('app.current_user_email', $1, TRUE)`;
-    return {
-      name: 'app_current_user_email',
-      text,
-      values: [email],
-    };
-  }
-
   public setSessionStoreId(id: string) {
     const text = `SELECT set_config('app.current_store_id', $1, TRUE)`;
     return {
       name: 'app_current_store_id',
-      text,
-      values: [id],
-    };
-  }
-
-  public setSessionUserId(id: string) {
-    const text = `SELECT set_config('app.current_user_id', $1, TRUE)`;
-    return {
-      name: 'app_current_user_id',
       text,
       values: [id],
     };
@@ -72,18 +54,7 @@ export default class CommonQueryString {
   }
 }
 
-const {
-  setSessionAlias,
-  setSessionStoreId,
-  setSessionUserId,
-  getStoreIdByAlias,
-  setSessionEmail,
-} = Container.get(CommonQueryString);
+const { setSessionAlias, setSessionStoreId, getStoreIdByAlias } =
+  Container.get(CommonQueryString);
 
-export {
-  setSessionAlias,
-  setSessionStoreId,
-  setSessionUserId,
-  getStoreIdByAlias,
-  setSessionEmail,
-};
+export { setSessionAlias, setSessionStoreId, getStoreIdByAlias };

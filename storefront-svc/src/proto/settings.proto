@@ -1,9 +1,10 @@
 syntax = "proto3";
 
-package SettingsPackage;
+package settings;
 
-import "photo.proto";
-import "common.proto";
+import "media.proto";
+import "language.proto";
+import "commons.proto";
 
 message Settings {
     uint32 id = 1;
@@ -12,16 +13,22 @@ message Settings {
     string storeName = 4;
     string storeEmail = 5;
     string storeNumber = 6;
-    Currency currency = 7;
-    repeated Social socials = 9;
-    uint32 maxCheckoutQuantity = 10;
-    Seo seo = 11;
+    string addressLine1 = 7;
+    string addressLine2 = 8;
+    repeated Currency currencies = 9;
+    repeated Language locales = 10;
+    GoogleAnalytics google = 11;
+    repeated Social socials = 12;
+    uint32 maxCheckoutQuantity = 13;
+    uint32 maxCheckoutAmount = 14;
+    Seo seo = 15;
 }
 
-message StoreConfigRequest {
+message ConfigRequest {
     required string alias = 1;
+    optional string storeId = 3;
 }
 
-message StoreConfigResponse {
+message ConfigResponse {
     Settings config = 1;
 }

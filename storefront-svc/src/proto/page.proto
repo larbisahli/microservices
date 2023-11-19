@@ -1,22 +1,26 @@
 syntax = "proto3";
 
-package PagePackage;
+package page;
 
-import "common.proto";
+import "commons.proto";
 
 message Page {
     string id = 1;
     string slug = 2;
     string name = 3;
     string content = 4;
-    Seo seo = 5;
+    string metaTitle = 5;
+    string metaDescription = 6;
+    repeated media.Image ogMedia = 7;
 }
 
-message StorePageRequest {
+message PageRequest {
     required string alias = 1;
-    string slug = 2;
+    required uint32 storeLanguageId = 2;
+    optional string storeId = 3;
+    required string slug = 4;
 }
 
-message StorePageResponse {
+message PageResponse {
     Page page = 1;
 }

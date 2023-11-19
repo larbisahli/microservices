@@ -1,8 +1,8 @@
 /**
  * This package helps us encode and decode resources to a binary blob (Uint8Array)
  */
-import { Category } from '@proto/generated/categoryPackage/Category';
-import { Menu } from '@proto/generated/categoryPackage/Menu';
+import { Category } from '@proto/generated/category/Category';
+import { Menu } from '@proto/generated/category/Menu';
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
@@ -27,8 +27,8 @@ export default class CategoryPackage extends protobuf.Root {
     super();
 
     this.root = this.loadSync(PROTO_PATH);
-    this.Menu = this.root.lookupType('categoryPackage.MenuResponse');
-    this.Category = this.root.lookupType('categoryPackage.CategoryResponse');
+    this.Menu = this.root.lookupType('category.MenuResponse');
+    this.Category = this.root.lookupType('category.CategoryResponse');
 
     this.decodeOptions = {
       enums: String,

@@ -104,44 +104,46 @@ export default class CategoryQueryString extends CommonQueryString {
     };
   }
 
-  public getMenu() {
-    const text = `SELECT cate_level1.id, cate_level1.category_name AS name,
-    (SELECT seo.url_key FROM category_seo AS seo WHERE seo.store_id = current_setting('app.current_store_id')::uuid AND seo.category_id = cate_level1.id) AS "url",
+  public getMenu(languageId: number) {
+    const text = `SELECT cate_level1.id, cate_level1.url_key AS "urlKey",
+    (SELECT name FROM category_translation WHERE store_id = current_setting('app.current_store_id')::uuid AND category_id = cate_level1.id AND language_id = $1),
     -- thumbnail
     ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
-    FROM photos AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate_level1.media_id )) AS thumbnail,
+    FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate_level1.media_id )) AS thumbnail,
     -- Children
-    ARRAY((SELECT json_build_object('id', cate_level2.id, 'name', cate_level2.category_name, 'thumbnail',
+    ARRAY((SELECT json_build_object('id', cate_level2.id,
+    'name', (SELECT name FROM category_translation WHERE store_id = current_setting('app.current_store_id')::uuid AND category_id = cate_level2.id AND language_id = $1),
+    'thumbnail', 'urlKey', cate_level2.url_key,
     ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
-    FROM photos AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate_level2.media_id )),
-    'url', (SELECT seo.url_key FROM category_seo AS seo WHERE seo.store_id = current_setting('app.current_store_id')::uuid AND seo.category_id = cate_level2.id),
-    'children',
-    ARRAY((SELECT json_build_object('id', cate_level3.id, 'name', cate_level3.category_name, 'thumbnail',
-    ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
-    FROM photos AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate_level3.media_id )),
-    'url', (SELECT seo.url_key FROM category_seo AS seo WHERE seo.store_id = current_setting('app.current_store_id')::uuid AND seo.category_id = cate_level3.id))
-    FROM category AS cate_level3 WHERE cate_level3.parent_id = cate_level2.id ORDER BY cate_level3.position ASC)))
-
-    FROM category AS cate_level2 WHERE cate_level2.parent_id = cate_level1.id ORDER BY cate_level2.position ASC)) AS children
+    FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate_level2.media_id )),
+    'children', ARRAY((SELECT json_build_object('id', cate_level3.id,
+    'name', (SELECT name FROM category_translation WHERE store_id = current_setting('app.current_store_id')::uuid AND category_id = cate_level3.id AND language_id = $1),
+    'urlKey', cate_level3.url_key,
+    'thumbnail', ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
+    FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate_level3.media_id )))
+    FROM category AS cate_level3 WHERE cate_level3.store_id = current_setting('app.current_store_id')::uuid
+    AND cate_level3.parent_id = cate_level2.id ORDER BY cate_level3.position ASC)))
+    FROM category AS cate_level2 WHERE cate_level2.store_id = current_setting('app.current_store_id')::uuid
+    AND cate_level2.parent_id = cate_level1.id ORDER BY cate_level2.position ASC)) AS children
     FROM category AS cate_level1 WHERE cate_level1.store_id = current_setting('app.current_store_id')::uuid AND cate_level1.level = 1
     AND cate_level1.parent_id IS NULL ORDER BY cate_level1.position ASC`;
 
     return {
       name: 'get-menu',
       text,
-      values: [],
+      values: [languageId],
     };
   }
 
   public getStoreCategory(id: number) {
-    const text = `SELECT cate.id, cate.parent_id AS "parentId", cate.category_name AS name, cate.level, cate.category_description AS description, cate.include_in_menu AS "includeInMenu", cate.position,
+    const text = `SELECT cate.id, cate.parent_id AS "parentId", cate.name AS name, cate.level, cate.category_description AS description, cate.include_in_menu AS "includeInMenu", cate.position,
     -- thumbnail
     ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
-    FROM photos AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate.media_id )) AS "thumbnail",
+    FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate.media_id )) AS "thumbnail",
     -- Children
     ARRAY((
-      SELECT json_build_object('id', cate_level2.id, 'name', cate_level2.category_name,
-    'thumbnail', ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path) FROM photos AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate_level2.media_id )),
+      SELECT json_build_object('id', cate_level2.id, 'name', cate_level2.name,
+    'thumbnail', ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate_level2.media_id )),
     'categorySeo', (SELECT json_build_object('urlKey', (SELECT seo.url_key FROM category_seo AS seo WHERE seo.store_id = current_setting('app.current_store_id')::uuid AND seo.category_id = cate_level2.id))))
     FROM category AS cate_level2 WHERE cate_level2.parent_id = cate.id ORDER BY cate_level2.position ASC)) AS "children"
 
@@ -158,7 +160,7 @@ export default class CategoryQueryString extends CommonQueryString {
     const text = `SELECT url_key AS "urlKey", category_id AS "categoryId", meta_title AS "metaTitle", meta_keywords AS "metaKeywords",
     meta_description AS "metaDescription", meta_robots AS "metaRobots", breadcrumbs_priority AS "breadcrumbsPriority",
     ARRAY(SELECT json_build_object('id', photo_seo.id, 'image', photo_seo.image_path, 'placeholder', photo_seo.placeholder_path)
-    FROM photos AS photo_seo WHERE photo_seo.store_id = current_setting('app.current_store_id')::uuid AND photo_seo.id = media_id) as "metaImage"
+    FROM media AS photo_seo WHERE photo_seo.store_id = current_setting('app.current_store_id')::uuid AND photo_seo.id = media_id) as "metaImage"
     FROM category_seo WHERE store_id = current_setting('app.current_store_id')::uuid AND url_key = $1`;
 
     return {

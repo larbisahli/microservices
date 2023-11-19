@@ -28,7 +28,9 @@ import { RPCPort } from './config';
       console.error(error);
       Logger.system.error(error);
     } else {
-      Logger.system.info(`🚀 Business RPC server running on port : ${RPCPort}`);
+      Logger.system.info(
+        `🚀 Storefront RPC server running on port : ${RPCPort}`
+      );
     }
   });
 })();

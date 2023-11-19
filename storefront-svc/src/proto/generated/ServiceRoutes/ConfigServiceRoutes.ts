@@ -3,70 +3,70 @@
 import type * as grpc from '@grpc/grpc-js';
 import type { MethodDefinition } from '@grpc/proto-loader';
 import type {
-  StoreConfigRequest as _SettingsPackage_StoreConfigRequest,
-  StoreConfigRequest__Output as _SettingsPackage_StoreConfigRequest__Output,
-} from '../SettingsPackage/StoreConfigRequest';
+  ConfigRequest as _settings_ConfigRequest,
+  ConfigRequest__Output as _settings_ConfigRequest__Output,
+} from '../settings/ConfigRequest';
 import type {
-  StoreConfigResponse as _SettingsPackage_StoreConfigResponse,
-  StoreConfigResponse__Output as _SettingsPackage_StoreConfigResponse__Output,
-} from '../SettingsPackage/StoreConfigResponse';
+  ConfigResponse as _settings_ConfigResponse,
+  ConfigResponse__Output as _settings_ConfigResponse__Output,
+} from '../settings/ConfigResponse';
 
 export interface ConfigServiceRoutesClient extends grpc.Client {
-  getStoreConfig(
-    argument: _SettingsPackage_StoreConfigRequest,
+  getConfig(
+    argument: _settings_ConfigRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_SettingsPackage_StoreConfigResponse__Output>
+    callback: grpc.requestCallback<_settings_ConfigResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreConfig(
-    argument: _SettingsPackage_StoreConfigRequest,
+  getConfig(
+    argument: _settings_ConfigRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_SettingsPackage_StoreConfigResponse__Output>
+    callback: grpc.requestCallback<_settings_ConfigResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreConfig(
-    argument: _SettingsPackage_StoreConfigRequest,
+  getConfig(
+    argument: _settings_ConfigRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_SettingsPackage_StoreConfigResponse__Output>
+    callback: grpc.requestCallback<_settings_ConfigResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreConfig(
-    argument: _SettingsPackage_StoreConfigRequest,
-    callback: grpc.requestCallback<_SettingsPackage_StoreConfigResponse__Output>
+  getConfig(
+    argument: _settings_ConfigRequest,
+    callback: grpc.requestCallback<_settings_ConfigResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreConfig(
-    argument: _SettingsPackage_StoreConfigRequest,
+  getConfig(
+    argument: _settings_ConfigRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_SettingsPackage_StoreConfigResponse__Output>
+    callback: grpc.requestCallback<_settings_ConfigResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreConfig(
-    argument: _SettingsPackage_StoreConfigRequest,
+  getConfig(
+    argument: _settings_ConfigRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_SettingsPackage_StoreConfigResponse__Output>
+    callback: grpc.requestCallback<_settings_ConfigResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreConfig(
-    argument: _SettingsPackage_StoreConfigRequest,
+  getConfig(
+    argument: _settings_ConfigRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_SettingsPackage_StoreConfigResponse__Output>
+    callback: grpc.requestCallback<_settings_ConfigResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStoreConfig(
-    argument: _SettingsPackage_StoreConfigRequest,
-    callback: grpc.requestCallback<_SettingsPackage_StoreConfigResponse__Output>
+  getConfig(
+    argument: _settings_ConfigRequest,
+    callback: grpc.requestCallback<_settings_ConfigResponse__Output>
   ): grpc.ClientUnaryCall;
 }
 
 export interface ConfigServiceRoutesHandlers
   extends grpc.UntypedServiceImplementation {
-  getStoreConfig: grpc.handleUnaryCall<
-    _SettingsPackage_StoreConfigRequest__Output,
-    _SettingsPackage_StoreConfigResponse
+  getConfig: grpc.handleUnaryCall<
+    _settings_ConfigRequest__Output,
+    _settings_ConfigResponse
   >;
 }
 
 export interface ConfigServiceRoutesDefinition extends grpc.ServiceDefinition {
-  getStoreConfig: MethodDefinition<
-    _SettingsPackage_StoreConfigRequest,
-    _SettingsPackage_StoreConfigResponse,
-    _SettingsPackage_StoreConfigRequest__Output,
-    _SettingsPackage_StoreConfigResponse__Output
+  getConfig: MethodDefinition<
+    _settings_ConfigRequest,
+    _settings_ConfigResponse,
+    _settings_ConfigRequest__Output,
+    _settings_ConfigResponse__Output
   >;
 }

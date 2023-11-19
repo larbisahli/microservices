@@ -56,7 +56,7 @@ message CreateAttributeRequest {
 
 message UpdateAttributeRequest {
     uint32 id = 1;
-    Attribute data = 1;
+    Attribute data = 2;
 }
 
 service AttributeService {

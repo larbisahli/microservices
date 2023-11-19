@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package TagPackage;
+package tag;
 
 message Tag {
     uint32 id = 1;

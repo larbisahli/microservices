@@ -1,9 +1,8 @@
 syntax = "proto3";
 
-package categoryPackage;
+package category;
 
-import "google/protobuf/timestamp.proto";
-import "photo.proto";
+import "media.proto";
 
 /*
   * Note that when a message contains a field of its own message type,
@@ -16,45 +15,37 @@ message Breadcrumbs {
   string categoryUrl = 3;
 }
 
-message CategorySeo {
-  string urlKey = 1;
-  string metaTitle = 2;
-  string metaKeywords = 3;
-  string metaDescription = 4;
-  string metaRobots = 5;
-  uint32 breadcrumbsPriority = 6;
-  repeated Image metaImage = 7;
-  repeated Breadcrumbs breadcrumbs = 8;
-}
-
 message Category {
-    uint32 id = 1;
-    string name = 2;
-    uint32 parentId = 3;
-    string description = 4;
-    repeated Image thumbnail = 5;
-    bool active = 6;
-    uint32 level = 7;
-    uint32 position = 8;
-    bool includeInMenu = 9;
-    bool hasChildren = 10;
-    repeated Category children = 11 [lazy = true];
-    CategorySeo categorySeo = 12;
-    // google.protobuf.Timestamp createdAt = 13;
-    // google.protobuf.Timestamp updatedAt = 14;
+  uint32 id = 1;
+  uint32 parentId = 2;
+  Category parent = 3 [lazy = true];
+  string name = 4;
+  string description = 5;
+  repeated media.Image thumbnail = 6;
+  optional bool hasChildren = 7;
+  repeated Category children = 8 [lazy = true];
+  string urlKey = 9;
+  string metaTitle = 10;
+  string metaKeywords = 11;
+  string metaDescription = 12;
+  string metaRobots = 13;
+  optional uint32 breadcrumbsPriority = 14;
+  repeated media.Image metaImage = 15;
+  repeated Breadcrumbs breadcrumbs = 16;
 }
 
 message Menu {
   uint32 id = 1;
   string name = 2;
-  string url = 3;
+  string urlKey = 3;
   repeated Image thumbnail = 4;
   repeated Menu children = 5 [lazy = true];
 }
 
-
 message MenuRequest {
   required string alias = 1;
+  required uint32 storeLanguageId = 2;
+  optional string storeId = 3;
 }
 
 message MenuResponse {
@@ -64,6 +55,8 @@ message MenuResponse {
 message CategoryRequest {
   required string urlKey = 1;
   required string alias = 2;
+  required uint32 storeLanguageId = 3;
+  optional string storeId = 4;
 }
 
 message CategoryResponse {

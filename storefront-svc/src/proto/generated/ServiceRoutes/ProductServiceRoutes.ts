@@ -3,186 +3,186 @@
 import type * as grpc from '@grpc/grpc-js';
 import type { MethodDefinition } from '@grpc/proto-loader';
 import type {
-  CategoryProductsRequest as _productPackage_CategoryProductsRequest,
-  CategoryProductsRequest__Output as _productPackage_CategoryProductsRequest__Output,
-} from '../productPackage/CategoryProductsRequest';
+  CategoryProductsRequest as _product_CategoryProductsRequest,
+  CategoryProductsRequest__Output as _product_CategoryProductsRequest__Output,
+} from '../product/CategoryProductsRequest';
 import type {
-  PopularProductsRequest as _productPackage_PopularProductsRequest,
-  PopularProductsRequest__Output as _productPackage_PopularProductsRequest__Output,
-} from '../productPackage/PopularProductsRequest';
+  PopularProductsRequest as _product_PopularProductsRequest,
+  PopularProductsRequest__Output as _product_PopularProductsRequest__Output,
+} from '../product/PopularProductsRequest';
 import type {
-  ProductRequest as _productPackage_ProductRequest,
-  ProductRequest__Output as _productPackage_ProductRequest__Output,
-} from '../productPackage/ProductRequest';
+  ProductRequest as _product_ProductRequest,
+  ProductRequest__Output as _product_ProductRequest__Output,
+} from '../product/ProductRequest';
 import type {
-  ProductResponse as _productPackage_ProductResponse,
-  ProductResponse__Output as _productPackage_ProductResponse__Output,
-} from '../productPackage/ProductResponse';
+  ProductResponse as _product_ProductResponse,
+  ProductResponse__Output as _product_ProductResponse__Output,
+} from '../product/ProductResponse';
 import type {
-  ProductsResponse as _productPackage_ProductsResponse,
-  ProductsResponse__Output as _productPackage_ProductsResponse__Output,
-} from '../productPackage/ProductsResponse';
+  ProductsResponse as _product_ProductsResponse,
+  ProductsResponse__Output as _product_ProductsResponse__Output,
+} from '../product/ProductsResponse';
 
 export interface ProductServiceRoutesClient extends grpc.Client {
   getCategoryProducts(
-    argument: _productPackage_CategoryProductsRequest,
+    argument: _product_CategoryProductsRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getCategoryProducts(
-    argument: _productPackage_CategoryProductsRequest,
+    argument: _product_CategoryProductsRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getCategoryProducts(
-    argument: _productPackage_CategoryProductsRequest,
+    argument: _product_CategoryProductsRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getCategoryProducts(
-    argument: _productPackage_CategoryProductsRequest,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    argument: _product_CategoryProductsRequest,
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getCategoryProducts(
-    argument: _productPackage_CategoryProductsRequest,
+    argument: _product_CategoryProductsRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getCategoryProducts(
-    argument: _productPackage_CategoryProductsRequest,
+    argument: _product_CategoryProductsRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getCategoryProducts(
-    argument: _productPackage_CategoryProductsRequest,
+    argument: _product_CategoryProductsRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getCategoryProducts(
-    argument: _productPackage_CategoryProductsRequest,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    argument: _product_CategoryProductsRequest,
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
 
   getPopularProducts(
-    argument: _productPackage_PopularProductsRequest,
+    argument: _product_PopularProductsRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getPopularProducts(
-    argument: _productPackage_PopularProductsRequest,
+    argument: _product_PopularProductsRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getPopularProducts(
-    argument: _productPackage_PopularProductsRequest,
+    argument: _product_PopularProductsRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getPopularProducts(
-    argument: _productPackage_PopularProductsRequest,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    argument: _product_PopularProductsRequest,
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getPopularProducts(
-    argument: _productPackage_PopularProductsRequest,
+    argument: _product_PopularProductsRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getPopularProducts(
-    argument: _productPackage_PopularProductsRequest,
+    argument: _product_PopularProductsRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getPopularProducts(
-    argument: _productPackage_PopularProductsRequest,
+    argument: _product_PopularProductsRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
   getPopularProducts(
-    argument: _productPackage_PopularProductsRequest,
-    callback: grpc.requestCallback<_productPackage_ProductsResponse__Output>
+    argument: _product_PopularProductsRequest,
+    callback: grpc.requestCallback<_product_ProductsResponse__Output>
   ): grpc.ClientUnaryCall;
 
   getProduct(
-    argument: _productPackage_ProductRequest,
+    argument: _product_ProductRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductResponse__Output>
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
   ): grpc.ClientUnaryCall;
   getProduct(
-    argument: _productPackage_ProductRequest,
+    argument: _product_ProductRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_productPackage_ProductResponse__Output>
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
   ): grpc.ClientUnaryCall;
   getProduct(
-    argument: _productPackage_ProductRequest,
+    argument: _product_ProductRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductResponse__Output>
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
   ): grpc.ClientUnaryCall;
   getProduct(
-    argument: _productPackage_ProductRequest,
-    callback: grpc.requestCallback<_productPackage_ProductResponse__Output>
+    argument: _product_ProductRequest,
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
   ): grpc.ClientUnaryCall;
   getProduct(
-    argument: _productPackage_ProductRequest,
+    argument: _product_ProductRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductResponse__Output>
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
   ): grpc.ClientUnaryCall;
   getProduct(
-    argument: _productPackage_ProductRequest,
+    argument: _product_ProductRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_productPackage_ProductResponse__Output>
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
   ): grpc.ClientUnaryCall;
   getProduct(
-    argument: _productPackage_ProductRequest,
+    argument: _product_ProductRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_productPackage_ProductResponse__Output>
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
   ): grpc.ClientUnaryCall;
   getProduct(
-    argument: _productPackage_ProductRequest,
-    callback: grpc.requestCallback<_productPackage_ProductResponse__Output>
+    argument: _product_ProductRequest,
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
   ): grpc.ClientUnaryCall;
 }
 
 export interface ProductServiceRoutesHandlers
   extends grpc.UntypedServiceImplementation {
   getCategoryProducts: grpc.handleUnaryCall<
-    _productPackage_CategoryProductsRequest__Output,
-    _productPackage_ProductsResponse
+    _product_CategoryProductsRequest__Output,
+    _product_ProductsResponse
   >;
 
   getPopularProducts: grpc.handleUnaryCall<
-    _productPackage_PopularProductsRequest__Output,
-    _productPackage_ProductsResponse
+    _product_PopularProductsRequest__Output,
+    _product_ProductsResponse
   >;
 
   getProduct: grpc.handleUnaryCall<
-    _productPackage_ProductRequest__Output,
-    _productPackage_ProductResponse
+    _product_ProductRequest__Output,
+    _product_ProductResponse
   >;
 }
 
 export interface ProductServiceRoutesDefinition extends grpc.ServiceDefinition {
   getCategoryProducts: MethodDefinition<
-    _productPackage_CategoryProductsRequest,
-    _productPackage_ProductsResponse,
-    _productPackage_CategoryProductsRequest__Output,
-    _productPackage_ProductsResponse__Output
+    _product_CategoryProductsRequest,
+    _product_ProductsResponse,
+    _product_CategoryProductsRequest__Output,
+    _product_ProductsResponse__Output
   >;
   getPopularProducts: MethodDefinition<
-    _productPackage_PopularProductsRequest,
-    _productPackage_ProductsResponse,
-    _productPackage_PopularProductsRequest__Output,
-    _productPackage_ProductsResponse__Output
+    _product_PopularProductsRequest,
+    _product_ProductsResponse,
+    _product_PopularProductsRequest__Output,
+    _product_ProductsResponse__Output
   >;
   getProduct: MethodDefinition<
-    _productPackage_ProductRequest,
-    _productPackage_ProductResponse,
-    _productPackage_ProductRequest__Output,
-    _productPackage_ProductResponse__Output
+    _product_ProductRequest,
+    _product_ProductResponse,
+    _product_ProductRequest__Output,
+    _product_ProductResponse__Output
   >;
 }

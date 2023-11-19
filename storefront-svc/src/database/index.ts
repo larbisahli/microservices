@@ -8,13 +8,7 @@ import { ACTION_PRIVILEGES, RESOURCES } from '@ts-types/enums';
 //   TransactionError,
 // } from '@core/Errors';
 import { Logger } from '@core';
-import {
-  getStoreIdByAlias,
-  setSessionAlias,
-  setSessionStoreId,
-  setSessionUserId,
-  setSessionEmail,
-} from '@sql';
+import { getStoreIdByAlias, setSessionAlias, setSessionStoreId } from '@sql';
 
 declare module 'pg' {
   export interface PoolClient {
@@ -41,7 +35,7 @@ export default class PostgresClient {
    * @param QueryPermissionType
    * @returns {Promise<PoolClient>}
    */
-  protected transaction = async (alias: string): Promise<PoolClient> => {
+  protected transaction = async (): Promise<PoolClient> => {
     try {
       const client: PoolClient = await ReadPool.connect();
 
@@ -54,14 +48,10 @@ export default class PostgresClient {
         console.error(
           `The last executed query on this client was: ${client.lastQuery}`
         );
+        Logger.database.warn({
+          message: `A client has been checked out for more than 5 seconds! The last executed query on this client was: ${client.lastQuery}`,
+        });
       }, 5000);
-
-      const storeId = '';
-
-      /** Set the alias session */
-      await client.query(setSessionAlias(alias));
-      /** Set the store id session */
-      await client.query(setSessionStoreId(storeId));
 
       // monkey patch the query method to keep track of the last query executed
       // @ts-ignore
@@ -92,14 +82,9 @@ export default class PostgresClient {
     return await ReadPool.query<T>(queryConfig);
   }
 
-  protected async setupClientSessions(
+  protected async setupStoreSessions(
     client: PoolClient,
-    {
-      alias,
-      storeId,
-      email,
-      userId,
-    }: { alias?: string; storeId?: string; email?: string; userId?: string }
+    { alias, storeId }: { alias: string; storeId?: string }
   ) {
     let store: StoreType | null = null;
 
@@ -109,15 +94,21 @@ export default class PostgresClient {
     }
 
     if (!storeId) {
+      /** Set email session for RLS to access the user_account table **/
+      const { rows: placeholderUuidRows } = await client.query(
+        `SELECT uuid_nil()`
+      );
+      const { uuid_nil } = placeholderUuidRows[0];
+      /** Set default value for uuid as placeholder **/
+      await client.query(setSessionStoreId(uuid_nil));
+
       /** Get store id by alias **/
       const { rows: storeRows } = await client.query<StoreType>(
         getStoreIdByAlias()
       );
       store = storeRows[0] ?? {};
     }
-
     const id = store?.id ?? storeId;
-
     if (id) {
       /** Set store id session for RLS **/
       await client.query(setSessionStoreId(id));
@@ -125,17 +116,6 @@ export default class PostgresClient {
       await client.query('ROLLBACK');
       return { error: { message: `Store "${alias}" not found` } };
     }
-
-    if (email) {
-      /** Set email session for RLS to access the user_account table **/
-      await client.query(setSessionEmail(email));
-    }
-
-    if (userId) {
-      /** Set user id session for RLS **/
-      await client.query(setSessionUserId(userId));
-    }
-
-    return { error: null, alias, storeId: id, email, userId };
+    return { error: null, alias, storeId: id };
   }
 }

@@ -7,13 +7,13 @@ import {
 import { Service } from 'typedi';
 import { SliderQueries } from '@sql';
 import { ResourceHandler } from '@cache/resource.store';
-import { HeroBanner__Output } from '@proto/generated/slidePackage/HeroBanner';
-import { HeroBannerRequest } from '@proto/generated/slidePackage/HeroBannerRequest';
-import { HeroBannerResponse } from '@proto/generated/slidePackage/HeroBannerResponse';
-import { PromoBannerRequest } from '@proto/generated/slidePackage/PromoBannerRequest';
-import { PromoBannerResponse } from '@proto/generated/slidePackage/PromoBannerResponse';
-import { StorePromoBanner } from '@proto/generated/slidePackage/StorePromoBanner';
 import { Status } from '@grpc/grpc-js/build/src/constants';
+import { HeroSlidesRequest } from '@proto/generated/slides/HeroSlidesRequest';
+import { HeroSlidesResponse } from '@proto/generated/slides/HeroSlidesResponse';
+import { HeroSlide__Output } from '@proto/generated/slides/HeroSlide';
+import { PromoBannerRequest } from '@proto/generated/slides/PromoBannerRequest';
+import { PromoBannerResponse } from '@proto/generated/slides/PromoBannerResponse';
+import { PromoBanner } from '@proto/generated/slides/PromoBanner';
 
 @Service()
 export default class SlideHandler extends PostgresClient {
@@ -32,16 +32,18 @@ export default class SlideHandler extends PostgresClient {
    * @param { ServerUnaryCall<StaffRequest, Staff>} call
    * @returns {Promise<Menu__Output[]>}
    */
-  public getHeroSlider = async (
-    call: ServerUnaryCall<HeroBannerRequest, HeroBannerResponse>
+  public getHeroSlides = async (
+    call: ServerUnaryCall<HeroSlidesRequest, HeroSlidesResponse>
   ): Promise<{
     error: ServerErrorResponse | Partial<StatusObject> | null;
-    response: { sliders: HeroBanner__Output[] | null };
+    response: { sliders: HeroSlide__Output[] | null };
   }> => {
-    const { getHeroSlider } = this.sliderQueries;
-    const { alias } = call.request;
+    const { getHeroSlides } = this.sliderQueries;
+    const { alias, storeId, storeLanguageId } = call.request;
 
-    if (!alias) {
+    console.log({ alias, storeId, storeLanguageId });
+
+    if (!alias || !storeLanguageId) {
       return {
         error: {
           code: Status.CANCELLED,
@@ -52,46 +54,38 @@ export default class SlideHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
-      alias,
-      resourceName: 'heroSlide',
-      packageName: 'heroSlide',
-    })) as { sliders: HeroBanner__Output[] | null };
+    // const resource = (await this.resourceHandler.getResource({
+    //   alias,
+    //   resourceName: 'heroSlide',
+    //   packageName: 'heroSlide',
+    // })) as { sliders: HeroSlide__Output[] | null };
 
-    if (resource) {
-      return { error: null, response: resource };
-    }
+    // if (resource) {
+    //   return { error: null, response: resource };
+    // }
 
-    const client = await this.transaction(alias);
+    const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      const { error } = await this.setupClientSessions(client, { alias });
+      await this.setupStoreSessions(client, { alias, storeId });
 
-      if (error) {
-        return {
-          error: {
-            code: Status.NOT_FOUND,
-            details: error?.message,
-          },
-          response: { sliders: [] },
-        };
-      }
-
-      const { rows } = await client.query<HeroBanner__Output>(getHeroSlider());
+      const { rows } = await client.query<HeroSlide__Output>(
+        getHeroSlides(storeLanguageId)
+      );
 
       const sliders = rows;
 
       /** Set the resources in the cache store */
-      if (sliders && alias) {
-        this.resourceHandler.setResource({
-          alias,
-          resource: sliders,
-          resourceName: 'heroSlide',
-          packageName: 'heroSlide',
-        });
-      }
+      // if (sliders && alias) {
+      //   this.resourceHandler.setResource({
+      //     alias,
+      //     resource: sliders,
+      //     resourceName: 'heroSlide',
+      //     packageName: 'heroSlide',
+      //   });
+      // }
 
       await client.query('COMMIT');
 
@@ -119,10 +113,10 @@ export default class SlideHandler extends PostgresClient {
     call: ServerUnaryCall<PromoBannerRequest, PromoBannerResponse>
   ): Promise<{
     error: ServerErrorResponse | Partial<StatusObject> | null;
-    response: { banner: StorePromoBanner | null };
+    response: { banner: PromoBanner | null };
   }> => {
     const { getStorePromoSlide } = this.sliderQueries;
-    const { alias } = call.request;
+    const { alias, storeId, storeLanguageId } = call.request;
 
     if (!alias) {
       return {
@@ -139,32 +133,20 @@ export default class SlideHandler extends PostgresClient {
       alias,
       resourceName: 'promoSlide',
       packageName: 'promoSlide',
-    })) as { banner: StorePromoBanner | null };
+    })) as { banner: PromoBanner | null };
 
     if (resource) {
       return { error: null, response: resource };
     }
 
-    const client = await this.transaction(alias);
+    const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      const { error } = await this.setupClientSessions(client, { alias });
+      await this.setupStoreSessions(client, { alias, storeId });
 
-      if (error) {
-        return {
-          error: {
-            code: Status.NOT_FOUND,
-            details: error?.message,
-          },
-          response: { banner: null },
-        };
-      }
-
-      const { rows } = await client.query<StorePromoBanner>(
-        getStorePromoSlide()
-      );
+      const { rows } = await client.query<PromoBanner>(getStorePromoSlide());
 
       const banner = rows[0];
 

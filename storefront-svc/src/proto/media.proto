@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package media;
+
+message Image {
+    uint32 id = 1;
+    string image = 2;
+    string placeholder = 3;
+    uint32 width = 4;
+    uint32 height = 5;
+}

@@ -13,9 +13,9 @@ import type {
   ConfigServiceRoutesDefinition as _ServiceRoutes_ConfigServiceRoutesDefinition,
 } from './ServiceRoutes/ConfigServiceRoutes';
 import type {
-  InvalidationServiceRoutesClient as _ServiceRoutes_InvalidationServiceRoutesClient,
-  InvalidationServiceRoutesDefinition as _ServiceRoutes_InvalidationServiceRoutesDefinition,
-} from './ServiceRoutes/InvalidationServiceRoutes';
+  LanguageServiceRoutesClient as _ServiceRoutes_LanguageServiceRoutesClient,
+  LanguageServiceRoutesDefinition as _ServiceRoutes_LanguageServiceRoutesDefinition,
+} from './ServiceRoutes/LanguageServiceRoutes';
 import type {
   PageServiceRoutesClient as _ServiceRoutes_PageServiceRoutesClient,
   PageServiceRoutesDefinition as _ServiceRoutes_PageServiceRoutesDefinition,
@@ -37,22 +37,6 @@ type SubtypeConstructor<
 };
 
 export interface ProtoGrpcType {
-  AttributePackage: {
-    Attribute: MessageTypeDefinition;
-    AttributeValue: MessageTypeDefinition;
-  };
-  CommonPackage: {
-    Currency: MessageTypeDefinition;
-    Icon: MessageTypeDefinition;
-    Seo: MessageTypeDefinition;
-    Social: MessageTypeDefinition;
-    productTypeEnum: EnumTypeDefinition;
-  };
-  PagePackage: {
-    Page: MessageTypeDefinition;
-    StorePageRequest: MessageTypeDefinition;
-    StorePageResponse: MessageTypeDefinition;
-  };
   ServiceRoutes: {
     CategoryServiceRoutes: SubtypeConstructor<
       typeof grpc.Client,
@@ -62,12 +46,10 @@ export interface ProtoGrpcType {
       typeof grpc.Client,
       _ServiceRoutes_ConfigServiceRoutesClient
     > & { service: _ServiceRoutes_ConfigServiceRoutesDefinition };
-    InvalidateResourceRequest: MessageTypeDefinition;
-    InvalidateResourceResponse: MessageTypeDefinition;
-    InvalidationServiceRoutes: SubtypeConstructor<
+    LanguageServiceRoutes: SubtypeConstructor<
       typeof grpc.Client,
-      _ServiceRoutes_InvalidationServiceRoutesClient
-    > & { service: _ServiceRoutes_InvalidationServiceRoutesDefinition };
+      _ServiceRoutes_LanguageServiceRoutesClient
+    > & { service: _ServiceRoutes_LanguageServiceRoutesDefinition };
     PageServiceRoutes: SubtypeConstructor<
       typeof grpc.Client,
       _ServiceRoutes_PageServiceRoutesClient
@@ -81,33 +63,52 @@ export interface ProtoGrpcType {
       _ServiceRoutes_SliderServiceRoutesClient
     > & { service: _ServiceRoutes_SliderServiceRoutesDefinition };
   };
-  SettingsPackage: {
-    Settings: MessageTypeDefinition;
-    StoreConfigRequest: MessageTypeDefinition;
-    StoreConfigResponse: MessageTypeDefinition;
+  attribute: {
+    Attribute: MessageTypeDefinition;
+    AttributeValue: MessageTypeDefinition;
   };
-  TagPackage: {
-    Tag: MessageTypeDefinition;
-  };
-  categoryPackage: {
+  category: {
     Breadcrumbs: MessageTypeDefinition;
     Category: MessageTypeDefinition;
     CategoryRequest: MessageTypeDefinition;
     CategoryResponse: MessageTypeDefinition;
-    CategorySeo: MessageTypeDefinition;
     Menu: MessageTypeDefinition;
     MenuRequest: MessageTypeDefinition;
     MenuResponse: MessageTypeDefinition;
+  };
+  commons: {
+    Currency: MessageTypeDefinition;
+    GoogleAnalytics: MessageTypeDefinition;
+    Icon: MessageTypeDefinition;
+    Seo: MessageTypeDefinition;
+    Social: MessageTypeDefinition;
+    Unit: MessageTypeDefinition;
+  };
+  enum: {
+    attributeTypeEnum: EnumTypeDefinition;
+    discountTypeEnum: EnumTypeDefinition;
+    productTypeEnum: EnumTypeDefinition;
   };
   google: {
     protobuf: {
       Timestamp: MessageTypeDefinition;
     };
   };
-  photoPackage: {
+  language: {
+    Language: MessageTypeDefinition;
+    LanguageRequest: MessageTypeDefinition;
+    LanguageResponse: MessageTypeDefinition;
+    Translation: MessageTypeDefinition;
+  };
+  media: {
     Image: MessageTypeDefinition;
   };
-  productPackage: {
+  page: {
+    Page: MessageTypeDefinition;
+    PageRequest: MessageTypeDefinition;
+    PageResponse: MessageTypeDefinition;
+  };
+  product: {
     CategoryProductsRequest: MessageTypeDefinition;
     PopularProductsRequest: MessageTypeDefinition;
     Product: MessageTypeDefinition;
@@ -115,21 +116,27 @@ export interface ProtoGrpcType {
     ProductResponse: MessageTypeDefinition;
     ProductSeo: MessageTypeDefinition;
     ProductShippingInfo: MessageTypeDefinition;
-    ProductType: MessageTypeDefinition;
     ProductsResponse: MessageTypeDefinition;
     Unit: MessageTypeDefinition;
     Variation: MessageTypeDefinition;
     VariationOption: MessageTypeDefinition;
   };
-  slidePackage: {
-    HeroBanner: MessageTypeDefinition;
-    HeroBannerRequest: MessageTypeDefinition;
-    HeroBannerResponse: MessageTypeDefinition;
-    HeroBannerStyle: MessageTypeDefinition;
+  settings: {
+    ConfigRequest: MessageTypeDefinition;
+    ConfigResponse: MessageTypeDefinition;
+    Settings: MessageTypeDefinition;
+  };
+  slides: {
+    HeroSlide: MessageTypeDefinition;
+    HeroSlideStyle: MessageTypeDefinition;
+    HeroSlidesRequest: MessageTypeDefinition;
+    HeroSlidesResponse: MessageTypeDefinition;
+    PromoBanner: MessageTypeDefinition;
     PromoBannerRequest: MessageTypeDefinition;
     PromoBannerResponse: MessageTypeDefinition;
     Slider: MessageTypeDefinition;
-    StoreHeroBanner: MessageTypeDefinition;
-    StorePromoBanner: MessageTypeDefinition;
+  };
+  tag: {
+    Tag: MessageTypeDefinition;
   };
 }

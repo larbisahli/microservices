@@ -1,12 +1,12 @@
 /**
  * This package helps us encode and decode resources to a binary blob (Uint8Array)
  */
-import { StoreHeroBanner } from '@proto/generated/slidePackage/StoreHeroBanner';
-import { StorePromoBanner } from '@proto/generated/slidePackage/StorePromoBanner';
+import { HeroSlide } from '@proto/generated/slides/HeroSlide';
+import { PromoBanner } from '@proto/generated/slides/PromoBanner';
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
-const PROTO_PATH = './dist/proto/slide.proto';
+const PROTO_PATH = './dist/proto/slides.proto';
 
 @Service()
 export default class SlidePackage extends protobuf.Root {
@@ -17,7 +17,7 @@ export default class SlidePackage extends protobuf.Root {
   decodeOptions: {
     enums: StringConstructor; // enums as string names
     longs: StringConstructor; // longs as strings (requires long.js)
-    bytes: StringConstructor; // bytes as base64 encoded strings
+    bytes: StringConstructor; // bytes as base64 encoded stringsBanne
     defaults: boolean; // includes default values
     arrays: boolean; // populates empty arrays (repeated fields) even if defaults=false
     objects: boolean; // populates empty objects (map fields) even if defaults=false
@@ -28,8 +28,8 @@ export default class SlidePackage extends protobuf.Root {
     super();
     this.root = this.loadSync(PROTO_PATH);
 
-    this.HeroBanner = this.root.lookupType('slidePackage.HeroBannerResponse');
-    this.PromoBanner = this.root.lookupType('slidePackage.PromoBannerResponse');
+    this.HeroBanner = this.root.lookupType('slides.HeroSlidesResponse');
+    this.PromoBanner = this.root.lookupType('slides.PromoBannerResponse');
 
     this.decodeOptions = {
       enums: String,
@@ -43,11 +43,11 @@ export default class SlidePackage extends protobuf.Root {
   }
 
   /**
-   * @param {StoreHeroBanner[]} sliders
+   * @param {HeroSlide[]} sliders
    * @returns {Promise<{ buffer: Uint8Array; error?: unknown }>}
    */
   public encodeHeroBanner = (
-    sliders: StoreHeroBanner[]
+    sliders: HeroSlide[]
   ): Promise<{ buffer: Uint8Array; error?: unknown }> => {
     return new Promise((resolve, reject) => {
       try {
@@ -86,11 +86,11 @@ export default class SlidePackage extends protobuf.Root {
   };
 
   /**
-   * @param {StorePromoBanner} banner
+   * @param {PromoBanner} banner
    * @returns {Promise<{ buffer: Uint8Array; error?: unknown }>}
    */
   public encodePromoBanner = (
-    banner: StorePromoBanner
+    banner: PromoBanner
   ): Promise<{ buffer: Uint8Array; error?: unknown }> => {
     return new Promise((resolve, reject) => {
       try {
