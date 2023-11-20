@@ -1,0 +1,19 @@
+# dependencies
+/node_modules
+
+# production
+/build
+/log
+/dist
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vscode
+# env
+# /.env
+ssl_renew.sh
+build
+# Sentry Auth Token
+.sentryclirc

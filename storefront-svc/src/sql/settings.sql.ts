@@ -6,6 +6,7 @@ export default class SettingsQueryString {
   public getStoreSettings() {
     const text = `SELECT ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
     FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = logo_media_id )) AS logo,
+    (SELECT alias from store AS st WHERE st.id = current_setting('app.current_store_id')::uuid) AS alias,
     ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = favicon_media_id )) AS favicon,
     ARRAY((SELECT json_build_object('id', lang.id, 'name', lang.name, 'localeId', lang.locale_id, 'iso2', lang.iso2, 'isDefault', lang.is_default) FROM store_language AS lang WHERE lang.store_id = current_setting('app.current_store_id')::uuid AND lang.active is TRUE )) AS locales,
     currencies, socials, google, store_name AS "storeName", store_email AS "storeEmail",

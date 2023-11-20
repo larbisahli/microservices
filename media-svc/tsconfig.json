@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "target": "ESNext",
+    "module": "CommonJS",
+    "lib": [
+      "ESNext"
+    ],
+    "types": [
+      "reflect-metadata"
+    ],
+    "noImplicitAny": true,
+    "strict": true,
+    "allowJs": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "sourceMap": false,
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "paths": {
+      "@config": [
+        "src/config/index"
+      ],
+      "@ts-types/*": [
+        "src/ts-types/*"
+      ],
+      "@lib/*": [
+        "src/lib/*"
+      ],
+      "@routes/*": [
+        "src/routes/*"
+      ],
+      "@core/*": [
+        "src/core/*"
+      ],
+      "*": [
+        "node_modules/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "additional.d.ts"]
+}

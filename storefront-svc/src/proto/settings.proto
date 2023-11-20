@@ -22,6 +22,7 @@ message Settings {
     uint32 maxCheckoutQuantity = 13;
     uint32 maxCheckoutAmount = 14;
     Seo seo = 15;
+    required string alias = 16;
 }
 
 message ConfigRequest {
