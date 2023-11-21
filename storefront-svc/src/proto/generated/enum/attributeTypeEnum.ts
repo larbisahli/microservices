@@ -5,10 +5,7 @@ export const attributeTypeEnum = {
   text: 'text',
 } as const;
 
-export type attributeTypeEnum =
-  | 'color'
-  | 0
-  | 'text'
-  | 1
+export type attributeTypeEnum = 'color' | 0 | 'text' | 1;
 
-export type attributeTypeEnum__Output = typeof attributeTypeEnum[keyof typeof attributeTypeEnum]
+export type attributeTypeEnum__Output =
+  typeof attributeTypeEnum[keyof typeof attributeTypeEnum];

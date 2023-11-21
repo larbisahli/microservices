@@ -1,32 +1,33 @@
 import type * as grpc from '@grpc/grpc-js';
 import type { MessageTypeDefinition } from '@grpc/proto-loader';
 
-
-type SubtypeConstructor<Constructor extends new (...args: any) => any, Subtype> = {
-  new(...args: ConstructorParameters<Constructor>): Subtype;
+type SubtypeConstructor<
+  Constructor extends new (...args: any) => any,
+  Subtype
+> = {
+  new (...args: ConstructorParameters<Constructor>): Subtype;
 };
 
 export interface ProtoGrpcType {
   commons: {
-    Currency: MessageTypeDefinition
-    GoogleAnalytics: MessageTypeDefinition
-    Icon: MessageTypeDefinition
-    Seo: MessageTypeDefinition
-    Social: MessageTypeDefinition
-    Unit: MessageTypeDefinition
-  }
+    Currency: MessageTypeDefinition;
+    GoogleAnalytics: MessageTypeDefinition;
+    Icon: MessageTypeDefinition;
+    Seo: MessageTypeDefinition;
+    Social: MessageTypeDefinition;
+    Unit: MessageTypeDefinition;
+  };
   google: {
     protobuf: {
-      Timestamp: MessageTypeDefinition
-    }
-  }
+      Timestamp: MessageTypeDefinition;
+    };
+  };
   media: {
-    Image: MessageTypeDefinition
-  }
+    Image: MessageTypeDefinition;
+  };
   page: {
-    Page: MessageTypeDefinition
-    PageRequest: MessageTypeDefinition
-    PageResponse: MessageTypeDefinition
-  }
+    Page: MessageTypeDefinition;
+    PageRequest: MessageTypeDefinition;
+    PageResponse: MessageTypeDefinition;
+  };
 }
-

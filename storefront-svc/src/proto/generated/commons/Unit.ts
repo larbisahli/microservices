@@ -1,10 +1,9 @@
 // Original file: src/proto/commons.proto
 
-
 export interface Unit {
-  'unit'?: (string);
+  unit?: string;
 }
 
 export interface Unit__Output {
-  'unit': (string);
+  unit: string;
 }
