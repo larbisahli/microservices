@@ -115,10 +115,10 @@ export default class SlideHandler extends PostgresClient {
     error: ServerErrorResponse | Partial<StatusObject> | null;
     response: { banner: PromoBanner | null };
   }> => {
-    const { getStorePromoSlide } = this.sliderQueries;
+    const { getStorePromoSlide, getPromoSlideTranslation } = this.sliderQueries;
     const { alias, storeId, storeLanguageId } = call.request;
 
-    if (!alias) {
+    if (!alias || !storeLanguageId) {
       return {
         error: {
           code: Status.CANCELLED,
@@ -129,15 +129,15 @@ export default class SlideHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
-      alias,
-      resourceName: 'promoSlide',
-      packageName: 'promoSlide',
-    })) as { banner: PromoBanner | null };
+    // const resource = (await this.resourceHandler.getResource({
+    //   alias,
+    //   resourceName: 'promoSlide',
+    //   packageName: 'promoSlide',
+    // })) as { banner: PromoBanner | null };
 
-    if (resource) {
-      return { error: null, response: resource };
-    }
+    // if (resource) {
+    //   return { error: null, response: resource };
+    // }
 
     const client = await this.transaction();
 
@@ -146,23 +146,37 @@ export default class SlideHandler extends PostgresClient {
 
       await this.setupStoreSessions(client, { alias, storeId });
 
-      const { rows } = await client.query<PromoBanner>(getStorePromoSlide());
+      interface banner extends PromoBanner {
+        id: number;
+      }
 
+      const { rows } = await client.query<banner>(getStorePromoSlide());
       const banner = rows[0];
 
+      const { rows: slide } = await client.query<PromoBanner>(
+        getPromoSlideTranslation(banner?.id, storeLanguageId)
+      );
+
+      const { direction, sliders } = slide[0];
+
+      console.log({ sliders });
+
       /** Set the resources in the cache store */
-      if (banner && alias) {
-        this.resourceHandler.setResource({
-          alias,
-          resource: banner,
-          resourceName: 'promoSlide',
-          packageName: 'promoSlide',
-        });
-      }
+      // if (banner && alias) {
+      //   this.resourceHandler.setResource({
+      //     alias,
+      //     resource: banner,
+      //     resourceName: 'promoSlide',
+      //     packageName: 'promoSlide',
+      //   });
+      // }
 
       await client.query('COMMIT');
 
-      return { response: { banner }, error: null };
+      return {
+        response: { banner: { ...banner, direction, sliders } },
+        error: null,
+      };
     } catch (error: any) {
       await client.query('ROLLBACK');
       const message = error?.message as string;

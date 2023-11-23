@@ -925,8 +925,10 @@ export default class ProductQueryString extends CommonQueryString {
 
   // --- Popular Product
 
-  public getPopularProducts() {
-    const text = `SELECT pd.id, pd.name AS name, pd.disable_out_of_stock AS "disableOutOfStock",
+  public getPopularProducts(languageId: number) {
+    const text = `SELECT pd.id,
+    (SELECT pt.name FROM product_transaction AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $1),
+    pd.disable_out_of_stock AS "disableOutOfStock",
     jsonb_build_object('id', pd.type) AS "type",
     -- Quantity
     CASE
@@ -960,7 +962,7 @@ export default class ProductQueryString extends CommonQueryString {
     -- Thumbnail
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
-    WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail,
+    WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail
     -- Seo
     -- (SELECT ps.slug FROM product_seo AS ps WHERE ps.store_id = current_setting('app.current_store_id')::uuid AND ps.product_id = pd.id) AS slug
     FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.published IS TRUE`;
@@ -968,7 +970,7 @@ export default class ProductQueryString extends CommonQueryString {
     return {
       name: 'get-popular-products',
       text,
-      values: [],
+      values: [languageId],
     };
   }
 

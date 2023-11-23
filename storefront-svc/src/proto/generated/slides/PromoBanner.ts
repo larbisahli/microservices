@@ -6,14 +6,14 @@ import type {
 } from '../slides/Slider';
 
 export interface PromoBanner {
-  animationSpeed?: string;
+  delaySpeed?: string;
   backgroundColor?: string;
   direction?: string;
   sliders?: _slides_Slider[];
 }
 
 export interface PromoBanner__Output {
-  animationSpeed: string;
+  delaySpeed: string;
   backgroundColor: string;
   direction: string;
   sliders: _slides_Slider__Output[];

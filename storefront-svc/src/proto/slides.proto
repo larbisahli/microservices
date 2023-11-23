@@ -24,14 +24,12 @@ message HeroSlide {
 }
 
 message Slider {
-  string destinationUrl = 1;
-  uint32 position = 2;
-  string text = 3;
-  string textColor = 4;
+  uint32 position = 1;
+  string content = 2;
 }
 
 message PromoBanner {
-  string animationSpeed = 1;
+  string delaySpeed = 1;
   string backgroundColor = 2;
   string direction = 3;
   repeated Slider sliders = 4;

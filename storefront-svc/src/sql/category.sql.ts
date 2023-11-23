@@ -113,8 +113,7 @@ export default class CategoryQueryString extends CommonQueryString {
     -- Children
     ARRAY((SELECT json_build_object('id', cate_level2.id,
     'name', (SELECT name FROM category_translation WHERE store_id = current_setting('app.current_store_id')::uuid AND category_id = cate_level2.id AND language_id = $1),
-    'thumbnail', 'urlKey', cate_level2.url_key,
-    ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
+    'urlKey', cate_level2.url_key, 'thumbnail', ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
     FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate_level2.media_id )),
     'children', ARRAY((SELECT json_build_object('id', cate_level3.id,
     'name', (SELECT name FROM category_translation WHERE store_id = current_setting('app.current_store_id')::uuid AND category_id = cate_level3.id AND language_id = $1),

@@ -54,7 +54,7 @@ export default class ProductHandler extends PostgresClient {
     const { getPopularProducts } = this.productQueries;
     const { alias, storeId, storeLanguageId } = call.request;
 
-    if (!alias) {
+    if (!alias || !storeLanguageId) {
       return {
         error: {
           code: Status.CANCELLED,
@@ -65,15 +65,15 @@ export default class ProductHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
-      alias,
-      resourceName: 'popularProducts',
-      packageName: 'products',
-    })) as { products: Product__Output[] | null };
+    // const resource = (await this.resourceHandler.getResource({
+    //   alias,
+    //   resourceName: 'popularProducts',
+    //   packageName: 'products',
+    // })) as { products: Product__Output[] | null };
 
-    if (resource) {
-      return { error: null, response: resource };
-    }
+    // if (resource) {
+    //   return { error: null, response: resource };
+    // }
 
     const client = await this.transaction();
 
@@ -83,20 +83,22 @@ export default class ProductHandler extends PostgresClient {
       await this.setupStoreSessions(client, { alias, storeId });
 
       const { rows } = await client.query<Product__Output>(
-        getPopularProducts()
+        getPopularProducts(storeLanguageId)
       );
 
       const products = rows;
 
+      console.log({ products });
+
       /** Set the resources in the cache store */
-      if (products && alias) {
-        this.resourceHandler.setResource({
-          alias,
-          resource: products,
-          resourceName: 'popularProducts',
-          packageName: 'products',
-        });
-      }
+      // if (products && alias) {
+      //   this.resourceHandler.setResource({
+      //     alias,
+      //     resource: products,
+      //     resourceName: 'popularProducts',
+      //     packageName: 'products',
+      //   });
+      // }
 
       await client.query('COMMIT');
 
