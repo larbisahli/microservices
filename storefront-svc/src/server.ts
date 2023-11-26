@@ -22,15 +22,19 @@ import { RPCPort } from './config';
  * Starts an Business RPC server that receives requests for the storefrontServerService service
  */
 (async function () {
-  gRPC.bindAsync(RPCPort, createInsecure(), (error) => {
-    gRPC.start();
-    if (error) {
-      console.error(error);
-      Logger.system.error(error);
-    } else {
-      Logger.system.info(
-        `🚀 Storefront RPC server running on port : ${RPCPort}`
-      );
-    }
-  });
+  try {
+    gRPC.bindAsync(RPCPort, createInsecure(), (error) => {
+      gRPC.start();
+      if (error) {
+        console.error(error);
+        Logger.system.error(error);
+      } else {
+        Logger.system.info(
+          `🚀 Storefront RPC server running on port : ${RPCPort}`
+        );
+      }
+    });
+  } catch (error) {
+    console.log('Internal error :::>>>>', error)
+  }
 })();
