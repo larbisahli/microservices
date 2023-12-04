@@ -20,8 +20,8 @@ const {
 
 export const PRODUCTION_ENV = NODE_ENV === 'development';
 
-const endPoint = PRODUCTION_ENV ? POSTGRES_ENDPOINT : POSTGRES_ENDPOINT_DEV;
-const database = PRODUCTION_ENV ? POSTGRES_DB : POSTGRES_DB_DEV;
+const endPoint = !PRODUCTION_ENV ? POSTGRES_ENDPOINT : POSTGRES_ENDPOINT_DEV;
+const database = !PRODUCTION_ENV ? POSTGRES_DB : POSTGRES_DB_DEV;
 const postgresPort = Number(POSTGRES_PORT);
 
 export const ReadPoolConfig = {

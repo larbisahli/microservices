@@ -1,9 +1,3 @@
-import {
-  ImageType,
-  ProductShippingInfo,
-  ProductType,
-  ProductVariationOptions,
-} from '@ts-types/interfaces';
 import { Service } from 'typedi';
 import CommonQueryString from './common.sql';
 
@@ -22,28 +16,27 @@ export default class ProductQueryString extends CommonQueryString {
     };
   }
 
-  public getProductContent(id: number) {
-    const text = `SELECT pd.id ,pd.sale_price AS "salePrice", pd.buying_price
-    AS "buyingPrice", pd.compare_price AS "comparePrice", pd.slug,
-            pd.disable_out_of_stock AS "disableOutOfStock", pd.quantity, pd.published,
-            pd.created_at AS "createdAt", pd.updated_at AS "updatedAt", pd.sku,
-            ARRAY(SELECT json_build_object('id', photo.id ,'image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
-            photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = pd.og_media_id) AS "metaImage",
-            jsonb_build_object('id', pd.type) AS "type" FROM product AS pd
-            WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.id = $1`;
+  public getProductContent(slug: string) {
+    const text = `SELECT pd.id ,pd.sale_price AS "salePrice", pd.compare_price AS "comparePrice", pd.slug,
+    pd.disable_out_of_stock AS "disableOutOfStock", pd.quantity, pd.published, pd.sku,
+    -- og-image
+    ARRAY(SELECT json_build_object('id', photo.id ,'image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
+    photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = pd.og_media_id) AS "metaImage",
+    jsonb_build_object('id', pd.type) AS "type" FROM product AS pd
+    WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.slug = $1`;
 
     return {
-      name: 'get-product-content',
+      name: 'get-store-product-content',
       text,
-      values: [id],
+      values: [slug],
     };
   }
 
   public getProductShippingInfo(id: number) {
     const text = `SELECT id, weight::INTEGER, json_build_object('unit', weight_unit) AS "weightUnit",
-            dimension_width::INTEGER AS "dimensionWidth", dimension_height::INTEGER AS "dimensionHeight", dimension_depth::INTEGER
+            dimension_width::INTEGER AS "dimensionWidth", dimension_height::INTEGER AS "dimensionHeight", dimension_length::INTEGER
             AS "dimensionLength", json_build_object('unit', dimension_unit) AS "dimensionUnit"
-            FROM product_shipping_info WHERE store_id = current_setting('app.current_store_id')::uuid AND product_id = $1`;
+            FROM product WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
 
     return {
       name: 'get-product-shipping-info',
@@ -73,16 +66,15 @@ export default class ProductQueryString extends CommonQueryString {
     };
   }
 
-  public getStoreProductCategories(id: number) {
-    const text = `SELECT cate.id, cate.name,
-            (SELECT json_build_object('breadcrumbsPriority', seo.breadcrumbs_priority, 'urlKey', seo.url_key) FROM category_seo seo WHERE seo.store_id = current_setting('app.current_store_id')::uuid AND seo.category_id = cate.id) as "categorySeo"
-            FROM category cate WHERE cate.store_id = current_setting('app.current_store_id')::uuid AND cate.id IN (SELECT pc.category_id FROM product_category pc
+  public getStoreProductCategories(id: number, storeLanguageId: number) {
+    const text = `SELECT cate.id, (SELECT ct.name FROM category_translation AS ct WHERE ct.store_id = current_setting('app.current_store_id')::uuid AND ct.category_id = cate.id AND ct.language_id = $2),
+    cate.breadcrumbs_priority, cate.url_key FROM category AS cate WHERE cate.store_id = current_setting('app.current_store_id')::uuid AND cate.id IN (SELECT pc.category_id FROM product_category pc
             WHERE pc.store_id = current_setting('app.current_store_id')::uuid AND pc.product_id = $1)`;
 
     return {
       name: 'get-store-product-categories',
       text,
-      values: [id],
+      values: [id, storeLanguageId],
     };
   }
 
@@ -153,12 +145,12 @@ export default class ProductQueryString extends CommonQueryString {
     };
   }
 
-  public getProductVariationForStore(id: number) {
-    const text = `SELECT json_build_object('id', pa.attribute_id, 'name', (SELECT att.attribute_name FROM attribute att
+  public getProductVariationForStore(id: number, storeLanguageId: number) {
+    const text = `SELECT json_build_object('id', pa.attribute_id, 'name', (SELECT (SELECT at.name FROM attribute_translation AS at WHERE at.store_id = current_setting('app.current_store_id')::uuid AND at.attribute_id = att.id AND at.language_id = $2 ) FROM attribute att
                   WHERE att.store_id = current_setting('app.current_store_id')::uuid AND att.id = pa.attribute_id)) AS "attribute",
                   ARRAY(SELECT json_build_object('id', pav.attribute_value_id,
-                  'value', (SELECT att_v.attribute_value FROM attribute_value att_v WHERE att_v.store_id = current_setting('app.current_store_id')::uuid AND att_v.id = pav.attribute_value_id),
-                  'color', (SELECT att_v.color FROM attribute_value att_v WHERE att_v.store_id = current_setting('app.current_store_id')::uuid AND att_v.id = pav.attribute_value_id)
+                  'name', (SELECT (SELECT avt.name FROM attribute_value_translation AS avt WHERE avt.store_id = current_setting('app.current_store_id')::uuid AND avt.attribute_value_id = att_v.id AND avt.language_id = $2) FROM attribute_value AS att_v WHERE att_v.store_id = current_setting('app.current_store_id')::uuid AND att_v.id = pav.attribute_value_id),
+                  'value', (SELECT (SELECT avt.value FROM attribute_value_translation AS avt WHERE avt.store_id = current_setting('app.current_store_id')::uuid AND avt.attribute_value_id = att_v.id AND avt.language_id = $2) FROM attribute_value AS att_v WHERE att_v.store_id = current_setting('app.current_store_id')::uuid AND att_v.id = pav.attribute_value_id)
                   ) FROM product_attribute_value pav WHERE pav.store_id = current_setting('app.current_store_id')::uuid
                   AND pav.product_attribute_id = pa.id) AS "values"
                   FROM product_attribute pa WHERE pa.store_id = current_setting('app.current_store_id')::uuid AND pa.product_id = $1`;
@@ -166,7 +158,7 @@ export default class ProductQueryString extends CommonQueryString {
     return {
       name: 'get-product-store-variation',
       text,
-      values: [id],
+      values: [id, storeLanguageId],
     };
   }
 
@@ -198,17 +190,6 @@ export default class ProductQueryString extends CommonQueryString {
     };
   }
 
-  public getProductTranslation(languageId: number, id: number) {
-    const text = `SELECT name, description, meta_title AS "metaTitle", meta_keywords AS "metaKeywords", meta_description AS "metaDescription", note
-                  FROM product_transaction WHERE store_id = current_setting('app.current_store_id')::uuid AND product_id = $1 AND language_id = $2`;
-
-    return {
-      name: 'get-product-translation',
-      text,
-      values: [id, languageId],
-    };
-  }
-
   public getProductRelatedProducts(
     language: number,
     defaultLanguageId: number,
@@ -216,8 +197,8 @@ export default class ProductQueryString extends CommonQueryString {
   ) {
     const text = `SELECT pd.id, pd.sku, jsonb_build_object('id', pd.type) AS type, pd.published,
                   -- Translation
-                  (SELECT ptt.name FROM product_transaction AS ptt WHERE ptt.store_id = current_setting('app.current_store_id')::uuid AND ptt.product_id = pd.id AND ptt.language_id = $1),
-                  (SELECT json_build_object('name', (SELECT pttd.name FROM product_transaction AS pttd WHERE pttd.store_id = current_setting('app.current_store_id')::uuid
+                  (SELECT ptt.name FROM product_translation AS ptt WHERE ptt.store_id = current_setting('app.current_store_id')::uuid AND ptt.product_id = pd.id AND ptt.language_id = $1),
+                  (SELECT json_build_object('name', (SELECT pttd.name FROM product_translation AS pttd WHERE pttd.store_id = current_setting('app.current_store_id')::uuid
                   AND pttd.product_id = pd.id AND pttd.language_id = $2))) AS translated,
                   -- Quantity
                   CASE
@@ -245,8 +226,8 @@ export default class ProductQueryString extends CommonQueryString {
   ) {
     const text = `SELECT pd.id, pd.sku, jsonb_build_object('id', pd.type) AS type, pd.published,
             -- Translation
-            (SELECT ptt.name FROM product_transaction AS ptt WHERE ptt.store_id = current_setting('app.current_store_id')::uuid AND ptt.product_id = pd.id AND ptt.language_id = $1),
-            (SELECT json_build_object('name', (SELECT pttd.name FROM product_transaction AS pttd WHERE pttd.store_id = current_setting('app.current_store_id')::uuid
+            (SELECT ptt.name FROM product_translation AS ptt WHERE ptt.store_id = current_setting('app.current_store_id')::uuid AND ptt.product_id = pd.id AND ptt.language_id = $1),
+            (SELECT json_build_object('name', (SELECT pttd.name FROM product_translation AS pttd WHERE pttd.store_id = current_setting('app.current_store_id')::uuid
             AND pttd.product_id = pd.id AND pttd.language_id = $2))) AS translated,
             -- Quantity
             CASE
@@ -274,9 +255,9 @@ export default class ProductQueryString extends CommonQueryString {
   ) {
     const text = `SELECT pd.id, pd.sku, jsonb_build_object('id', pd.type) AS type, pd.published,
                   -- Translation
-                  (SELECT ptt.name FROM product_transaction AS ptt WHERE ptt.store_id = current_setting('app.current_store_id')::uuid AND ptt.product_id = pd.id AND ptt.language_id = $1),
+                  (SELECT ptt.name FROM product_translation AS ptt WHERE ptt.store_id = current_setting('app.current_store_id')::uuid AND ptt.product_id = pd.id AND ptt.language_id = $1),
                   (SELECT json_build_object(
-                    'name', (SELECT pttd.name FROM product_transaction AS pttd WHERE pttd.store_id = current_setting('app.current_store_id')::uuid
+                    'name', (SELECT pttd.name FROM product_translation AS pttd WHERE pttd.store_id = current_setting('app.current_store_id')::uuid
                   AND pttd.product_id = pd.id AND pttd.language_id = $2))) AS translated,
                   -- Quantity
                   CASE
@@ -306,8 +287,8 @@ export default class ProductQueryString extends CommonQueryString {
     const text = `SELECT pd.id, pd.sku, jsonb_build_object('id', pd.type) AS type, pd.published, pd.created_at AS "createdAt",
 
                 -- Translation
-                (SELECT ptt.name FROM product_transaction AS ptt WHERE ptt.store_id = current_setting('app.current_store_id')::uuid AND ptt.product_id = pd.id AND ptt.language_id = $1),
-                (SELECT json_build_object('name', (SELECT pttd.name FROM product_transaction AS pttd WHERE pttd.store_id = current_setting('app.current_store_id')::uuid
+                (SELECT ptt.name FROM product_translation AS ptt WHERE ptt.store_id = current_setting('app.current_store_id')::uuid AND ptt.product_id = pd.id AND ptt.language_id = $1),
+                (SELECT json_build_object('name', (SELECT pttd.name FROM product_translation AS pttd WHERE pttd.store_id = current_setting('app.current_store_id')::uuid
                 AND pttd.product_id = pd.id AND pttd.language_id = $2))) AS translated,
                 -- Quantity
                 CASE
@@ -353,8 +334,8 @@ export default class ProductQueryString extends CommonQueryString {
   ) {
     const text = `SELECT pd.id, pd.sku, jsonb_build_object('id', pd.type) AS type, pd.published, pd.created_at AS "createdAt",
                 -- Translation
-                (SELECT ptt.name FROM product_transaction AS ptt WHERE ptt.store_id = current_setting('app.current_store_id')::uuid AND ptt.product_id = pd.id AND ptt.language_id = $1),
-                (SELECT json_build_object('name', (SELECT pttd.name FROM product_transaction AS pttd WHERE pttd.store_id = current_setting('app.current_store_id')::uuid
+                (SELECT ptt.name FROM product_translation AS ptt WHERE ptt.store_id = current_setting('app.current_store_id')::uuid AND ptt.product_id = pd.id AND ptt.language_id = $1),
+                (SELECT json_build_object('name', (SELECT pttd.name FROM product_translation AS pttd WHERE pttd.store_id = current_setting('app.current_store_id')::uuid
                 AND pttd.product_id = pd.id AND pttd.language_id = $2))) AS translated,
 
                 -- Quantity
@@ -392,249 +373,6 @@ export default class ProductQueryString extends CommonQueryString {
     };
   }
 
-  public insertProductContent(...args: ProductType[keyof ProductType][]) {
-    const text = `INSERT INTO product(
-            store_id, sku, sale_price, compare_price, buying_price, quantity,
-            type, published, disable_out_of_stock, free_shipping, display_product_measurements,
-            slug, og_media_id, weight, weight_unit, dimension_width,
-            dimension_height, dimension_depth, dimension_unit, created_by)
-            VALUES(
-              current_setting('app.current_store_id')::uuid, $1, $2, $3, $4, $5, $6, $7,
-              $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, current_setting('app.current_user_id')::uuid)
-            RETURNING id`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public insertProductTranslation(...args: ProductType[keyof ProductType][]) {
-    const text = `INSERT INTO product_transaction (store_id, product_id, language_id, name, description,
-      meta_title, meta_keywords, meta_description, note)
-    VALUES (current_setting('app.current_store_id')::uuid, $1, $2, $3, $4, $5, $6, $7, NULLIF($8, ''))`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public updateProductContent(...args: ProductType[keyof ProductType][]) {
-    const text = `UPDATE product SET published = $2, disable_out_of_stock = $3, free_shipping = $4,
-           display_product_measurements = $5, updated_by = current_setting('app.current_user_id')::uuid
-           WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1
-           RETURNING id, disable_out_of_stock AS "disableOutOfStock", published`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public updateProductContentForSeo(...args: ProductType[keyof ProductType][]) {
-    const text = `UPDATE product SET slug = $2, og_media_id = $3, updated_by = current_setting('app.current_user_id')::uuid
-           WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1
-           RETURNING id, slug, published`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public updateProductTranslation(...args: ProductType[keyof ProductType][]) {
-    const text = `INSERT INTO product_transaction(store_id, product_id, language_id, name, description,
-                  meta_title, meta_keywords, meta_description, note)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2, $3, $4, $5, $6, $7, $8)
-                  ON CONFLICT (store_id, product_id, language_id) DO UPDATE SET
-                  name = excluded.name, description = excluded.description,
-                  meta_title = excluded.meta_title, meta_keywords = excluded.meta_keywords,
-                  meta_description = excluded.meta_description, note = excluded.note
-                  `;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public updateProductType(id: number, type: 'simple' | 'variable') {
-    const text = `UPDATE product SET type = $2 WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
-
-    return {
-      text,
-      values: [id, type],
-    };
-  }
-
-  public getProductType(id: number) {
-    const text = `SELECT type AS "type" FROM product WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
-
-    return {
-      text,
-      values: [id],
-    };
-  }
-
-  public updateSimpleProductInformation(
-    ...args: ProductType[keyof ProductType][]
-  ) {
-    const text = `UPDATE product SET sale_price = $2, compare_price = $3, buying_price = $4,
-                  quantity = $5, sku = $6, updated_by = current_setting('app.current_user_id')::uuid
-                  WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1
-                  RETURNING sale_price AS "salePrice", compare_price AS "comparePrice", buying_price AS "buyingPrice", quantity, sku, type AS "type"`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public productLastUpdatedBy(id: number) {
-    const text = `UPDATE product SET updated_by = current_setting('app.current_user_id')::uuid
-                  WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
-
-    return {
-      text,
-      values: [id],
-    };
-  }
-
-  // **** galleries ****
-
-  // COALESCE((SELECT MAX(display_order)+1 FROM categories)
-  public insertProductImage(...args: ImageType[keyof ImageType][]) {
-    const text = `INSERT INTO product_media(store_id, product_id, media_id, is_thumbnail, position)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2, $3, $4) RETURNING id`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public updateImage(...args: ImageType[keyof ImageType][]) {
-    const text = `UPDATE product_media SET media_id = $3 WHERE store_id = current_setting('app.current_store_id')::uuid
-            AND product_id = $1 AND media_id = $2 AND is_thumbnail is TRUE`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteGalleryImage(...args: ImageType[keyof ImageType][]) {
-    const text = `DELETE FROM product_media WHERE store_id = current_setting('app.current_store_id')::uuid
-                  AND product_id = $1 AND media_id = $2 AND is_thumbnail is FALSE`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  // **** product_category ****
-
-  public insertProductCategory(...args: number[]) {
-    const text = `INSERT INTO product_category(store_id, product_id, category_id)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2)`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteProductCategory(...args: number[]) {
-    const text = `DELETE FROM product_category WHERE store_id = current_setting('app.current_store_id')::uuid
-                  AND product_id = $1 AND category_id = $2`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  // **** product_manufacturer ****
-
-  public insertProductManufacturer(...args: number[]) {
-    const text = `INSERT INTO product_manufacturer(store_id, product_id, manufacturer_id)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2)`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteProductManufacturer(...args: number[]) {
-    const text = `DELETE FROM product_manufacturer WHERE store_id = current_setting('app.current_store_id')::uuid
-                  AND product_id = $1 AND manufacturer_id = $2`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public updateProductShippingInfo(
-    ...args: ProductShippingInfo[keyof ProductShippingInfo][]
-  ) {
-    const text = `UPDATE product_shipping_info SET weight = $2, weight_unit = $3, volume = $4, volume_unit = $5,
-    dimension_width = $6, dimension_height = $7, dimension_depth = $8, dimension_unit = $9
-    WHERE store_id = current_setting('app.current_store_id')::uuid AND product_id = $1`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  // **** product_tag ****
-
-  public insertProductTag(...args: number[]) {
-    const text = `INSERT INTO product_tag(store_id, product_id, tag_id)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2)`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteProductTag(...args: number[]) {
-    const text = `DELETE FROM product_tag WHERE store_id = current_setting('app.current_store_id')::uuid
-                  AND product_id = $1 AND tag_id = $2`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  // **** product_supplier ****
-
-  public insertProductSupplier(...args: number[]) {
-    const text = `INSERT INTO product_supplier(store_id, product_id, supplier_id)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2)`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteProductSupplier(...args: number[]) {
-    const text = `DELETE FROM product_supplier WHERE store_id = current_setting('app.current_store_id')::uuid
-                  AND product_id = $1 AND supplier_id = $2`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
   // **** product_attribute ****
 
   public getProductAttribute(...args: number[]) {
@@ -644,34 +382,6 @@ export default class ProductQueryString extends CommonQueryString {
     return {
       text,
       values: [...args],
-    };
-  }
-
-  public insertProductAttribute(...args: number[]) {
-    const text = `INSERT INTO product_attribute(store_id, product_id, attribute_id)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2) RETURNING id`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteProductAttribute(id: number) {
-    const text = `DELETE FROM product_attribute WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
-
-    return {
-      text,
-      values: [id],
-    };
-  }
-
-  public deleteAllProductAttribute(id: number) {
-    const text = `DELETE FROM product_attribute WHERE store_id = current_setting('app.current_store_id')::uuid AND product_id = $1`;
-
-    return {
-      text,
-      values: [id],
     };
   }
 
@@ -687,247 +397,22 @@ export default class ProductQueryString extends CommonQueryString {
     };
   }
 
-  // **** product_attribute_value ****
-
-  public getProductAttributeValue(...args: number[]) {
-    const text = `SELECT id FROM product_attribute_value WHERE store_id = current_setting('app.current_store_id')::uuid
-                  AND product_attribute_id = $1 AND attribute_value_id = $2`;
+  public getProductTranslation(id: number, storeLanguageId: number) {
+    const text = `SELECT name, description, meta_title AS "metaTitle", meta_keywords AS "metaKeywords", meta_description AS "metaDescription"
+    FROM product_translation WHERE store_id = current_setting('app.current_store_id')::uuid AND product_id = $1 AND language_id = $2`;
 
     return {
+      name: 'get-store-product-translation',
       text,
-      values: [...args],
-    };
-  }
-
-  public insertProductAttributeValue(...args: number[]) {
-    const text = `INSERT INTO product_attribute_value(store_id, product_attribute_id, attribute_value_id)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2)`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteProductAttributeValue(
-    productAttributeId: number,
-    attributeValueId: number
-  ) {
-    const text = `DELETE FROM product_attribute_value WHERE store_id = current_setting('app.current_store_id')::uuid
-                  AND product_attribute_id = $1 AND attribute_value_id = $2`;
-
-    return {
-      text,
-      values: [productAttributeId, attributeValueId],
-    };
-  }
-
-  public deleteProductAttributeValueAll(id: number) {
-    const text = `DELETE FROM product_attribute_value WHERE store_id = current_setting('app.current_store_id')::uuid AND product_attribute_id = $1`;
-
-    return {
-      text,
-      values: [id],
-    };
-  }
-
-  // **** variant_options ****
-
-  public insertVariantOption(
-    ...args: ProductVariationOptions[keyof ProductVariationOptions][]
-  ) {
-    const text = `INSERT INTO variant_option(store_id, title, media_id, product_id, sale_price, compare_price, buying_price, quantity, sku, active)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public updateVariantOption(
-    ...args: ProductVariationOptions[keyof ProductVariationOptions][]
-  ) {
-    const text = `UPDATE variant_option SET title = $2, media_id = $3, sale_price = $4, compare_price = $5,
-                  buying_price = $6, quantity = $7, sku = $8, active = $9
-                  WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public getVariantIdByOptionId(id: number) {
-    const text = `SELECT id FROM variant WHERE store_id = current_setting('app.current_store_id')::uuid AND variant_option_id = $1`;
-
-    return {
-      text,
-      values: [id],
-    };
-  }
-
-  public deleteVariantOption(id: number) {
-    const text = `DELETE FROM variant_option WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
-
-    return {
-      text,
-      values: [id],
-    };
-  }
-
-  public deleteProductVariantOption(id: number) {
-    const text = `DELETE FROM variant_option WHERE store_id = current_setting('app.current_store_id')::uuid AND product_id = $1`;
-
-    return {
-      text,
-      values: [id],
-    };
-  }
-
-  // **** variant ****
-
-  public insertVariant(...args: (string | number)[]) {
-    const text = `INSERT INTO variant(store_id, variant_option, product_id, variant_option_id)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2, $3) RETURNING id`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteVariant(id: number) {
-    const text = `DELETE FROM variant WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
-
-    return {
-      text,
-      values: [id],
-    };
-  }
-
-  public deleteProductVariants(id: number) {
-    const text = `DELETE FROM variant WHERE store_id = current_setting('app.current_store_id')::uuid AND product_id = $1`;
-
-    return {
-      text,
-      values: [id],
-    };
-  }
-
-  // **** variant_value ****
-
-  public insertVariantValue(...args: number[]) {
-    const text = `INSERT INTO variant_value(store_id, variant_id, product_attribute_value_id)
-                  VALUES(current_setting('app.current_store_id')::uuid, $1, $2)`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteVariantValue(id: number) {
-    const text = `DELETE FROM variant_value WHERE store_id = current_setting('app.current_store_id')::uuid AND variant_id = $1`;
-
-    return {
-      text,
-      values: [id],
-    };
-  }
-
-  // --- related_product
-  public insertRelatedProduct(...args: number[]) {
-    const text = `INSERT INTO related_product(store_id, product_id, related_product_id)
-            VALUES(current_setting('app.current_store_id')::uuid, $1, $2)`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteRelatedProduct(...args: number[]) {
-    const text = `DELETE FROM related_product WHERE
-                  store_id = current_setting('app.current_store_id')::uuid AND product_id = $1 AND related_product_id = $2`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  // --- upsell_product
-  public insertUpsellProduct(...args: number[]) {
-    const text = `INSERT INTO upsell_product(store_id, product_id, upsell_product_id)
-            VALUES(current_setting('app.current_store_id')::uuid, $1, $2)`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteUpsellProduct(...args: number[]) {
-    const text = `DELETE FROM upsell_product WHERE
-                  store_id = current_setting('app.current_store_id')::uuid AND product_id = $1 AND upsell_product_id = $2`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  // --- cross_sell_product
-  public insertCrossSellProduct(...args: number[]) {
-    const text = `INSERT INTO cross_sell_product(store_id, product_id, cross_sell_product_id)
-            VALUES(current_setting('app.current_store_id')::uuid, $1, $2)`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public deleteCrossSellProduct(...args: number[]) {
-    const text = `DELETE FROM cross_sell_product WHERE
-                  store_id = current_setting('app.current_store_id')::uuid AND product_id = $1 AND cross_sell_product_id = $2`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public getProductSeoBySlug(slug: string) {
-    const text = `SELECT seo.id, seo.slug, seo.product_id AS "productId", seo.meta_title AS "metaTitle", seo.meta_keywords AS "metaKeywords", seo.meta_description AS "metaDescription",
-    ARRAY(SELECT json_build_object('id', photo_seo.id ,'image', photo_seo.image_path, 'placeholder', photo_seo.placeholder_path) FROM media AS photo_seo WHERE
-    photo_seo.store_id = current_setting('app.current_store_id')::uuid AND photo_seo.id = seo.media_id) AS "metaImage"
-    FROM product_seo seo WHERE seo.store_id = current_setting('app.current_store_id')::uuid AND seo.slug = $1`;
-
-    return {
-      name: 'get-product-seo-by-slug',
-      text,
-      values: [slug],
-    };
-  }
-
-  // Make sure we are using index only scan for this query
-  public getProductSlugById(id: number) {
-    const text = `SELECT slug FROM product WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
-
-    return {
-      name: 'get-product-slug-by-id',
-      text,
-      values: [id],
+      values: [id, storeLanguageId],
     };
   }
 
   // --- Popular Product
 
   public getPopularProducts(languageId: number) {
-    const text = `SELECT pd.id,
-    (SELECT pt.name FROM product_transaction AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $1),
+    const text = `SELECT pd.id, slug,
+    (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $1),
     pd.disable_out_of_stock AS "disableOutOfStock",
     jsonb_build_object('id', pd.type) AS "type",
     -- Quantity
@@ -963,8 +448,6 @@ export default class ProductQueryString extends CommonQueryString {
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
     WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail
-    -- Seo
-    -- (SELECT ps.slug FROM product_seo AS ps WHERE ps.store_id = current_setting('app.current_store_id')::uuid AND ps.product_id = pd.id) AS slug
     FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.published IS TRUE`;
 
     return {
@@ -974,8 +457,9 @@ export default class ProductQueryString extends CommonQueryString {
     };
   }
 
-  public getStoreProductRelatedProducts(id: number) {
-    const text = `SELECT pd.id, pd.name AS name, pd.disable_out_of_stock AS "disableOutOfStock",
+  public getStoreProductRelatedProducts(id: number, storeLanguageId: number) {
+    const text = `SELECT pd.id, pd.disable_out_of_stock AS "disableOutOfStock", pd.slug,
+    (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $2),
     jsonb_build_object('id', pd.type) AS "type",
     -- Quantity
     CASE
@@ -1009,21 +493,20 @@ export default class ProductQueryString extends CommonQueryString {
     -- Thumbnail
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
-    WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail,
-    -- Seo
-    -- (SELECT ps.slug FROM product_seo AS ps WHERE ps.store_id = current_setting('app.current_store_id')::uuid AND ps.product_id = pd.id) AS slug
+    WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail
     FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.published IS TRUE AND pd.id IN
                   (SELECT related_product_id FROM related_product rp WHERE rp.store_id = current_setting('app.current_store_id')::uuid AND rp.product_id = $1)`;
 
     return {
       name: 'get-store-product-related-products',
       text,
-      values: [id],
+      values: [id, storeLanguageId],
     };
   }
 
-  public getStoreProductUpsellProducts(id: number) {
-    const text = `SELECT pd.id, pd.name AS name, pd.disable_out_of_stock AS "disableOutOfStock",
+  public getStoreProductUpsellProducts(id: number, storeLanguageId: number) {
+    const text = `SELECT pd.id, pd.disable_out_of_stock AS "disableOutOfStock", pd.slug,
+    (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $2),
     jsonb_build_object('id', pd.type) AS "type",
     -- Quantity
     CASE
@@ -1057,21 +540,20 @@ export default class ProductQueryString extends CommonQueryString {
     -- Thumbnail
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
-    WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail,
-    -- Seo
-    -- (SELECT ps.slug FROM product_seo AS ps WHERE ps.store_id = current_setting('app.current_store_id')::uuid AND ps.product_id = pd.id) AS slug
+    WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail
     FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.published IS TRUE AND pd.id IN
     (SELECT upsell_product_id FROM upsell_product usp WHERE usp.store_id = current_setting('app.current_store_id')::uuid AND usp.product_id = $1)`;
 
     return {
       name: 'get-store-product-upsell-products',
       text,
-      values: [id],
+      values: [id, storeLanguageId],
     };
   }
 
-  public getStoreProductCrossSellProducts(id: number) {
-    const text = `SELECT pd.id, pd.name AS name, pd.disable_out_of_stock AS "disableOutOfStock",
+  public getStoreProductCrossSellProducts(id: number, storeLanguageId: number) {
+    const text = `SELECT pd.id, pd.disable_out_of_stock AS "disableOutOfStock", pd.slug,
+    (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $1),
     jsonb_build_object('id', pd.type) AS "type",
     -- Quantity
     CASE
@@ -1105,25 +587,26 @@ export default class ProductQueryString extends CommonQueryString {
     -- Thumbnail
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
-    WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail,
-    -- Seo
-    -- (SELECT ps.slug FROM product_seo AS ps WHERE ps.store_id = current_setting('app.current_store_id')::uuid AND ps.product_id = pd.id) AS slug
+    WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail
     FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.published IS TRUE AND pd.id IN
     (SELECT cross_sell_product_id FROM cross_sell_product csp WHERE csp.store_id = current_setting('app.current_store_id')::uuid AND csp.product_id = $1)`;
 
     return {
       name: 'get-store-product-cross-sell-products',
       text,
-      values: [id],
+      values: [id, storeLanguageId],
     };
   }
 
   public getCategoryProducts(
     categoryId: number,
+    storeLanguageId: number,
     limit: number,
     offset: number
   ) {
-    const text = `SELECT pd.id, pd.name AS name, pd.disable_out_of_stock AS "disableOutOfStock",
+    const text = `SELECT pd.id, pd.slug,
+    (SELECT pt.name FROM product_translation as pt WHERE pt.store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $2),
+    pd.disable_out_of_stock AS "disableOutOfStock",
     jsonb_build_object('id', pd.type) AS "type",
     -- Quantity
     CASE
@@ -1157,16 +640,14 @@ export default class ProductQueryString extends CommonQueryString {
     -- Thumbnail
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
-    WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail,
-    -- Seo
-    (SELECT ps.slug FROM product_seo AS ps WHERE ps.store_id = current_setting('app.current_store_id')::uuid AND ps.product_id = pd.id) AS slug
+    WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail
     FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.published IS TRUE AND pd.id IN (SELECT pc.product_id FROM product_category pc
-      WHERE pc.store_id = current_setting('app.current_store_id')::uuid AND pc.category_id = $1) ORDER BY pd.sale_price ASC LIMIT $2 OFFSET $3`;
+      WHERE pc.store_id = current_setting('app.current_store_id')::uuid AND pc.category_id = $1) ORDER BY pd.sale_price ASC LIMIT $3 OFFSET $4`;
 
     return {
       name: 'get-category-products',
       text,
-      values: [categoryId, limit, offset],
+      values: [categoryId, storeLanguageId, limit, offset],
     };
   }
 }

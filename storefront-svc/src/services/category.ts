@@ -15,7 +15,6 @@ import { CategoryResponse } from '@proto/generated/category/CategoryResponse';
 import { CategoryRequest } from '@proto/generated/category/CategoryRequest';
 import { Category } from '@proto/generated/category/Category';
 import { Breadcrumbs } from '@proto/generated/category/Breadcrumbs';
-import { isEmpty } from 'underscore';
 
 @Service()
 export default class CategoryHandler extends PostgresClient {
@@ -117,12 +116,14 @@ export default class CategoryHandler extends PostgresClient {
   }> => {
     const {
       getStoreCategory,
-      getStoreCategorySeo,
       getCategoryLevelById,
       getCategoryUrlKeyById,
+      getStoreCategoryTranslation,
     } = this.categoryQueries;
 
-    const { alias, storeLanguageId, storeId, urlKey } = call.request;
+    const { urlKey, alias, storeLanguageId, storeId } = call.request;
+
+    console.log({ urlKey, alias, storeLanguageId, storeId });
 
     if (!alias || !urlKey || !storeLanguageId) {
       return {
@@ -135,15 +136,15 @@ export default class CategoryHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
-      alias,
-      resourceName: urlKey,
-      packageName: 'category',
-    })) as { category: Category | null };
+    // const resource = (await this.resourceHandler.getResource({
+    //   alias,
+    //   resourceName: urlKey,
+    //   packageName: 'category',
+    // })) as { category: Category | null };
 
-    if (resource) {
-      return { error: null, response: resource };
-    }
+    // if (resource) {
+    //   return { error: null, response: resource };
+    // }
 
     const client = await this.transaction();
 
@@ -154,33 +155,41 @@ export default class CategoryHandler extends PostgresClient {
 
       let breadcrumbs = [] as Breadcrumbs[];
 
-      const { rows: categorySeoRows } = await client.query<Category>(
-        getStoreCategorySeo(urlKey)
+      const { rows } = await client.query<Category>(
+        getStoreCategory(urlKey, storeLanguageId)
       );
 
-      const categorySeo = categorySeoRows[0] ?? {};
+      const category = rows[0] ?? {};
 
-      const { rows: categoryRows } = await client.query<Category>(
-        // @ts-ignore
-        getStoreCategory(categorySeo?.categoryId)
+      if (!category?.id) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: 'Unknown error',
+          },
+          response: { category: null },
+        };
+      }
+
+      const { rows: categoryTranslationRows } = await client.query<Category>(
+        getStoreCategoryTranslation(category?.id!, storeLanguageId)
       );
 
-      const category = categoryRows[0] ?? {};
+      const categoryTranslation = categoryTranslationRows[0] ?? {};
 
       // TODO: For breadcrumbs data make sure we are using index only scan in our queries
-
       // *** Current ***
       breadcrumbs.push({
         // @ts-ignore
         categoryLevel: category?.level,
-        categoryName: category.name,
-        categoryUrl: categorySeo?.urlKey,
+        categoryName: categoryTranslation?.name,
+        categoryUrl: category?.urlKey,
       });
 
       // *** Parent ***
       if (category?.parentId) {
         const { rows: categoryParentRows } = await client.query<Category>(
-          getCategoryLevelById(category?.parentId)
+          getCategoryLevelById(category?.parentId, storeLanguageId)
         );
 
         const categoryParent = categoryParentRows[0] ?? {};
@@ -201,7 +210,7 @@ export default class CategoryHandler extends PostgresClient {
         // *** Ancestor ***
         if (categoryParent?.parentId) {
           const { rows: categoryAncestorsRows } = await client.query<Category>(
-            getCategoryLevelById(categoryParent?.parentId)
+            getCategoryLevelById(categoryParent?.parentId, storeLanguageId)
           );
 
           const categoryAncestors = categoryAncestorsRows[0] ?? {};
@@ -224,21 +233,21 @@ export default class CategoryHandler extends PostgresClient {
 
       const responseCategory = {
         ...category,
-        categorySeo: {
-          ...categorySeo,
-          breadcrumbs,
-        },
+        ...categoryTranslation,
+        breadcrumbs,
       };
 
+      console.log({ breadcrumbs: breadcrumbs[0] });
+
       /** Set the resources in the cache store */
-      if (category && alias && urlKey) {
-        this.resourceHandler.setResource({
-          alias,
-          resourceName: urlKey,
-          resource: responseCategory,
-          packageName: 'category',
-        });
-      }
+      // if (category && alias && urlKey) {
+      //   this.resourceHandler.setResource({
+      //     alias,
+      //     resourceName: urlKey,
+      //     resource: responseCategory,
+      //     packageName: 'category',
+      //   });
+      // }
 
       await client.query('COMMIT');
 

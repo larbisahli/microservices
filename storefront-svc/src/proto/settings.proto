@@ -16,13 +16,14 @@ message Settings {
     string addressLine1 = 7;
     string addressLine2 = 8;
     repeated Currency currencies = 9;
-    repeated Language locales = 10;
-    GoogleAnalytics google = 11;
-    repeated Social socials = 12;
-    uint32 maxCheckoutQuantity = 13;
-    uint32 maxCheckoutAmount = 14;
-    Seo seo = 15;
-    required string alias = 16;
+    Currency defaultCurrency = 10;
+    repeated Language locales = 11;
+    GoogleAnalytics google = 12;
+    repeated Social socials = 13;
+    uint32 maxCheckoutQuantity = 14;
+    uint32 maxCheckoutAmount = 15;
+    Seo seo = 16;
+    required string alias = 17;
 }
 
 message ConfigRequest {

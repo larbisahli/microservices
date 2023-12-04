@@ -35,6 +35,7 @@ export interface Settings {
   addressLine1?: string;
   addressLine2?: string;
   currencies?: _commons_Currency[];
+  defaultCurrency?: _commons_Currency | null;
   locales?: _language_Language[];
   google?: _commons_GoogleAnalytics | null;
   socials?: _commons_Social[];
@@ -54,6 +55,7 @@ export interface Settings__Output {
   addressLine1: string;
   addressLine2: string;
   currencies: _commons_Currency__Output[];
+  defaultCurrency: _commons_Currency__Output | null;
   locales: _language_Language__Output[];
   google: _commons_GoogleAnalytics__Output | null;
   socials: _commons_Social__Output[];

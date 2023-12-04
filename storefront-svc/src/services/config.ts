@@ -85,8 +85,6 @@ export default class ConfigHandler extends PostgresClient {
 
       await client.query('COMMIT');
 
-      console.log({ config });
-
       return { response: { config }, error: null };
     } catch (error: any) {
       await client.query('ROLLBACK');

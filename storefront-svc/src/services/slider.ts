@@ -41,8 +41,6 @@ export default class SlideHandler extends PostgresClient {
     const { getHeroSlides } = this.sliderQueries;
     const { alias, storeId, storeLanguageId } = call.request;
 
-    console.log({ alias, storeId, storeLanguageId });
-
     if (!alias || !storeLanguageId) {
       return {
         error: {
@@ -153,13 +151,20 @@ export default class SlideHandler extends PostgresClient {
       const { rows } = await client.query<banner>(getStorePromoSlide());
       const banner = rows[0];
 
+      console.log({ banner });
+
+      if (!banner) {
+        return {
+          response: { banner: {} },
+          error: null,
+        };
+      }
+
       const { rows: slide } = await client.query<PromoBanner>(
         getPromoSlideTranslation(banner?.id, storeLanguageId)
       );
 
       const { direction, sliders } = slide[0];
-
-      console.log({ sliders });
 
       /** Set the resources in the cache store */
       // if (banner && alias) {

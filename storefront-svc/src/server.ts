@@ -35,6 +35,6 @@ import { RPCPort } from './config';
       }
     });
   } catch (error) {
-    console.log('Internal error :::>>>>', error)
+    console.log('Internal error :::>>>>', error);
   }
 })();

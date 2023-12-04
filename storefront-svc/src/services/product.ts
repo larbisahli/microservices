@@ -88,8 +88,6 @@ export default class ProductHandler extends PostgresClient {
 
       const products = rows;
 
-      console.log({ products });
-
       /** Set the resources in the cache store */
       // if (products && alias) {
       //   this.resourceHandler.setResource({
@@ -147,16 +145,16 @@ export default class ProductHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
-      alias,
-      resourceName: urlKey,
-      packageName: 'products',
-      page,
-    })) as { products: Product__Output[] | null };
+    // const resource = (await this.resourceHandler.getResource({
+    //   alias,
+    //   resourceName: urlKey,
+    //   packageName: 'products',
+    //   page,
+    // })) as { products: Product__Output[] | null };
 
-    if (resource) {
-      return { error: null, response: resource };
-    }
+    // if (resource) {
+    //   return { error: null, response: resource };
+    // }
 
     const client = await this.transaction();
 
@@ -165,11 +163,11 @@ export default class ProductHandler extends PostgresClient {
 
       await this.setupStoreSessions(client, { alias, storeId });
 
-      const { rows: category } = await client.query<{ categoryId: number }>(
+      const { rows: category } = await client.query<{ id: number }>(
         getStoreCategoryIdByUrlKey(urlKey)
       );
 
-      const { categoryId } = category[0] ?? {};
+      const { id: categoryId } = category[0] ?? {};
 
       if (!categoryId) {
         return {
@@ -182,7 +180,12 @@ export default class ProductHandler extends PostgresClient {
       }
 
       const { rows } = await client.query<Product__Output>(
-        getCategoryProducts(categoryId, limit, offset(page, limit))
+        getCategoryProducts(
+          categoryId,
+          storeLanguageId,
+          limit,
+          offset(page, limit)
+        )
       );
 
       const products = rows;
@@ -217,7 +220,7 @@ export default class ProductHandler extends PostgresClient {
     response: { product: Product__Output | ProductType | null };
   }> => {
     const {
-      getProductSeoBySlug,
+      getProductTranslation,
       getProductGallery,
       getProductContent,
       getProductShippingInfo,
@@ -231,7 +234,7 @@ export default class ProductHandler extends PostgresClient {
     } = this.productQueries;
     const { alias, storeId, storeLanguageId, slug } = call.request;
 
-    if (!alias || !slug) {
+    if (!alias || !slug || !storeLanguageId) {
       return {
         error: {
           code: Status.CANCELLED,
@@ -259,75 +262,73 @@ export default class ProductHandler extends PostgresClient {
 
       await this.setupStoreSessions(client, { alias, storeId });
 
-      // Seo
-      const { rows: productSeoRows } = await client.query<ProductSeoType>(
-        getProductSeoBySlug(slug)
-      );
-
-      const productSeo = productSeoRows[0] ?? {};
-
-      const id = 1; //productSeo?.productId;
-
-      // Thumbnail
-      const { rows: thumbnail } = await client.query<ImageType>(
-        getProductGallery(id, true)
-      );
-
-      // Gallery
-      const { rows: gallery } = await client.query<ImageType>(
-        getProductGallery(id, false)
-      );
-
       // ProductContent
       const { rows: productContent } = await client.query<ProductType>(
-        getProductContent(id)
+        getProductContent(slug)
       );
 
       const content = productContent[0] ?? {};
 
+      const { id: productId } = content;
+
+      // Translation
+      const { rows: productTranslationRows } =
+        await client.query<ProductSeoType>(
+          getProductTranslation(productId, storeLanguageId)
+        );
+
+      const productTranslation = productTranslationRows[0] ?? {};
+
+      // Thumbnail
+      const { rows: thumbnail } = await client.query<ImageType>(
+        getProductGallery(productId, true)
+      );
+
+      // Gallery
+      const { rows: gallery } = await client.query<ImageType>(
+        getProductGallery(productId, false)
+      );
+
       // ProductShippingInfo
       const { rows: productShippingInfoRows } =
-        await client.query<ProductShippingInfo>(getProductShippingInfo(id));
+        await client.query<ProductShippingInfo>(
+          getProductShippingInfo(productId)
+        );
 
       const productShippingInfo = productShippingInfoRows[0];
 
       // ProductCategory
       const { rows: categories } = await client.query<CategoryType>(
-        getStoreProductCategories(id)
+        getStoreProductCategories(productId, storeLanguageId)
       );
 
       // ProductTag
       // const { rows: tags } = await client.query<TagType>(getProductTags(id));
 
-      // ProductSupplier
-      const { rows: suppliers } = await client.query<SuppliersType>(
-        getProductSuppliers(id)
-      );
-
       // variationOptions
       const { rows: variationOptions } =
         await client.query<ProductVariationOptions>(
-          getProductVariationOptions(id)
+          getProductVariationOptions(productId)
         );
 
       // variations
       const { rows: variations } = await client.query<VariationType>(
-        getProductVariationForStore(id)
+        getProductVariationForStore(productId, storeLanguageId)
       );
 
       // relatedProducts
       const { rows: relatedProducts } = await client.query<ProductType>(
-        getStoreProductRelatedProducts(id)
+        getStoreProductRelatedProducts(productId, storeLanguageId)
       );
 
       // upsellProducts
       const { rows: upsellProducts } = await client.query<ProductType>(
-        getStoreProductUpsellProducts(id)
+        getStoreProductUpsellProducts(productId, storeLanguageId)
       );
 
       // crossSellProducts
       const { rows: crossSellProducts } = await client.query<ProductType>(
-        getStoreProductUpsellProducts(id)
+        getStoreProductUpsellProducts(productId, storeLanguageId)
       );
 
       const product = {
@@ -336,10 +337,13 @@ export default class ProductHandler extends PostgresClient {
         gallery,
         categories,
         // tags,
-        suppliers,
         variationOptions,
         variations,
-        productSeo,
+        productSeo: {
+          slug: content.slug,
+          metaImage: content?.metaImage,
+          ...productTranslation,
+        },
         productShippingInfo,
         relatedProducts,
         upsellProducts,

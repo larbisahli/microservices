@@ -222,6 +222,8 @@ export interface ProductType extends SharedValues {
   id: Scalars['Int'];
   name?: Scalars['String'];
   sku?: Nullable<Scalars['String']>;
+  slug?: Nullable<Scalars['String']>;
+  metaImage?: ImageType[];
   salePrice?: Scalars['Float'];
   comparePrice?: Scalars['Float'];
   buyingPrice?: Scalars['Float'];
