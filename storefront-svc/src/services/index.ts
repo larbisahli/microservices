@@ -33,7 +33,7 @@ import { MenuResponse } from '@proto/generated/category/MenuResponse';
 import { Menu, Menu__Output } from '@proto/generated/category/Menu';
 import { CategoryRequest } from '@proto/generated/category/CategoryRequest';
 import { CategoryResponse } from '@proto/generated/category/CategoryResponse';
-import { Category } from '@proto/generated/category/Category';
+import { Category, Category__Output } from '@proto/generated/category/Category';
 import { HeroSlidesRequest } from '@proto/generated/slides/HeroSlidesRequest';
 import { HeroSlidesResponse } from '@proto/generated/slides/HeroSlidesResponse';
 import { HeroSlide } from '@proto/generated/slides/HeroSlide';
@@ -43,6 +43,8 @@ import { Status } from '@grpc/grpc-js/build/src/constants';
 import { Language } from '@proto/generated/language/Language';
 import { LanguageRequest } from '@proto/generated/language/LanguageRequest';
 import { LanguageResponse } from '@proto/generated/language/LanguageResponse';
+import { HomePageCategoryRequest__Output } from '@proto/generated/category/HomePageCategoryRequest';
+import { HomePageCategoryResponse__Output } from '@proto/generated/category/HomePageCategoryResponse';
 
 const PROTO_PATH = './dist/proto/serviceRoutes.proto';
 
@@ -106,6 +108,7 @@ class gRPC extends grpc.Server {
 
     this.addService(CategoryServiceRoutes.service, {
       getMenu: this.getMenu,
+      getHomePageCategories: this.getHomePageCategories,
       getCategory: this.getCategory,
     });
 
@@ -235,6 +238,25 @@ class gRPC extends grpc.Server {
       response: { menu },
     } = await this.categoryHandler.getMenu(call);
     callback(error, { menu });
+  };
+
+  /**
+   * Store menu request handler.
+   * @param {EventEmitter} call Call object for the handler to process
+   * @param {function(Error, {menu: Menu__Output[]})} callback Response callback
+   */
+  protected getHomePageCategories = async (
+    call: grpc.ServerUnaryCall<
+      HomePageCategoryRequest__Output,
+      HomePageCategoryResponse__Output
+    >,
+    callback: grpc.sendUnaryData<{ categories: Category__Output[] }>
+  ) => {
+    const {
+      error,
+      response: { categories },
+    } = await this.categoryHandler.getHomePageCategories(call);
+    callback(error, { categories });
   };
 
   /**

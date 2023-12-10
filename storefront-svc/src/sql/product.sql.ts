@@ -17,13 +17,12 @@ export default class ProductQueryString extends CommonQueryString {
   }
 
   public getProductContent(slug: string) {
-    const text = `SELECT pd.id ,pd.sale_price AS "salePrice", pd.compare_price AS "comparePrice", pd.slug,
+    const text = `SELECT pd.id ,pd.sale_price AS "salePrice", pd.compare_price AS "comparePrice", pd.slug, pd.type,
     pd.disable_out_of_stock AS "disableOutOfStock", pd.quantity, pd.published, pd.sku,
     -- og-image
     ARRAY(SELECT json_build_object('id', photo.id ,'image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
-    photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = pd.og_media_id) AS "metaImage",
-    jsonb_build_object('id', pd.type) AS "type" FROM product AS pd
-    WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.slug = $1`;
+    photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = pd.og_media_id) AS "metaImage"
+    FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.slug = $1`;
 
     return {
       name: 'get-store-product-content',
@@ -67,8 +66,14 @@ export default class ProductQueryString extends CommonQueryString {
   }
 
   public getStoreProductCategories(id: number, storeLanguageId: number) {
-    const text = `SELECT cate.id, (SELECT ct.name FROM category_translation AS ct WHERE ct.store_id = current_setting('app.current_store_id')::uuid AND ct.category_id = cate.id AND ct.language_id = $2),
-    cate.breadcrumbs_priority, cate.url_key FROM category AS cate WHERE cate.store_id = current_setting('app.current_store_id')::uuid AND cate.id IN (SELECT pc.category_id FROM product_category pc
+    const text = `SELECT cate.id, cate.level, (SELECT json_build_object(
+      'name', (SELECT ctp.name FROM category_translation AS ctp WHERE ctp.store_id = current_setting('app.current_store_id')::uuid AND ctp.category_id = pa.id AND ctp.language_id = $2),
+      'urlKey', pa.url_key, 'level', pa.level, 'parent', (SELECT json_build_object(
+        'name', (SELECT ctp2.name FROM category_translation AS ctp2 WHERE ctp2.store_id = current_setting('app.current_store_id')::uuid AND ctp2.category_id = pa2.id AND ctp2.language_id = $2),
+        'urlKey', pa2.url_key, 'level', pa2.level) FROM category AS pa2 WHERE pa2.store_id = current_setting('app.current_store_id')::uuid AND pa2.id = pa.parent_id))
+        FROM category AS pa WHERE pa.store_id = current_setting('app.current_store_id')::uuid AND pa.id = cate.parent_id) AS parent,
+    (SELECT ct.name FROM category_translation AS ct WHERE ct.store_id = current_setting('app.current_store_id')::uuid AND ct.category_id = cate.id AND ct.language_id = $2),
+    cate.breadcrumbs_priority AS "breadcrumbsPriority", cate.url_key AS "urlKey" FROM category AS cate WHERE cate.store_id = current_setting('app.current_store_id')::uuid AND cate.id IN (SELECT pc.category_id FROM product_category pc
             WHERE pc.store_id = current_setting('app.current_store_id')::uuid AND pc.product_id = $1)`;
 
     return {
@@ -146,8 +151,8 @@ export default class ProductQueryString extends CommonQueryString {
   }
 
   public getProductVariationForStore(id: number, storeLanguageId: number) {
-    const text = `SELECT json_build_object('id', pa.attribute_id, 'name', (SELECT (SELECT at.name FROM attribute_translation AS at WHERE at.store_id = current_setting('app.current_store_id')::uuid AND at.attribute_id = att.id AND at.language_id = $2 ) FROM attribute att
-                  WHERE att.store_id = current_setting('app.current_store_id')::uuid AND att.id = pa.attribute_id)) AS "attribute",
+    const text = `SELECT (SELECT json_build_object('id', pa.attribute_id,'type', att.type,'name', (SELECT at.name FROM attribute_translation AS at WHERE at.store_id = current_setting('app.current_store_id')::uuid AND at.attribute_id = att.id AND at.language_id = $2)) FROM attribute att
+                  WHERE att.store_id = current_setting('app.current_store_id')::uuid AND att.id = pa.attribute_id) AS "attribute",
                   ARRAY(SELECT json_build_object('id', pav.attribute_value_id,
                   'name', (SELECT (SELECT avt.name FROM attribute_value_translation AS avt WHERE avt.store_id = current_setting('app.current_store_id')::uuid AND avt.attribute_value_id = att_v.id AND avt.language_id = $2) FROM attribute_value AS att_v WHERE att_v.store_id = current_setting('app.current_store_id')::uuid AND att_v.id = pav.attribute_value_id),
                   'value', (SELECT (SELECT avt.value FROM attribute_value_translation AS avt WHERE avt.store_id = current_setting('app.current_store_id')::uuid AND avt.attribute_value_id = att_v.id AND avt.language_id = $2) FROM attribute_value AS att_v WHERE att_v.store_id = current_setting('app.current_store_id')::uuid AND att_v.id = pav.attribute_value_id)

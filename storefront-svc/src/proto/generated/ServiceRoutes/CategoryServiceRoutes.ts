@@ -11,6 +11,14 @@ import type {
   CategoryResponse__Output as _category_CategoryResponse__Output,
 } from '../category/CategoryResponse';
 import type {
+  HomePageCategoryRequest as _category_HomePageCategoryRequest,
+  HomePageCategoryRequest__Output as _category_HomePageCategoryRequest__Output,
+} from '../category/HomePageCategoryRequest';
+import type {
+  HomePageCategoryResponse as _category_HomePageCategoryResponse,
+  HomePageCategoryResponse__Output as _category_HomePageCategoryResponse__Output,
+} from '../category/HomePageCategoryResponse';
+import type {
   MenuRequest as _category_MenuRequest,
   MenuRequest__Output as _category_MenuRequest__Output,
 } from '../category/MenuRequest';
@@ -59,6 +67,47 @@ export interface CategoryServiceRoutesClient extends grpc.Client {
   getCategory(
     argument: _category_CategoryRequest,
     callback: grpc.requestCallback<_category_CategoryResponse__Output>
+  ): grpc.ClientUnaryCall;
+
+  getHomePageCategories(
+    argument: _category_HomePageCategoryRequest,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_category_HomePageCategoryResponse__Output>
+  ): grpc.ClientUnaryCall;
+  getHomePageCategories(
+    argument: _category_HomePageCategoryRequest,
+    metadata: grpc.Metadata,
+    callback: grpc.requestCallback<_category_HomePageCategoryResponse__Output>
+  ): grpc.ClientUnaryCall;
+  getHomePageCategories(
+    argument: _category_HomePageCategoryRequest,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_category_HomePageCategoryResponse__Output>
+  ): grpc.ClientUnaryCall;
+  getHomePageCategories(
+    argument: _category_HomePageCategoryRequest,
+    callback: grpc.requestCallback<_category_HomePageCategoryResponse__Output>
+  ): grpc.ClientUnaryCall;
+  getHomePageCategories(
+    argument: _category_HomePageCategoryRequest,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_category_HomePageCategoryResponse__Output>
+  ): grpc.ClientUnaryCall;
+  getHomePageCategories(
+    argument: _category_HomePageCategoryRequest,
+    metadata: grpc.Metadata,
+    callback: grpc.requestCallback<_category_HomePageCategoryResponse__Output>
+  ): grpc.ClientUnaryCall;
+  getHomePageCategories(
+    argument: _category_HomePageCategoryRequest,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_category_HomePageCategoryResponse__Output>
+  ): grpc.ClientUnaryCall;
+  getHomePageCategories(
+    argument: _category_HomePageCategoryRequest,
+    callback: grpc.requestCallback<_category_HomePageCategoryResponse__Output>
   ): grpc.ClientUnaryCall;
 
   getMenu(
@@ -110,6 +159,11 @@ export interface CategoryServiceRoutesHandlers
     _category_CategoryResponse
   >;
 
+  getHomePageCategories: grpc.handleUnaryCall<
+    _category_HomePageCategoryRequest__Output,
+    _category_HomePageCategoryResponse
+  >;
+
   getMenu: grpc.handleUnaryCall<
     _category_MenuRequest__Output,
     _category_MenuResponse
@@ -123,6 +177,12 @@ export interface CategoryServiceRoutesDefinition
     _category_CategoryResponse,
     _category_CategoryRequest__Output,
     _category_CategoryResponse__Output
+  >;
+  getHomePageCategories: MethodDefinition<
+    _category_HomePageCategoryRequest,
+    _category_HomePageCategoryResponse,
+    _category_HomePageCategoryRequest__Output,
+    _category_HomePageCategoryResponse__Output
   >;
   getMenu: MethodDefinition<
     _category_MenuRequest,

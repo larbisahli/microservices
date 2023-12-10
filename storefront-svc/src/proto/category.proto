@@ -32,6 +32,7 @@ message Category {
   optional uint32 breadcrumbsPriority = 14;
   repeated media.Image metaImage = 15;
   repeated Breadcrumbs breadcrumbs = 16;
+  uint32 level = 17;
 }
 
 message Menu {
@@ -50,6 +51,16 @@ message MenuRequest {
 
 message MenuResponse {
   repeated Menu menu = 1;
+}
+
+message HomePageCategoryRequest {
+  required string alias = 1;
+  required uint32 storeLanguageId = 2;
+  optional string storeId = 3;
+}
+
+message HomePageCategoryResponse {
+  repeated Category categories = 1;
 }
 
 message CategoryRequest {

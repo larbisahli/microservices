@@ -249,7 +249,7 @@ export interface ProductType extends SharedValues {
   productShippingInfo?: ProductShippingInfo;
   variationOptions?: ProductVariationOptions[];
   variations?: VariationType[];
-  productSeo?: ProductSeoType;
+  productSeo?: ProductTranslationType;
   relatedProducts?: Array<Nullable<ProductRef>>;
   upsellProducts?: Array<Nullable<ProductRef>>;
   crossSellProducts?: Array<Nullable<ProductRef>>;
@@ -274,8 +274,10 @@ interface ProductRef {
   quantity?: Scalars['Int'];
 }
 
-export interface ProductSeoType {
+export interface ProductTranslationType {
   slug?: Scalars['String'];
+  name?: Scalars['String'];
+  description?: Scalars['String'];
   metaTitle?: string;
   metaKeywords?: string;
   metaDescription?: string;

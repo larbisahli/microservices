@@ -79,15 +79,15 @@ export default class CategoryQueryString extends CommonQueryString {
     };
   }
 
-  public getStoreHomeCategories(languageId: number) {
-    const text = `SELECT cate_level1.id, cate_level1.url_key AS "urlKey",
-    (SELECT name FROM category_translation WHERE store_id = current_setting('app.current_store_id')::uuid AND category_id = cate_level1.id AND language_id = $1),
+  public getHomePageCategories(languageId: number) {
+    const text = `SELECT cate.id, cate.url_key AS "urlKey",
+    (SELECT name FROM category_translation WHERE store_id = current_setting('app.current_store_id')::uuid AND category_id = cate.id AND language_id = $1),
     -- thumbnail
     ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
-    FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate_level1.media_id )) AS thumbnail,
-    AND cate_level1.parent_id IS NULL AND cate_level1.include_in_menu is TRUE ORDER BY cate_level1.position ASC`;
+    FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate.media_id )) AS thumbnail
+    FROM category AS cate WHERE cate.store_id = current_setting('app.current_store_id')::uuid AND cate.include_in_homepage is TRUE ORDER BY cate.position ASC`;
     return {
-      name: 'get-menu',
+      name: 'get-home-page-categories',
       text,
       values: [languageId],
     };

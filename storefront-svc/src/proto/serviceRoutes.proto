@@ -15,6 +15,7 @@ service LanguageServiceRoutes {
 
 service CategoryServiceRoutes {
   rpc getMenu(MenuRequest)                               returns (MenuResponse);
+  rpc getHomePageCategories(HomePageCategoryRequest)     returns (HomePageCategoryResponse);
   rpc getCategory(CategoryRequest)                       returns (CategoryResponse);
 }
 

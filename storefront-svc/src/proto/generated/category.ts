@@ -14,6 +14,8 @@ export interface ProtoGrpcType {
     Category: MessageTypeDefinition;
     CategoryRequest: MessageTypeDefinition;
     CategoryResponse: MessageTypeDefinition;
+    HomePageCategoryRequest: MessageTypeDefinition;
+    HomePageCategoryResponse: MessageTypeDefinition;
     Menu: MessageTypeDefinition;
     MenuRequest: MessageTypeDefinition;
     MenuResponse: MessageTypeDefinition;

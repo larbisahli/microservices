@@ -13,8 +13,10 @@ import { MenuResponse } from '@proto/generated/category/MenuResponse';
 import { Menu__Output } from '@proto/generated/category/Menu';
 import { CategoryResponse } from '@proto/generated/category/CategoryResponse';
 import { CategoryRequest } from '@proto/generated/category/CategoryRequest';
-import { Category } from '@proto/generated/category/Category';
+import { Category, Category__Output } from '@proto/generated/category/Category';
 import { Breadcrumbs } from '@proto/generated/category/Breadcrumbs';
+import { HomePageCategoryResponse__Output } from '@proto/generated/category/HomePageCategoryResponse';
+import { HomePageCategoryRequest__Output } from '@proto/generated/category/HomePageCategoryRequest';
 
 @Service()
 export default class CategoryHandler extends PostgresClient {
@@ -98,6 +100,84 @@ export default class CategoryHandler extends PostgresClient {
           details: message,
         },
         response: { menu: [] },
+      };
+    } finally {
+      client.release();
+    }
+  };
+
+  /**
+   * @param { ServerUnaryCall<MenuRequest__Output, MenuResponse>} call
+   * @returns {Promise<Menu__Output[]>}
+   */
+  public getHomePageCategories = async (
+    call: ServerUnaryCall<
+      HomePageCategoryRequest__Output,
+      HomePageCategoryResponse__Output
+    >
+  ): Promise<{
+    error: ServerErrorResponse | Partial<StatusObject> | null;
+    response: { categories: Category__Output[] | [] };
+  }> => {
+    const { getHomePageCategories } = this.categoryQueries;
+    const { alias, storeLanguageId, storeId } = call.request;
+
+    if (!alias || !storeLanguageId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'Store identifier is not defined',
+        },
+        response: { categories: [] },
+      };
+    }
+
+    // /** Check if resource is in the cache store */
+    // const resource = (await this.resourceHandler.getResource({
+    //   alias,
+    //   resourceName: 'menu',
+    //   packageName: 'menu',
+    // })) as { menu: Menu__Output[] | [] };
+
+    // if (resource) {
+    //   return { error: null, response: resource };
+    // }
+
+    const client = await this.transaction();
+
+    try {
+      await client.query('BEGIN');
+
+      await this.setupStoreSessions(client, { alias, storeId });
+
+      const { rows } = await client.query<Category__Output>(
+        getHomePageCategories(storeLanguageId)
+      );
+
+      const categories = rows;
+
+      /** Set the resources in the cache store */
+      // if (menu && alias) {
+      //   this.resourceHandler.setResource({
+      //     alias,
+      //     resourceName: 'menu',
+      //     resource: menu,
+      //     packageName: 'menu',
+      //   });
+      // }
+
+      await client.query('COMMIT');
+
+      return { response: { categories }, error: null };
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      const message = error?.message as string;
+      return {
+        error: {
+          code: Status.FAILED_PRECONDITION,
+          details: message,
+        },
+        response: { categories: [] },
       };
     } finally {
       client.release();

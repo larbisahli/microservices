@@ -30,6 +30,7 @@ export interface Category {
   breadcrumbsPriority?: number;
   metaImage?: _media_Image[];
   breadcrumbs?: _category_Breadcrumbs[];
+  level?: number;
   _hasChildren?: 'hasChildren';
   _breadcrumbsPriority?: 'breadcrumbsPriority';
 }
@@ -51,6 +52,7 @@ export interface Category__Output {
   breadcrumbsPriority?: number;
   metaImage: _media_Image__Output[];
   breadcrumbs: _category_Breadcrumbs__Output[];
+  level: number;
   _hasChildren: 'hasChildren';
   _breadcrumbsPriority: 'breadcrumbsPriority';
 }

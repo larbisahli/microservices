@@ -9,8 +9,8 @@ import { CategoryQueries, ProductQueries } from '@sql';
 import {
   CategoryType,
   ImageType,
-  ProductSeoType,
   ProductShippingInfo,
+  ProductTranslationType,
   ProductType,
   ProductVariationOptions,
   SuppliersType,
@@ -226,7 +226,6 @@ export default class ProductHandler extends PostgresClient {
       getProductShippingInfo,
       getStoreProductCategories,
       getProductTags,
-      getProductSuppliers,
       getProductVariationOptions,
       getProductVariationForStore,
       getStoreProductRelatedProducts,
@@ -273,7 +272,7 @@ export default class ProductHandler extends PostgresClient {
 
       // Translation
       const { rows: productTranslationRows } =
-        await client.query<ProductSeoType>(
+        await client.query<ProductTranslationType>(
           getProductTranslation(productId, storeLanguageId)
         );
 
@@ -301,6 +300,8 @@ export default class ProductHandler extends PostgresClient {
       const { rows: categories } = await client.query<CategoryType>(
         getStoreProductCategories(productId, storeLanguageId)
       );
+
+      console.log({ categories });
 
       // ProductTag
       // const { rows: tags } = await client.query<TagType>(getProductTags(id));
@@ -333,6 +334,8 @@ export default class ProductHandler extends PostgresClient {
 
       const product = {
         ...content,
+        name: productTranslation?.name,
+        description: productTranslation?.description,
         thumbnail,
         gallery,
         categories,
@@ -353,6 +356,7 @@ export default class ProductHandler extends PostgresClient {
       await client.query('COMMIT');
 
       return {
+        // @ts-ignore
         response: { product },
         error: null,
       };
