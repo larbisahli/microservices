@@ -36,4 +36,10 @@ export interface ProtoGrpcType {
     ConfigResponse: MessageTypeDefinition;
     Settings: MessageTypeDefinition;
   };
+  tax: {
+    AppliesTo: MessageTypeDefinition;
+    Tax: MessageTypeDefinition;
+    TaxedCountries: MessageTypeDefinition;
+    ZipCodeRange: MessageTypeDefinition;
+  };
 }

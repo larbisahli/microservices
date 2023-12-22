@@ -4,14 +4,17 @@ import type {
   Image as _media_Image,
   Image__Output as _media_Image__Output,
 } from '../media/Image';
+import type {
+  Price as _product_Price,
+  Price__Output as _product_Price__Output,
+} from '../product/Price';
 
 export interface VariationOption {
   id?: number;
   title?: string;
   thumbnail?: _media_Image[];
   options?: number[];
-  salePrice?: number | string;
-  comparePrice?: number | string;
+  price?: _product_Price | null;
   quantity?: number;
   sku?: string;
 }
@@ -21,8 +24,7 @@ export interface VariationOption__Output {
   title: string;
   thumbnail: _media_Image__Output[];
   options: number[];
-  salePrice: number;
-  comparePrice: number;
+  price: _product_Price__Output | null;
   quantity: number;
   sku: string;
 }

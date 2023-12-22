@@ -232,7 +232,7 @@ export interface ProductType extends SharedValues {
   quantity?: Scalars['Int'];
   case?: Scalars['Int']; //SUM()
   description?: Scalars['String'];
-  type?: { id: 'simple' | 'variable' };
+  type?: 'simple' | 'variable';
   published?: Scalars['Boolean'];
   status?: 'draft' | 'publish';
   disableOutOfStock?: Scalars['Boolean'];

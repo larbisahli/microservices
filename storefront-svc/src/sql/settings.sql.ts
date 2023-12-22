@@ -13,7 +13,8 @@ export default class SettingsQueryString {
     FROM store_language AS lang WHERE lang.store_id = current_setting('app.current_store_id')::uuid AND lang.active is TRUE )) AS locales,
     currencies, default_currency AS "defaultCurrency", socials, google, store_name AS "storeName", store_email AS "storeEmail",
     store_number AS "storeNumber", address_line1 AS "addressLine1", address_line2 AS "addressLine2",
-    max_checkout_quantity AS "maxCheckoutQuantity", max_checkout_amount AS "maxCheckoutAmount",
+    max_checkout_quantity AS "maxCheckoutQuantity", max_checkout_amount AS "maxCheckoutAmount", store_id AS "storeId",
+    (SELECT json_build_object('name', tax.name, 'rate', tax.rate, 'countries', tax.countries) FROM store_tax AS tax WHERE tax.store_id = current_setting('app.current_store_id')::uuid AND tax.id = tax_id) as tax,
     (SELECT json_build_object(
     'metaTitle', meta_title, 'metaDescription', meta_description,
     'metaTags', meta_tags, 'ogTitle', og_title,
@@ -23,6 +24,26 @@ export default class SettingsQueryString {
 
     return {
       name: 'get-settings',
+      text,
+      values: [],
+    };
+  }
+
+  public getStorTaxRate() {
+    const text = `SELECT rate, countries FROM store_tax WHERE store_id = current_setting('app.current_store_id')::uuid AND id = (SELECT ss.tax_id FROM store_settings AS ss WHERE ss.store_id = current_setting('app.current_store_id')::uuid)`;
+
+    return {
+      name: 'get-store-tax-rate',
+      text,
+      values: [],
+    };
+  }
+
+  public getStoreSystemCurrency() {
+    const text = `SELECT system_currency AS "systemCurrency" FROM store_settings WHERE store_id = current_setting('app.current_store_id')::uuid`;
+
+    return {
+      name: 'get-store-system-currency',
       text,
       values: [],
     };

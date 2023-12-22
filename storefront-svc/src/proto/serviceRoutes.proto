@@ -8,6 +8,7 @@ import "slides.proto";
 import "settings.proto";
 import "language.proto";
 import "page.proto";
+import "payment.proto";
 
 service LanguageServiceRoutes {
   rpc getLanguage(LanguageRequest)                       returns (LanguageResponse);
@@ -36,4 +37,8 @@ service PageServiceRoutes {
 
 service ConfigServiceRoutes {
   rpc getConfig(ConfigRequest)                           returns (ConfigResponse);
+}
+
+service PaymentServiceRoutes {
+  rpc getStripeClientSecret(StipePaymentRequest)         returns (StipePaymentResponse);
 }

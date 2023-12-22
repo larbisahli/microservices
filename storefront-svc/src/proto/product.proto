@@ -7,6 +7,7 @@ import "attribute.proto";
 import "tag.proto";
 import "category.proto";
 import "enum.proto";
+import "commons.proto";
 
 message Variation {
   Attribute attribute = 1;
@@ -18,10 +19,9 @@ message VariationOption {
   string title = 2;
   repeated Image thumbnail = 3;
   repeated uint32 options = 4;
-  double salePrice = 5;
-  double comparePrice = 6;
-  uint32 quantity = 7;
-  string sku = 8;
+  Price price = 5;
+  uint32 quantity = 6;
+  string sku = 7;
 }
 
 message Unit {
@@ -49,6 +49,27 @@ message ProductSeo {
   repeated Image metaImage = 6;
 }
 
+message FinalPrice {
+  Currency currency = 1;
+  double value = 2;
+}
+
+message Price {
+  FinalPrice finalPrice = 1;
+  FinalPrice finalPriceExclTax = 2;
+  Discount discount = 3;
+}
+
+message PriceRange {
+  Price maximumPrice = 1;
+  Price minimumPrice = 2;
+}
+
+message Discount {
+  double amountOff = 1;
+  double percentOff = 2;
+}
+
 message Product {
     uint32 id = 1;
     string name = 2;
@@ -59,21 +80,21 @@ message Product {
     repeated Image thumbnail = 7;
     repeated Image gallery = 8;
     bool inStock = 9;
-    double salePrice = 10;
-    double comparePrice = 11;
-    double maxPrice = 12;
-    double minPrice = 13;
-    uint32 quantity = 14;
-    bool disableOutOfStock = 15;
-    repeated Variation variations = 16;
-    repeated VariationOption variationOptions = 17;
-    ProductShippingInfo productShippingInfo = 18;
-    repeated Category categories = 19;
-    repeated Tag tags = 20;
-    ProductSeo productSeo = 21;
-    repeated Product relatedProducts = 22 [lazy = true];
-    repeated Product upsellProducts = 23 [lazy = true];
-    repeated Product crossSellProducts = 24 [lazy = true];
+    PriceRange priceRange = 10;
+    uint32 quantity = 11;
+    bool disableOutOfStock = 12;
+    repeated Variation variations = 13;
+    repeated VariationOption variationOptions = 14;
+    ProductShippingInfo productShippingInfo = 15;
+    repeated Category categories = 16;
+    repeated Tag tags = 17;
+    ProductSeo productSeo = 18;
+    repeated Product relatedProducts = 19 [lazy = true];
+    repeated Product upsellProducts = 20 [lazy = true];
+    repeated Product crossSellProducts = 21 [lazy = true];
+    Price price = 22;
+    uint32 ratingSummary = 23;
+    uint32 reviewCount = 24;
 }
 
 message PopularProductsRequest {

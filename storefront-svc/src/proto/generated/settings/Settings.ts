@@ -24,6 +24,10 @@ import type {
   Seo as _commons_Seo,
   Seo__Output as _commons_Seo__Output,
 } from '../commons/Seo';
+import type {
+  Tax as _tax_Tax,
+  Tax__Output as _tax_Tax__Output,
+} from '../tax/Tax';
 
 export interface Settings {
   id?: number;
@@ -43,6 +47,8 @@ export interface Settings {
   maxCheckoutAmount?: number;
   seo?: _commons_Seo | null;
   alias?: string;
+  storeId?: string;
+  tax?: _tax_Tax | null;
 }
 
 export interface Settings__Output {
@@ -63,4 +69,6 @@ export interface Settings__Output {
   maxCheckoutAmount: number;
   seo: _commons_Seo__Output | null;
   alias: string;
+  storeId: string;
+  tax: _tax_Tax__Output | null;
 }

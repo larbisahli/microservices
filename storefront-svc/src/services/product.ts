@@ -5,14 +5,16 @@ import {
   StatusObject,
 } from '@grpc/grpc-js';
 import { Service } from 'typedi';
-import { CategoryQueries, ProductQueries } from '@sql';
+import { CategoryQueries, ProductQueries, SettingsQueries } from '@sql';
 import {
   CategoryType,
+  CurrencyType,
   ImageType,
   ProductShippingInfo,
   ProductTranslationType,
   ProductType,
   ProductVariationOptions,
+  SettingsType,
   SuppliersType,
   TagType,
   VariationType,
@@ -26,6 +28,103 @@ import { Product__Output } from '@proto/generated/product/Product';
 import { CategoryProductsRequest } from '@proto/generated/product/CategoryProductsRequest';
 import { ProductRequest } from '@proto/generated/product/ProductRequest';
 import { ProductResponse } from '@proto/generated/product/ProductResponse';
+import { productTypeEnum } from '@proto/generated/enum/productTypeEnum';
+
+interface ProductInterface extends Product__Output {
+  maxComparePrice: number;
+  minComparePrice: number;
+  maxPrice: number;
+  minPrice: number;
+  salePrice: number;
+  comparePrice: number;
+}
+
+const roundTo3 = (v: number = 0) => Math.round(v * 1000) / 1000;
+const calcTaxRate = (price: number = 0, rate: number = 0) =>
+  roundTo3(Number(price) + Number(price) * (Number(rate) / 100));
+const calcPercentage = (salePrice: number = 0, comparePrice: number = 0) =>
+  roundTo3(
+    ((Number(comparePrice) - Number(salePrice)) / Number(comparePrice)) * 100
+  );
+
+const calcPriceRange = (
+  product: ProductInterface,
+  systemCurrency: CurrencyType,
+  rate: number
+) => {
+  const isConfigurable = product?.type === productTypeEnum.variable;
+
+  if (isConfigurable) {
+    return {
+      priceRange: {
+        maximumPrice: {
+          finalPrice: {
+            currency: {
+              code: systemCurrency?.code,
+            },
+            value: calcTaxRate(product?.maxPrice, rate),
+          },
+          finalPriceExclTax: {
+            currency: {
+              code: systemCurrency?.code,
+            },
+            value: product?.maxPrice,
+          },
+          discount: {
+            amountOff: product?.maxComparePrice,
+            percentOff: calcPercentage(
+              product?.maxPrice,
+              product?.maxComparePrice
+            ),
+          },
+        },
+        minimumPrice: {
+          finalPrice: {
+            currency: {
+              code: systemCurrency?.code,
+            },
+            value: calcTaxRate(product?.minPrice, rate),
+          },
+          finalPriceExclTax: {
+            currency: {
+              code: systemCurrency?.code,
+            },
+            value: product?.minPrice,
+          },
+          discount: {
+            amountOff: product?.minComparePrice,
+            percentOff: calcPercentage(
+              product?.minPrice,
+              product?.minComparePrice
+            ),
+          },
+        },
+      },
+    };
+  }
+  return {
+    priceRange: {
+      maximumPrice: {
+        finalPrice: {
+          currency: {
+            code: systemCurrency?.code,
+          },
+          value: calcTaxRate(product?.salePrice, rate),
+        },
+        finalPriceExclTax: {
+          currency: {
+            code: systemCurrency?.code,
+          },
+          value: product?.salePrice,
+        },
+        discount: {
+          amountOff: product?.comparePrice,
+          percentOff: calcPercentage(product?.salePrice, product?.comparePrice),
+        },
+      },
+    },
+  };
+};
 
 @Service()
 export default class ProductHandler extends PostgresClient {
@@ -35,6 +134,7 @@ export default class ProductHandler extends PostgresClient {
    */
   constructor(
     protected productQueries: ProductQueries,
+    protected settingsQueries: SettingsQueries,
     protected categoryQueries: CategoryQueries,
     protected resourceHandler: ResourceHandler
   ) {
@@ -52,6 +152,7 @@ export default class ProductHandler extends PostgresClient {
     response: { products: Product__Output[] | null };
   }> => {
     const { getPopularProducts } = this.productQueries;
+    const { getStorTaxRate, getStoreSystemCurrency } = this.settingsQueries;
     const { alias, storeId, storeLanguageId } = call.request;
 
     if (!alias || !storeLanguageId) {
@@ -82,7 +183,17 @@ export default class ProductHandler extends PostgresClient {
 
       await this.setupStoreSessions(client, { alias, storeId });
 
-      const { rows } = await client.query<Product__Output>(
+      const { rows: taxRateRows } = await client.query<{ rate: number }>(
+        getStorTaxRate()
+      );
+      const { rows: systemCurrencyRows } = await client.query<{
+        systemCurrency: CurrencyType;
+      }>(getStoreSystemCurrency());
+
+      const { rate } = taxRateRows[0] ?? {};
+      const { systemCurrency } = systemCurrencyRows[0] ?? {};
+
+      const { rows } = await client.query<ProductInterface>(
         getPopularProducts(storeLanguageId)
       );
 
@@ -98,9 +209,22 @@ export default class ProductHandler extends PostgresClient {
       //   });
       // }
 
+      const results = products?.map((product) => {
+        return {
+          ...product,
+          ...calcPriceRange(product, systemCurrency, rate),
+        };
+      });
+
       await client.query('COMMIT');
 
-      return { response: { products }, error: null };
+      return {
+        response: {
+          // @ts-ignore
+          products: results,
+        },
+        error: null,
+      };
     } catch (error: any) {
       console.log(error);
       await client.query('ROLLBACK');
@@ -231,6 +355,8 @@ export default class ProductHandler extends PostgresClient {
       getStoreProductRelatedProducts,
       getStoreProductUpsellProducts,
     } = this.productQueries;
+    const { getStorTaxRate, getStoreSystemCurrency } = this.settingsQueries;
+
     const { alias, storeId, storeLanguageId, slug } = call.request;
 
     if (!alias || !slug || !storeLanguageId) {
@@ -257,6 +383,7 @@ export default class ProductHandler extends PostgresClient {
     const client = await this.transaction();
 
     try {
+      // TODO use promise.all
       await client.query('BEGIN');
 
       await this.setupStoreSessions(client, { alias, storeId });
@@ -267,6 +394,9 @@ export default class ProductHandler extends PostgresClient {
       );
 
       const content = productContent[0] ?? {};
+
+      const isVariable = content?.type === productTypeEnum.variable;
+      const isSimple = content?.type === productTypeEnum.simple;
 
       const { id: productId } = content;
 
@@ -301,13 +431,11 @@ export default class ProductHandler extends PostgresClient {
         getStoreProductCategories(productId, storeLanguageId)
       );
 
-      console.log({ categories });
-
       // ProductTag
       // const { rows: tags } = await client.query<TagType>(getProductTags(id));
 
       // variationOptions
-      const { rows: variationOptions } =
+      const { rows: variationOptionsRows } =
         await client.query<ProductVariationOptions>(
           getProductVariationOptions(productId)
         );
@@ -318,19 +446,77 @@ export default class ProductHandler extends PostgresClient {
       );
 
       // relatedProducts
-      const { rows: relatedProducts } = await client.query<ProductType>(
-        getStoreProductRelatedProducts(productId, storeLanguageId)
-      );
+      const { rows: relatedProductsRows } =
+        await client.query<ProductInterface>(
+          getStoreProductRelatedProducts(productId, storeLanguageId)
+        );
 
       // upsellProducts
-      const { rows: upsellProducts } = await client.query<ProductType>(
+      const { rows: upsellProductsRows } = await client.query<ProductInterface>(
         getStoreProductUpsellProducts(productId, storeLanguageId)
       );
 
       // crossSellProducts
-      const { rows: crossSellProducts } = await client.query<ProductType>(
-        getStoreProductUpsellProducts(productId, storeLanguageId)
+      const { rows: crossSellProductsRows } =
+        await client.query<ProductInterface>(
+          getStoreProductUpsellProducts(productId, storeLanguageId)
+        );
+
+      const { rows: taxRateRows } = await client.query<{ rate: number }>(
+        getStorTaxRate()
       );
+      const { rows: systemCurrencyRows } = await client.query<{
+        systemCurrency: CurrencyType;
+      }>(getStoreSystemCurrency());
+
+      const { rate } = taxRateRows[0] ?? {};
+      const { systemCurrency } = systemCurrencyRows[0] ?? {};
+
+      const variationOptions = variationOptionsRows?.map((option) => {
+        return {
+          ...option,
+          price: {
+            finalPrice: {
+              currency: {
+                code: systemCurrency?.code,
+              },
+              value: calcTaxRate(option?.salePrice!, rate),
+            },
+            finalPriceExclTax: {
+              currency: {
+                code: systemCurrency?.code,
+              },
+              value: option?.salePrice,
+            },
+            discount: {
+              amountOff: option?.comparePrice,
+              percentOff: calcPercentage(
+                option?.salePrice!,
+                option?.comparePrice!
+              ),
+            },
+          },
+        };
+      });
+
+      const relatedProducts = relatedProductsRows?.map((product) => {
+        return {
+          ...product,
+          ...calcPriceRange(product, systemCurrency, rate),
+        };
+      });
+      const upsellProducts = upsellProductsRows?.map((product) => {
+        return {
+          ...product,
+          ...calcPriceRange(product, systemCurrency, rate),
+        };
+      });
+      const crossSellProducts = crossSellProductsRows?.map((product) => {
+        return {
+          ...product,
+          ...calcPriceRange(product, systemCurrency, rate),
+        };
+      });
 
       const product = {
         ...content,
@@ -351,6 +537,33 @@ export default class ProductHandler extends PostgresClient {
         relatedProducts,
         upsellProducts,
         crossSellProducts,
+        ...{
+          ...(isSimple
+            ? {
+                price: {
+                  finalPrice: {
+                    currency: {
+                      code: systemCurrency?.code,
+                    },
+                    value: calcTaxRate(content?.salePrice!, rate),
+                  },
+                  finalPriceExclTax: {
+                    currency: {
+                      code: systemCurrency?.code,
+                    },
+                    value: content?.salePrice,
+                  },
+                  discount: {
+                    amountOff: content?.comparePrice,
+                    percentOff: calcPercentage(
+                      content?.salePrice!,
+                      content?.comparePrice!
+                    ),
+                  },
+                },
+              }
+            : {}),
+        },
       };
 
       await client.query('COMMIT');

@@ -419,7 +419,7 @@ export default class ProductQueryString extends CommonQueryString {
     const text = `SELECT pd.id, slug,
     (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $1),
     pd.disable_out_of_stock AS "disableOutOfStock",
-    jsonb_build_object('id', pd.type) AS "type",
+    pd.type AS "type",
     -- Quantity
     CASE
       WHEN pd.type = 'simple' THEN pd.quantity
@@ -440,6 +440,15 @@ export default class ProductQueryString extends CommonQueryString {
       WHEN pd.type = 'variable' THEN (SELECT DISTINCT ON(vp.compare_price) vp.compare_price
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE ORDER BY vp.compare_price LIMIT 1)
       WHEN pd.type = 'simple' THEN pd.compare_price END AS "comparePrice",
+    -- maxComparePrice/minComparePrice
+    CASE
+    WHEN pd.type = 'variable' THEN (SELECT DISTINCT ON(vp.compare_price) vp.compare_price
+    FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE ORDER BY vp.compare_price ASC LIMIT 1)
+    WHEN pd.type = 'simple' THEN pd.compare_price END AS "minComparePrice",
+    CASE
+      WHEN pd.type = 'variable' THEN (SELECT DISTINCT ON(vp.compare_price) vp.compare_price
+      FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE ORDER BY vp.compare_price DESC LIMIT 1)
+      WHEN pd.type = 'simple' THEN pd.compare_price END AS "maxComparePrice",
     -- maxPrice/minPrice
     CASE
       WHEN pd.type = 'variable' THEN (SELECT Max(vp.sale_price)
@@ -453,7 +462,7 @@ export default class ProductQueryString extends CommonQueryString {
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
     WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail
-    FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.published IS TRUE`;
+    FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.include_in_homepage IS FALSE AND pd.published IS TRUE`;
 
     return {
       name: 'get-popular-products',

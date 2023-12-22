@@ -27,17 +27,34 @@ export interface ProtoGrpcType {
     MenuRequest: MessageTypeDefinition;
     MenuResponse: MessageTypeDefinition;
   };
+  commons: {
+    Currency: MessageTypeDefinition;
+    GoogleAnalytics: MessageTypeDefinition;
+    Icon: MessageTypeDefinition;
+    Seo: MessageTypeDefinition;
+    Social: MessageTypeDefinition;
+    Unit: MessageTypeDefinition;
+  };
   enum: {
     attributeTypeEnum: EnumTypeDefinition;
     discountTypeEnum: EnumTypeDefinition;
     productTypeEnum: EnumTypeDefinition;
+  };
+  google: {
+    protobuf: {
+      Timestamp: MessageTypeDefinition;
+    };
   };
   media: {
     Image: MessageTypeDefinition;
   };
   product: {
     CategoryProductsRequest: MessageTypeDefinition;
+    Discount: MessageTypeDefinition;
+    FinalPrice: MessageTypeDefinition;
     PopularProductsRequest: MessageTypeDefinition;
+    Price: MessageTypeDefinition;
+    PriceRange: MessageTypeDefinition;
     Product: MessageTypeDefinition;
     ProductRequest: MessageTypeDefinition;
     ProductResponse: MessageTypeDefinition;

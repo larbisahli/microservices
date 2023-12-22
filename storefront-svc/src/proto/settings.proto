@@ -5,6 +5,7 @@ package settings;
 import "media.proto";
 import "language.proto";
 import "commons.proto";
+import "tax.proto";
 
 message Settings {
     uint32 id = 1;
@@ -24,6 +25,8 @@ message Settings {
     uint32 maxCheckoutAmount = 15;
     Seo seo = 16;
     required string alias = 17;
+    required string storeId = 18;
+    Tax tax = 19;
 }
 
 message ConfigRequest {

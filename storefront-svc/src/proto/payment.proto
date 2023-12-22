@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package payment;
+
+message Stripe {
+    string clientSecret = 1;
+}
+
+message StipePaymentRequest {
+    required string alias = 1;
+    optional string storeId = 3;
+}
+
+message StipePaymentResponse {
+    Stripe results = 1;
+}

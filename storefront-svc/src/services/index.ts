@@ -25,10 +25,7 @@ import { CategoryProductsRequest } from '@proto/generated/product/CategoryProduc
 import { ProductRequest } from '@proto/generated/product/ProductRequest';
 import { ProductResponse } from '@proto/generated/product/ProductResponse';
 import { ProductType } from '@ts-types/interfaces';
-import {
-  MenuRequest,
-  MenuRequest__Output,
-} from '@proto/generated/category/MenuRequest';
+import { MenuRequest__Output } from '@proto/generated/category/MenuRequest';
 import { MenuResponse } from '@proto/generated/category/MenuResponse';
 import { Menu, Menu__Output } from '@proto/generated/category/Menu';
 import { CategoryRequest } from '@proto/generated/category/CategoryRequest';
@@ -39,7 +36,6 @@ import { HeroSlidesResponse } from '@proto/generated/slides/HeroSlidesResponse';
 import { HeroSlide } from '@proto/generated/slides/HeroSlide';
 import { PromoBannerRequest } from '@proto/generated/slides/PromoBannerRequest';
 import { PromoBannerResponse } from '@proto/generated/slides/PromoBannerResponse';
-import { Status } from '@grpc/grpc-js/build/src/constants';
 import { Language } from '@proto/generated/language/Language';
 import { LanguageRequest } from '@proto/generated/language/LanguageRequest';
 import { LanguageResponse } from '@proto/generated/language/LanguageResponse';

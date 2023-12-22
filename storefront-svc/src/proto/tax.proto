@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package tax;
+
+message ZipCodeRange {
+    string from = 1;
+    string to = 2;
+}
+
+message AppliesTo {
+    string zipCode = 1;
+    ZipCodeRange zipCodeRange = 2;
+    bool entireCountry = 3;
+    string state = 4;
+}
+
+message TaxedCountries {
+    string iso2 = 1;
+    uint32 rate = 2;
+    AppliesTo appliesTo = 3;
+}
+
+message Tax {
+    string name = 1;
+    uint32 rate = 2;
+    repeated TaxedCountries countries = 3;
+}

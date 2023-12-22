@@ -21,6 +21,10 @@ import type {
   PageServiceRoutesDefinition as _ServiceRoutes_PageServiceRoutesDefinition,
 } from './ServiceRoutes/PageServiceRoutes';
 import type {
+  PaymentServiceRoutesClient as _ServiceRoutes_PaymentServiceRoutesClient,
+  PaymentServiceRoutesDefinition as _ServiceRoutes_PaymentServiceRoutesDefinition,
+} from './ServiceRoutes/PaymentServiceRoutes';
+import type {
   ProductServiceRoutesClient as _ServiceRoutes_ProductServiceRoutesClient,
   ProductServiceRoutesDefinition as _ServiceRoutes_ProductServiceRoutesDefinition,
 } from './ServiceRoutes/ProductServiceRoutes';
@@ -54,6 +58,10 @@ export interface ProtoGrpcType {
       typeof grpc.Client,
       _ServiceRoutes_PageServiceRoutesClient
     > & { service: _ServiceRoutes_PageServiceRoutesDefinition };
+    PaymentServiceRoutes: SubtypeConstructor<
+      typeof grpc.Client,
+      _ServiceRoutes_PaymentServiceRoutesClient
+    > & { service: _ServiceRoutes_PaymentServiceRoutesDefinition };
     ProductServiceRoutes: SubtypeConstructor<
       typeof grpc.Client,
       _ServiceRoutes_ProductServiceRoutesClient
@@ -110,9 +118,18 @@ export interface ProtoGrpcType {
     PageRequest: MessageTypeDefinition;
     PageResponse: MessageTypeDefinition;
   };
+  payment: {
+    StipePaymentRequest: MessageTypeDefinition;
+    StipePaymentResponse: MessageTypeDefinition;
+    Stripe: MessageTypeDefinition;
+  };
   product: {
     CategoryProductsRequest: MessageTypeDefinition;
+    Discount: MessageTypeDefinition;
+    FinalPrice: MessageTypeDefinition;
     PopularProductsRequest: MessageTypeDefinition;
+    Price: MessageTypeDefinition;
+    PriceRange: MessageTypeDefinition;
     Product: MessageTypeDefinition;
     ProductRequest: MessageTypeDefinition;
     ProductResponse: MessageTypeDefinition;
@@ -140,5 +157,11 @@ export interface ProtoGrpcType {
   };
   tag: {
     Tag: MessageTypeDefinition;
+  };
+  tax: {
+    AppliesTo: MessageTypeDefinition;
+    Tax: MessageTypeDefinition;
+    TaxedCountries: MessageTypeDefinition;
+    ZipCodeRange: MessageTypeDefinition;
   };
 }
