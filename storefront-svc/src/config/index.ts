@@ -34,8 +34,9 @@ export const ReadPoolConfig = {
 };
 
 export const MongoDBConfig = {
-  url: `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_CLUSTER_URL}?retryWrites=true&w=majority`,
-  admin_url: `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_CLUSTER_URL}/admin-cache?retryWrites=true&w=majority`,
+  url: `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_CLUSTER_URL}/?retryWrites=true&w=majority`,
+  admin_url: `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_CLUSTER_URL}/internal?retryWrites=true&w=majority`,
+  store_db: `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_CLUSTER_URL}/store?retryWrites=true&w=majority`,
 };
 
 export const RPCPort = '0.0.0.0:50051';

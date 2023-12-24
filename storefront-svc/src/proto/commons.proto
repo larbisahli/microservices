@@ -53,3 +53,8 @@ message GoogleAnalytics {
     bool isTrackProductAddToCart = 9;
     bool isTrackProductRemoveToCart = 10;
 }
+
+message Country {
+    string iso2 = 1;
+    string name = 2;
+}

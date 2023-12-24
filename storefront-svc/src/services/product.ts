@@ -71,10 +71,10 @@ const calcPriceRange = (
             value: product?.maxPrice,
           },
           discount: {
-            amountOff: product?.maxComparePrice,
+            amountOff: calcTaxRate(product?.maxComparePrice, rate),
             percentOff: calcPercentage(
-              product?.maxPrice,
-              product?.maxComparePrice
+              calcTaxRate(product?.maxPrice, rate),
+              calcTaxRate(product?.maxComparePrice, rate)
             ),
           },
         },
@@ -92,10 +92,10 @@ const calcPriceRange = (
             value: product?.minPrice,
           },
           discount: {
-            amountOff: product?.minComparePrice,
+            amountOff: calcTaxRate(product?.minComparePrice, rate),
             percentOff: calcPercentage(
-              product?.minPrice,
-              product?.minComparePrice
+              calcTaxRate(product?.minPrice, rate),
+              calcTaxRate(product?.minComparePrice, rate)
             ),
           },
         },
@@ -118,8 +118,11 @@ const calcPriceRange = (
           value: product?.salePrice,
         },
         discount: {
-          amountOff: product?.comparePrice,
-          percentOff: calcPercentage(product?.salePrice, product?.comparePrice),
+          amountOff: calcTaxRate(product?.comparePrice, rate),
+          percentOff: calcPercentage(
+            calcTaxRate(product?.salePrice, rate),
+            calcTaxRate(product?.comparePrice, rate)
+          ),
         },
       },
     },
@@ -489,10 +492,10 @@ export default class ProductHandler extends PostgresClient {
               value: option?.salePrice,
             },
             discount: {
-              amountOff: option?.comparePrice,
+              amountOff: calcTaxRate(option?.comparePrice, rate),
               percentOff: calcPercentage(
-                option?.salePrice!,
-                option?.comparePrice!
+                calcTaxRate(option?.salePrice, rate),
+                calcTaxRate(option?.comparePrice, rate)
               ),
             },
           },
@@ -554,10 +557,10 @@ export default class ProductHandler extends PostgresClient {
                     value: content?.salePrice,
                   },
                   discount: {
-                    amountOff: content?.comparePrice,
+                    amountOff: calcTaxRate(content?.comparePrice, rate),
                     percentOff: calcPercentage(
-                      content?.salePrice!,
-                      content?.comparePrice!
+                      calcTaxRate(content?.salePrice, rate),
+                      calcTaxRate(content?.comparePrice, rate)
                     ),
                   },
                 },
