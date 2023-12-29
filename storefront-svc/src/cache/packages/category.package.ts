@@ -13,6 +13,7 @@ export default class CategoryPackage extends protobuf.Root {
   root: protobuf.Root;
   Menu: protobuf.Type;
   Category: protobuf.Type;
+  HomePageCategories: protobuf.Type;
   decodeOptions: {
     enums: StringConstructor; // enums as string names
     longs: StringConstructor; // longs as strings (requires long.js)
@@ -29,6 +30,9 @@ export default class CategoryPackage extends protobuf.Root {
     this.root = this.loadSync(PROTO_PATH);
     this.Menu = this.root.lookupType('category.MenuResponse');
     this.Category = this.root.lookupType('category.CategoryResponse');
+    this.HomePageCategories = this.root.lookupType(
+      'category.HomePageCategoryResponse'
+    );
 
     this.decodeOptions = {
       enums: String,
@@ -121,6 +125,51 @@ export default class CategoryPackage extends protobuf.Root {
           this.decodeOptions
         );
         resolve({ resource: category });
+      } catch (error) {
+        reject({ error });
+      }
+    });
+  };
+
+  // -----------------------------
+
+  /**
+   * @param {Category[]} category
+   * @returns {Promise<{ buffer: Uint8Array; error?: unknown }>}
+   */
+  public encodeHomepageCategories = (
+    categories: Category
+  ): Promise<{ buffer: Uint8Array; error?: unknown }> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const errMsg = this.HomePageCategories.verify(categories);
+        if (errMsg) {
+          reject(errMsg);
+        }
+        const message = this.HomePageCategories.create({ categories });
+        // Encode the message to a buffer
+        const buffer = this.HomePageCategories.encode(message).finish();
+        resolve({ buffer });
+      } catch (error) {
+        reject({ error });
+      }
+    });
+  };
+
+  /**
+   * @param {protobuf.Buffer} buffer
+   * @returns {Promise<{ resource: any; error?: unknown }>}
+   */
+  public decodeHomepageCategories = (
+    buffer: protobuf.Buffer
+  ): Promise<{ resource: any; error?: unknown }> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const categories = this.HomePageCategories.toObject(
+          this.HomePageCategories.decode(buffer),
+          this.decodeOptions
+        );
+        resolve({ resource: categories });
       } catch (error) {
         reject({ error });
       }

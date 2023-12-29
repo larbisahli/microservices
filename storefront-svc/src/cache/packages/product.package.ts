@@ -17,6 +17,7 @@ export default class ProductPackage extends protobuf.Root {
     longs: StringConstructor; // longs as strings (requires long.js)
     bytes: StringConstructor; // bytes as base64 encoded strings
     defaults: boolean; // includes default values
+    keepCase: boolean; // includes default values
     arrays: boolean; // populates empty arrays (repeated fields) even if defaults=false
     objects: boolean; // populates empty objects (map fields) even if defaults=false
     oneofs: boolean; // includes virtual oneof fields set to the present field's name
@@ -34,10 +35,11 @@ export default class ProductPackage extends protobuf.Root {
       enums: String,
       longs: String,
       bytes: String,
-      defaults: true,
+      defaults: false,
       arrays: true,
       objects: true,
       oneofs: true,
+      keepCase: true,
     };
   }
 

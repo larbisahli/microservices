@@ -1,7 +1,5 @@
 import { Logger } from '@core';
 import { Service } from 'typedi';
-import CacheStore from './store';
-import { Binary } from 'mongodb';
 import {
   CategoryPackage,
   ConfigPackage,
@@ -9,12 +7,17 @@ import {
   ProductPackage,
   SlidePackage,
 } from './packages';
-import { MongoDBConfig } from '@config';
 import { isEmpty } from 'underscore';
 import crypto from 'crypto';
+import LanguagePackage from './packages/language.package';
+import ResourceCache from './models/resource';
+import Product from './models/product';
+import byteSize from 'byte-size';
+import { ResourceNamesEnum, ResourceNamesType } from '@ts-types/index';
+import { ProductServiceRoutes } from '@services';
 
 @Service()
-export class ResourceHandler extends CacheStore {
+export class ResourceHandler {
   packages: {
     [key: string]: {
       encode: (
@@ -31,110 +34,140 @@ export class ResourceHandler extends CacheStore {
     protected categoryPackage: CategoryPackage,
     protected slidePackage: SlidePackage,
     protected configPackage: ConfigPackage,
+    protected languagePackage: LanguagePackage,
     protected pagePackage: PagePackage
   ) {
-    super({
-      mongoUrl: MongoDBConfig.url,
-      dbName: 'store-cache',
-      // * (in seconds) Note: If the store doesn't make any request within 5h we will automatically prune the store cache
-      ttl: 5 * 60 * 60,
-    });
-
     this.packages = {
-      menu: {
+      [ResourceNamesEnum.MENU]: {
         encode: this.categoryPackage.encodeMenu,
         decode: this.categoryPackage.decodeMenu,
       },
-      category: {
+      [ResourceNamesEnum.CATEGORY]: {
         encode: this.categoryPackage.encodeCategory,
         decode: this.categoryPackage.decodeCategory,
       },
-      heroSlide: {
+      [ResourceNamesEnum.HOMEPAGE_CATEGORIES]: {
+        encode: this.categoryPackage.encodeHomepageCategories,
+        decode: this.categoryPackage.decodeHomepageCategories,
+      },
+      [ResourceNamesEnum.HERO_SLIDE]: {
         encode: this.slidePackage.encodeHeroBanner,
         decode: this.slidePackage.decodeHeroBanner,
       },
-      promoSlide: {
+      [ResourceNamesEnum.PROMO_SLIDE]: {
         encode: this.slidePackage.encodePromoBanner,
         decode: this.slidePackage.decodePromoBanner,
       },
-      products: {
+      [ResourceNamesEnum.PRODUCTS]: {
         encode: this.productPackage.encodeProducts,
         decode: this.productPackage.decodeProducts,
       },
-      product: {
+      [ResourceNamesEnum.PRODUCT]: {
         encode: this.productPackage.encodeProduct,
         decode: this.productPackage.decodeProduct,
       },
-      storeConfig: {
+      [ResourceNamesEnum.CONFIG]: {
         encode: this.configPackage.encodeConfig,
         decode: this.configPackage.decodeConfig,
       },
-      page: {
-        encode: this.pagePackage.encodePage,
-        decode: this.pagePackage.decodePage,
+      [ResourceNamesEnum.LANGUAGE]: {
+        encode: this.languagePackage.encode,
+        decode: this.languagePackage.decode,
+      },
+      [ResourceNamesEnum.PAGE]: {
+        encode: this.pagePackage.encode,
+        decode: this.pagePackage.decode,
       },
     };
   }
 
   private getId = ({
-    packageName,
-    resourceName,
+    alias,
+    key,
     page = null,
   }: {
-    packageName: string;
-    resourceName: string;
+    alias: string;
+    key: string;
     page?: number | null;
   }) => {
     if (page) {
       return crypto
         .createHash('sha256')
-        .update(`${packageName}:${resourceName}:${page}`)
+        .update(`${alias}:${key}:${page}`)
         .digest('hex');
     } else {
       return crypto
         .createHash('sha256')
-        .update(`${packageName}:${resourceName}`)
+        .update(`${alias}:${key}`)
         .digest('hex');
     }
   };
 
+  private getProductId = ({
+    storeId,
+    productId,
+  }: {
+    storeId: string;
+    productId: number;
+  }) => {
+    return `${storeId}:${productId}`;
+  };
+
   public getResource = async ({
     alias,
-    resourceName,
-    packageName,
+    key,
+    name,
     page = null,
   }: {
     alias: string;
-    resourceName: string;
-    packageName: string;
+    key: string;
+    name: ResourceNamesType;
     page?: number | null;
   }) => {
     try {
-      const resource = await this.get(
-        alias,
-        this.getId({ packageName, resourceName, page })
-      );
+      const resource = await ResourceCache.findOne({
+        key: { $eq: this.getId({ alias, key, page }) },
+      });
 
-      if (!(resource && resource?.buffer instanceof Binary)) {
+      if (isEmpty(resource && resource.data)) {
         return null;
       }
 
-      const oneHourInMs = 60 * 60 * 1000;
+      /**
+       * Convert the data from Buffer to object
+       */
+      return (await this.packages[name].decode(resource?.data!))?.resource;
+    } catch (error) {
+      Logger.system.error((error as Error).message);
+      console.log('getResource >>', { error });
+      throw error;
+    }
+  };
 
-      // Extend document expiry date if the document was accessed within 1h left to expiry
-      if (
-        oneHourInMs >
-        Number(resource.expires?.getTime()) - new Date(Date.now()).getTime()
-      ) {
-        await this.extendExpiryDate(alias, resourceName);
+  public getProduct = async ({
+    storeId,
+    productId,
+    slug,
+  }: {
+    storeId: string;
+    productId: number;
+    slug?: string | null;
+  }) => {
+    try {
+      const resource = await ResourceCache.findOne({
+        key: { $eq: this.getProductId({ storeId, productId }) },
+      });
+
+      if (isEmpty(resource && resource.data)) {
+        return null;
       }
 
       /**
-       * Convert the data back from a BSON Binary object to a Node.js Buffer
+       * Convert the data from Buffer to object
        */
-      const buffer = Buffer.from(resource.buffer.buffer);
-
-      return (await this.packages[packageName].decode(buffer))?.resource;
+      return (
+        await this.packages[ResourceNamesEnum.PRODUCT].decode(resource?.data!)
+      )?.resource;
     } catch (error) {
       Logger.system.error((error as Error).message);
       console.log('getResource >>', { error });
@@ -143,15 +176,15 @@ export class ResourceHandler extends CacheStore {
   };
 
   public setResource = async ({
-    alias,
-    resourceName,
+    store,
+    key,
+    name,
     resource,
-    packageName,
     page = null,
   }: {
-    alias: string;
-    resourceName: string;
-    packageName: string;
+    store: { alias: string; storeId: string };
+    key: string;
+    name: ResourceNamesType;
     resource: any;
     page?: number | null;
   }) => {
@@ -159,9 +192,7 @@ export class ResourceHandler extends CacheStore {
       /**
        * Storing the buffer directly into the db will save up to 46% storage space
        */
-      const { buffer, error } = await this.packages[packageName].encode(
-        resource
-      );
+      const { buffer, error } = await this.packages[name].encode(resource);
 
       if (error) {
         throw error;
@@ -171,18 +202,35 @@ export class ResourceHandler extends CacheStore {
         return true;
       }
 
-      const respond = await this.set(alias, {
-        _id: this.getId({ packageName, resourceName, page }),
-        buffer,
-        packageName,
-        resourceName,
+      // Calculate the data size for future inspection (mongodb doc max size is 16MB)
+      const { value, unit } = byteSize(buffer?.length, {
+        precision: 2,
+      });
+
+      const { alias, storeId } = store;
+
+      // if(name === ResourceNamesEnum.PRODUCT) {
+      //   const respond = await Product.create({
+      //     key: this.getProductId({ storeId, productId: resource?.id }),
+      //     slug: resource?.slug,
+      //     data: buffer,
+      //     alias,
+      //     storeId,
+      //     name,
+      //     size: `${value}${unit}`,
+      //   });
+      //   return respond;
+      // }
+
+      const respond = await ResourceCache.create({
+        key: this.getId({ alias, key, page }),
+        data: buffer,
+        alias,
+        storeId,
+        name,
         page,
-      })
-        .then(() => true)
-        .catch((error) => {
-          console.log({ error });
-          return false;
-        });
+        size: `${value}${unit}`,
+      });
 
       return respond;
     } catch (error) {
@@ -193,23 +241,21 @@ export class ResourceHandler extends CacheStore {
 
   public deleteResource = async ({
     alias,
-    resourceName,
-    packageName,
+    key,
+    name,
   }: {
     alias: string;
-    resourceName: string;
-    packageName: string;
+    key: string;
+    name: ResourceNamesType;
   }) => {
     try {
-      return await this.destroy(
-        alias,
-        this.getId({ packageName, resourceName })
-      )
-        .then(() => true)
-        .catch((error) => {
-          console.log({ error });
-          return false;
-        });
+      // return await this.db
+      //   .destroy(name, this.getId({ alias, key }))
+      //   .then(() => true)
+      //   .catch((error) => {
+      //     console.log({ error });
+      //     return false;
+      //   });
     } catch (error) {
       Logger.system.error(error);
       console.log('setResource >>', { error });

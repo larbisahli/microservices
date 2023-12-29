@@ -146,6 +146,47 @@ export interface ProductServiceRoutesClient extends grpc.Client {
     argument: _product_ProductRequest,
     callback: grpc.requestCallback<_product_ProductResponse__Output>
   ): grpc.ClientUnaryCall;
+
+  product(
+    argument: _product_ProductResponse,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
+  ): grpc.ClientUnaryCall;
+  product(
+    argument: _product_ProductResponse,
+    metadata: grpc.Metadata,
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
+  ): grpc.ClientUnaryCall;
+  product(
+    argument: _product_ProductResponse,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
+  ): grpc.ClientUnaryCall;
+  product(
+    argument: _product_ProductResponse,
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
+  ): grpc.ClientUnaryCall;
+  product(
+    argument: _product_ProductResponse,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
+  ): grpc.ClientUnaryCall;
+  product(
+    argument: _product_ProductResponse,
+    metadata: grpc.Metadata,
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
+  ): grpc.ClientUnaryCall;
+  product(
+    argument: _product_ProductResponse,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
+  ): grpc.ClientUnaryCall;
+  product(
+    argument: _product_ProductResponse,
+    callback: grpc.requestCallback<_product_ProductResponse__Output>
+  ): grpc.ClientUnaryCall;
 }
 
 export interface ProductServiceRoutesHandlers
@@ -162,6 +203,11 @@ export interface ProductServiceRoutesHandlers
 
   getProduct: grpc.handleUnaryCall<
     _product_ProductRequest__Output,
+    _product_ProductResponse
+  >;
+
+  product: grpc.handleUnaryCall<
+    _product_ProductResponse__Output,
     _product_ProductResponse
   >;
 }
@@ -183,6 +229,12 @@ export interface ProductServiceRoutesDefinition extends grpc.ServiceDefinition {
     _product_ProductRequest,
     _product_ProductResponse,
     _product_ProductRequest__Output,
+    _product_ProductResponse__Output
+  >;
+  product: MethodDefinition<
+    _product_ProductResponse,
+    _product_ProductResponse,
+    _product_ProductResponse__Output,
     _product_ProductResponse__Output
   >;
 }

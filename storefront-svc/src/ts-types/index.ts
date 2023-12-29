@@ -32,3 +32,18 @@ export type PermissionType = {
 export interface QueryPermissionType {
   permission: PermissionType;
 }
+
+export enum ResourceNamesEnum {
+  CONFIG = 'Config',
+  LANGUAGE = 'Language',
+  MENU = 'Menu',
+  CATEGORY = 'Category',
+  HOMEPAGE_CATEGORIES = 'HomepageCategories',
+  HERO_SLIDE = 'HeroSlide',
+  PROMO_SLIDE = 'PromoSlide',
+  PRODUCTS = 'Products',
+  PRODUCT = 'Product',
+  PAGE = 'Page',
+}
+
+export type ResourceNamesType = ResourceNamesEnum;

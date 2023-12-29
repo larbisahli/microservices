@@ -10,6 +10,7 @@ type SubtypeConstructor<
 
 export interface ProtoGrpcType {
   commons: {
+    Country: MessageTypeDefinition;
     Currency: MessageTypeDefinition;
     GoogleAnalytics: MessageTypeDefinition;
     Icon: MessageTypeDefinition;

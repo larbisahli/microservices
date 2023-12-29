@@ -1,10 +1,6 @@
 // Original file: src/proto/product.proto
 
 import type {
-  productTypeEnum as _enum_productTypeEnum,
-  productTypeEnum__Output as _enum_productTypeEnum__Output,
-} from '../enum/productTypeEnum';
-import type {
   Image as _media_Image,
   Image__Output as _media_Image__Output,
 } from '../media/Image';
@@ -50,7 +46,7 @@ export interface Product {
   name?: string;
   sku?: string;
   slug?: string;
-  type?: _enum_productTypeEnum;
+  type?: string;
   description?: string;
   thumbnail?: _media_Image[];
   gallery?: _media_Image[];
@@ -77,7 +73,7 @@ export interface Product__Output {
   name: string;
   sku: string;
   slug: string;
-  type: _enum_productTypeEnum__Output;
+  type: string;
   description: string;
   thumbnail: _media_Image__Output[];
   gallery: _media_Image__Output[];

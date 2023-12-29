@@ -6,7 +6,6 @@ import "media.proto";
 import "attribute.proto";
 import "tag.proto";
 import "category.proto";
-import "enum.proto";
 import "commons.proto";
 
 message Variation {
@@ -75,7 +74,7 @@ message Product {
     string name = 2;
     string sku = 3;
     string slug = 4;
-    enum.productTypeEnum type = 5;
+    string type = 5;
     string description = 6;
     repeated Image thumbnail = 7;
     repeated Image gallery = 8;

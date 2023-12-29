@@ -9,8 +9,7 @@ type SubtypeConstructor<
 };
 
 export interface ProtoGrpcType {
-  attribute: {
-    Attribute: MessageTypeDefinition;
-    AttributeValue: MessageTypeDefinition;
+  cart: {
+    Cart: MessageTypeDefinition;
   };
 }

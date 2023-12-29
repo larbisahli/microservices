@@ -17,6 +17,7 @@ import { Category, Category__Output } from '@proto/generated/category/Category';
 import { Breadcrumbs } from '@proto/generated/category/Breadcrumbs';
 import { HomePageCategoryResponse__Output } from '@proto/generated/category/HomePageCategoryResponse';
 import { HomePageCategoryRequest__Output } from '@proto/generated/category/HomePageCategoryRequest';
+import { ResourceNamesEnum } from '@ts-types/index';
 
 @Service()
 export default class CategoryHandler extends PostgresClient {
@@ -54,23 +55,33 @@ export default class CategoryHandler extends PostgresClient {
       };
     }
 
-    // /** Check if resource is in the cache store */
-    // const resource = (await this.resourceHandler.getResource({
-    //   alias,
-    //   resourceName: 'menu',
-    //   packageName: 'menu',
-    // })) as { menu: Menu__Output[] | [] };
+    /** Check if resource is in the cache store */
+    const resource = (await this.resourceHandler.getResource({
+      alias,
+      key: ResourceNamesEnum.MENU,
+      name: ResourceNamesEnum.MENU,
+    })) as { menu: Menu__Output[] | [] };
 
-    // if (resource) {
-    //   return { error: null, response: resource };
-    // }
+    if (resource) {
+      return { error: null, response: resource };
+    }
 
     const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: store?.error.message,
+          },
+          response: { menu: [] },
+        };
+      }
 
       const { rows } = await client.query<Menu__Output>(
         getMenu(storeLanguageId)
@@ -79,14 +90,14 @@ export default class CategoryHandler extends PostgresClient {
       const menu = rows;
 
       /** Set the resources in the cache store */
-      // if (menu && alias) {
-      //   this.resourceHandler.setResource({
-      //     alias,
-      //     resourceName: 'menu',
-      //     resource: menu,
-      //     packageName: 'menu',
-      //   });
-      // }
+      if (menu && alias) {
+        this.resourceHandler.setResource({
+          store,
+          key: ResourceNamesEnum.MENU,
+          name: ResourceNamesEnum.MENU,
+          resource: menu,
+        });
+      }
 
       await client.query('COMMIT');
 
@@ -132,23 +143,33 @@ export default class CategoryHandler extends PostgresClient {
       };
     }
 
-    // /** Check if resource is in the cache store */
-    // const resource = (await this.resourceHandler.getResource({
-    //   alias,
-    //   resourceName: 'menu',
-    //   packageName: 'menu',
-    // })) as { menu: Menu__Output[] | [] };
+    /** Check if resource is in the cache store */
+    const resource = (await this.resourceHandler.getResource({
+      alias,
+      key: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
+      name: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
+    })) as { categories: Category__Output[] | [] };
 
-    // if (resource) {
-    //   return { error: null, response: resource };
-    // }
+    if (resource) {
+      return { error: null, response: resource };
+    }
 
     const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: store?.error.message,
+          },
+          response: { categories: [] },
+        };
+      }
 
       const { rows } = await client.query<Category__Output>(
         getHomePageCategories(storeLanguageId)
@@ -157,14 +178,14 @@ export default class CategoryHandler extends PostgresClient {
       const categories = rows;
 
       /** Set the resources in the cache store */
-      // if (menu && alias) {
-      //   this.resourceHandler.setResource({
-      //     alias,
-      //     resourceName: 'menu',
-      //     resource: menu,
-      //     packageName: 'menu',
-      //   });
-      // }
+      if (categories && alias) {
+        this.resourceHandler.setResource({
+          store,
+          key: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
+          name: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
+          resource: categories,
+        });
+      }
 
       await client.query('COMMIT');
 
@@ -203,8 +224,6 @@ export default class CategoryHandler extends PostgresClient {
 
     const { urlKey, alias, storeLanguageId, storeId } = call.request;
 
-    console.log({ urlKey, alias, storeLanguageId, storeId });
-
     if (!alias || !urlKey || !storeLanguageId) {
       return {
         error: {
@@ -216,22 +235,32 @@ export default class CategoryHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    // const resource = (await this.resourceHandler.getResource({
-    //   alias,
-    //   resourceName: urlKey,
-    //   packageName: 'category',
-    // })) as { category: Category | null };
+    const resource = (await this.resourceHandler.getResource({
+      alias,
+      key: urlKey,
+      name: ResourceNamesEnum.CATEGORY,
+    })) as { category: Category | null };
 
-    // if (resource) {
-    //   return { error: null, response: resource };
-    // }
+    if (resource) {
+      return { error: null, response: resource };
+    }
 
     const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: store?.error.message,
+          },
+          response: { category: null },
+        };
+      }
 
       let breadcrumbs = [] as Breadcrumbs[];
 
@@ -317,17 +346,15 @@ export default class CategoryHandler extends PostgresClient {
         breadcrumbs,
       };
 
-      console.log({ breadcrumbs: breadcrumbs[0] });
-
       /** Set the resources in the cache store */
-      // if (category && alias && urlKey) {
-      //   this.resourceHandler.setResource({
-      //     alias,
-      //     resourceName: urlKey,
-      //     resource: responseCategory,
-      //     packageName: 'category',
-      //   });
-      // }
+      if (category && alias && urlKey) {
+        this.resourceHandler.setResource({
+          store,
+          key: urlKey,
+          name: ResourceNamesEnum.CATEGORY,
+          resource: responseCategory,
+        });
+      }
 
       await client.query('COMMIT');
 

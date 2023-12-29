@@ -14,6 +14,7 @@ import { HeroSlide__Output } from '@proto/generated/slides/HeroSlide';
 import { PromoBannerRequest } from '@proto/generated/slides/PromoBannerRequest';
 import { PromoBannerResponse } from '@proto/generated/slides/PromoBannerResponse';
 import { PromoBanner } from '@proto/generated/slides/PromoBanner';
+import { ResourceNamesEnum } from '@ts-types/index';
 
 @Service()
 export default class SlideHandler extends PostgresClient {
@@ -52,22 +53,32 @@ export default class SlideHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    // const resource = (await this.resourceHandler.getResource({
-    //   alias,
-    //   resourceName: 'heroSlide',
-    //   packageName: 'heroSlide',
-    // })) as { sliders: HeroSlide__Output[] | null };
+    const resource = (await this.resourceHandler.getResource({
+      alias,
+      key: ResourceNamesEnum.HERO_SLIDE,
+      name: ResourceNamesEnum.HERO_SLIDE,
+    })) as { sliders: HeroSlide__Output[] | null };
 
-    // if (resource) {
-    //   return { error: null, response: resource };
-    // }
+    if (resource) {
+      return { error: null, response: resource };
+    }
 
     const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: store?.error.message,
+          },
+          response: { sliders: null },
+        };
+      }
 
       const { rows } = await client.query<HeroSlide__Output>(
         getHeroSlides(storeLanguageId)
@@ -76,14 +87,14 @@ export default class SlideHandler extends PostgresClient {
       const sliders = rows;
 
       /** Set the resources in the cache store */
-      // if (sliders && alias) {
-      //   this.resourceHandler.setResource({
-      //     alias,
-      //     resource: sliders,
-      //     resourceName: 'heroSlide',
-      //     packageName: 'heroSlide',
-      //   });
-      // }
+      if (sliders && alias) {
+        this.resourceHandler.setResource({
+          store,
+          key: ResourceNamesEnum.HERO_SLIDE,
+          name: ResourceNamesEnum.HERO_SLIDE,
+          resource: sliders,
+        });
+      }
 
       await client.query('COMMIT');
 
@@ -127,22 +138,32 @@ export default class SlideHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    // const resource = (await this.resourceHandler.getResource({
-    //   alias,
-    //   resourceName: 'promoSlide',
-    //   packageName: 'promoSlide',
-    // })) as { banner: PromoBanner | null };
+    const resource = (await this.resourceHandler.getResource({
+      alias,
+      key: ResourceNamesEnum.PROMO_SLIDE,
+      name: ResourceNamesEnum.PROMO_SLIDE,
+    })) as { banner: PromoBanner | null };
 
-    // if (resource) {
-    //   return { error: null, response: resource };
-    // }
+    if (resource) {
+      return { error: null, response: resource };
+    }
 
     const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.INTERNAL,
+            details: store?.error.message,
+          },
+          response: { banner: null },
+        };
+      }
 
       interface banner extends PromoBanner {
         id: number;
@@ -167,14 +188,14 @@ export default class SlideHandler extends PostgresClient {
       const { direction, sliders } = slide[0];
 
       /** Set the resources in the cache store */
-      // if (banner && alias) {
-      //   this.resourceHandler.setResource({
-      //     alias,
-      //     resource: banner,
-      //     resourceName: 'promoSlide',
-      //     packageName: 'promoSlide',
-      //   });
-      // }
+      if (banner && alias) {
+        this.resourceHandler.setResource({
+          store,
+          key: ResourceNamesEnum.PROMO_SLIDE,
+          name: ResourceNamesEnum.PROMO_SLIDE,
+          resource: banner,
+        });
+      }
 
       await client.query('COMMIT');
 

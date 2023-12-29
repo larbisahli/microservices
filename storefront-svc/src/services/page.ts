@@ -12,6 +12,7 @@ import { PageRequest } from '@proto/generated/page/PageRequest';
 import { PageResponse } from '@proto/generated/page/PageResponse';
 import { Page } from '@proto/generated/page/Page';
 import { isEmpty } from 'underscore';
+import { ResourceNamesEnum } from '@ts-types/index';
 
 @Service()
 export default class PageHandler extends PostgresClient {
@@ -50,22 +51,32 @@ export default class PageHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    // const resource = (await this.resourceHandler.getResource({
-    //   alias,
-    //   resourceName: slug,
-    //   packageName: 'page',
-    // })) as { page: Page | null };
+    const resource = (await this.resourceHandler.getResource({
+      alias,
+      key: slug,
+      name: ResourceNamesEnum.PAGE,
+    })) as { page: Page | null };
 
-    // if (resource) {
-    //   return { error: null, response: resource };
-    // }
+    if (resource) {
+      return { error: null, response: resource };
+    }
 
     const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: store?.error.message,
+          },
+          response: { page: null },
+        };
+      }
 
       const { rows: pageRows } = await client.query<Page>(getPage(slug));
 
@@ -88,14 +99,14 @@ export default class PageHandler extends PostgresClient {
       const translation = pageTranslationRows[0];
 
       /** Set the resources in the cache store */
-      // if (page && alias) {
-      //   this.resourceHandler.setResource({
-      //     alias,
-      //     resourceName: slug,
-      //     packageName: 'page',
-      //     resource: page,
-      //   });
-      // }
+      if (page && alias) {
+        this.resourceHandler.setResource({
+          store,
+          key: slug,
+          name: ResourceNamesEnum.PAGE,
+          resource: page,
+        });
+      }
 
       await client.query('COMMIT');
 

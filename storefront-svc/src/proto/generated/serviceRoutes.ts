@@ -1,8 +1,5 @@
 import type * as grpc from '@grpc/grpc-js';
-import type {
-  EnumTypeDefinition,
-  MessageTypeDefinition,
-} from '@grpc/proto-loader';
+import type { MessageTypeDefinition } from '@grpc/proto-loader';
 
 import type {
   CategoryServiceRoutesClient as _ServiceRoutes_CategoryServiceRoutesClient,
@@ -87,17 +84,13 @@ export interface ProtoGrpcType {
     MenuResponse: MessageTypeDefinition;
   };
   commons: {
+    Country: MessageTypeDefinition;
     Currency: MessageTypeDefinition;
     GoogleAnalytics: MessageTypeDefinition;
     Icon: MessageTypeDefinition;
     Seo: MessageTypeDefinition;
     Social: MessageTypeDefinition;
     Unit: MessageTypeDefinition;
-  };
-  enum: {
-    attributeTypeEnum: EnumTypeDefinition;
-    discountTypeEnum: EnumTypeDefinition;
-    productTypeEnum: EnumTypeDefinition;
   };
   google: {
     protobuf: {

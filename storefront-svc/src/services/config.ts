@@ -14,6 +14,7 @@ import { Settings__Output } from '@proto/generated/settings/Settings';
 import { Language } from '@proto/generated/language/Language';
 import { LanguageRequest } from '@proto/generated/language/LanguageRequest';
 import { LanguageResponse } from '@proto/generated/language/LanguageResponse';
+import { ResourceNamesEnum } from '@ts-types/index';
 
 @Service()
 export default class ConfigHandler extends PostgresClient {
@@ -52,36 +53,47 @@ export default class ConfigHandler extends PostgresClient {
       };
     }
 
-    // /** Check if resource is in the cache store */
-    // const resource = (await this.resourceHandler.getResource({
-    //   alias,
-    //   resourceName: 'storeConfig',
-    //   packageName: 'storeConfig',
-    // })) as { config: Settings__Output | null };
+    /** Check if resource is in the cache store */
+    const resource = (await this.resourceHandler.getResource({
+      alias,
+      key: ResourceNamesEnum.CONFIG,
+      name: ResourceNamesEnum.CONFIG,
+    })) as { config: Settings__Output | null };
 
-    // if (resource) {
-    //   return { error: null, response: resource };
-    // }
+    if (resource) {
+      return { error: null, response: resource };
+    }
+
     const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: store?.error.message,
+          },
+          response: { config: null },
+        };
+      }
 
       const { rows } = await client.query<Settings__Output>(getStoreSettings());
 
       const config = rows[0];
 
       /** Set the resources in the cache store */
-      // if (config && alias) {
-      //   this.resourceHandler.setResource({
-      //     alias,
-      //     resourceName: 'storeConfig',
-      //     packageName: 'storeConfig',
-      //     resource: config,
-      //   });
-      // }
+      if (config && alias) {
+        this.resourceHandler.setResource({
+          store,
+          key: ResourceNamesEnum.CONFIG,
+          name: ResourceNamesEnum.CONFIG,
+          resource: config,
+        });
+      }
 
       await client.query('COMMIT');
 
@@ -103,7 +115,7 @@ export default class ConfigHandler extends PostgresClient {
 
   /**
    * @param { ServerUnaryCall<StoreConfigRequest, StoreConfigResponse>} call
-   * @returns {Promise<Settings__Output>}
+   * @returns {Promise<{ language: Language | null }>}
    */
   public getStoreLanguage = async (
     call: ServerUnaryCall<LanguageRequest, LanguageResponse>
@@ -124,37 +136,47 @@ export default class ConfigHandler extends PostgresClient {
       };
     }
 
-    // /** Check if resource is in the cache store */
-    // const resource = (await this.resourceHandler.getResource({
-    //   alias,
-    //   resourceName: 'storeConfig',
-    //   packageName: 'storeConfig',
-    // })) as { config: Settings__Output | null };
+    /** Check if resource is in the cache store */
+    const resource = (await this.resourceHandler.getResource({
+      alias,
+      key: ResourceNamesEnum.LANGUAGE,
+      name: ResourceNamesEnum.LANGUAGE,
+    })) as { language: Language | null };
 
-    // if (resource) {
-    //   return { error: null, response: resource };
-    // }
+    if (resource) {
+      return { error: null, response: resource };
+    }
 
     const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: store?.error.message,
+          },
+          response: { language: null },
+        };
+      }
 
       const { rows } = await client.query<Language>(getLanguage(id));
 
       const language = rows[0];
 
       /** Set the resources in the cache store */
-      // if (config && alias) {
-      //   this.resourceHandler.setResource({
-      //     alias,
-      //     resourceName: 'storeConfig',
-      //     packageName: 'storeConfig',
-      //     resource: config,
-      //   });
-      // }
+      if (language && alias) {
+        this.resourceHandler.setResource({
+          store,
+          key: ResourceNamesEnum.LANGUAGE,
+          name: ResourceNamesEnum.LANGUAGE,
+          resource: language,
+        });
+      }
 
       await client.query('COMMIT');
 

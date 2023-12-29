@@ -14,9 +14,6 @@ import {
   ProductTranslationType,
   ProductType,
   ProductVariationOptions,
-  SettingsType,
-  SuppliersType,
-  TagType,
   VariationType,
 } from '@ts-types/interfaces';
 import { offset } from '@utils/index';
@@ -29,6 +26,7 @@ import { CategoryProductsRequest } from '@proto/generated/product/CategoryProduc
 import { ProductRequest } from '@proto/generated/product/ProductRequest';
 import { ProductResponse } from '@proto/generated/product/ProductResponse';
 import { productTypeEnum } from '@proto/generated/enum/productTypeEnum';
+import { ResourceNamesEnum } from '@ts-types/index';
 
 interface ProductInterface extends Product__Output {
   maxComparePrice: number;
@@ -169,22 +167,32 @@ export default class ProductHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    // const resource = (await this.resourceHandler.getResource({
-    //   alias,
-    //   resourceName: 'popularProducts',
-    //   packageName: 'products',
-    // })) as { products: Product__Output[] | null };
+    const resource = (await this.resourceHandler.getResource({
+      alias,
+      key: 'PopularProducts',
+      name: ResourceNamesEnum.PRODUCTS,
+    })) as { products: Product__Output[] | null };
 
-    // if (resource) {
-    //   return { error: null, response: resource };
-    // }
+    if (resource) {
+      return { error: null, response: resource };
+    }
 
     const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: store?.error.message,
+          },
+          response: { products: null },
+        };
+      }
 
       const { rows: taxRateRows } = await client.query<{ rate: number }>(
         getStorTaxRate()
@@ -200,31 +208,29 @@ export default class ProductHandler extends PostgresClient {
         getPopularProducts(storeLanguageId)
       );
 
-      const products = rows;
-
-      /** Set the resources in the cache store */
-      // if (products && alias) {
-      //   this.resourceHandler.setResource({
-      //     alias,
-      //     resource: products,
-      //     resourceName: 'popularProducts',
-      //     packageName: 'products',
-      //   });
-      // }
-
-      const results = products?.map((product) => {
+      const products = rows?.map((product) => {
         return {
           ...product,
           ...calcPriceRange(product, systemCurrency, rate),
         };
       });
 
+      /** Set the resources in the cache store */
+      if (products && alias) {
+        this.resourceHandler.setResource({
+          store,
+          key: 'PopularProducts',
+          name: ResourceNamesEnum.PRODUCTS,
+          resource: products,
+        });
+      }
+
       await client.query('COMMIT');
 
       return {
         response: {
           // @ts-ignore
-          products: results,
+          products,
         },
         error: null,
       };
@@ -272,23 +278,33 @@ export default class ProductHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    // const resource = (await this.resourceHandler.getResource({
-    //   alias,
-    //   resourceName: urlKey,
-    //   packageName: 'products',
-    //   page,
-    // })) as { products: Product__Output[] | null };
+    const resource = (await this.resourceHandler.getResource({
+      alias,
+      key: urlKey,
+      name: ResourceNamesEnum.PRODUCTS,
+      page,
+    })) as { products: Product__Output[] | null };
 
-    // if (resource) {
-    //   return { error: null, response: resource };
-    // }
+    if (resource) {
+      return { error: null, response: resource };
+    }
 
     const client = await this.transaction();
 
     try {
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: store?.error.message,
+          },
+          response: { products: null },
+        };
+      }
 
       const { rows: category } = await client.query<{ id: number }>(
         getStoreCategoryIdByUrlKey(urlKey)
@@ -316,6 +332,17 @@ export default class ProductHandler extends PostgresClient {
       );
 
       const products = rows;
+
+      /** Set the resources in the cache store */
+      if (products && alias) {
+        this.resourceHandler.setResource({
+          store,
+          key: urlKey,
+          name: ResourceNamesEnum.PRODUCTS,
+          resource: products,
+          page,
+        });
+      }
 
       await client.query('COMMIT');
 
@@ -375,8 +402,8 @@ export default class ProductHandler extends PostgresClient {
     /** Check if resource is in the cache store */
     const resource = (await this.resourceHandler.getResource({
       alias,
-      resourceName: slug,
-      packageName: 'product',
+      key: slug,
+      name: ResourceNamesEnum.PRODUCT,
     })) as { product: Product__Output | ProductType | null };
 
     if (resource) {
@@ -389,7 +416,17 @@ export default class ProductHandler extends PostgresClient {
       // TODO use promise.all
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, { alias, storeId });
+
+      if (store?.error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: store?.error.message,
+          },
+          response: { product: null },
+        };
+      }
 
       // ProductContent
       const { rows: productContent } = await client.query<ProductType>(
@@ -568,6 +605,16 @@ export default class ProductHandler extends PostgresClient {
             : {}),
         },
       };
+
+      /** Set the resources in the cache store */
+      if (product && alias) {
+        this.resourceHandler.setResource({
+          store,
+          key: slug,
+          name: ResourceNamesEnum.PRODUCT,
+          resource: product,
+        });
+      }
 
       await client.query('COMMIT');
 

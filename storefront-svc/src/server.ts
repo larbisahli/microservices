@@ -6,14 +6,14 @@
  *
  * @license - my license :)
  * @link https://github.com/dropgala/business-server
- * @author Larbi Sahli <larbisahli1905@gmail.com>
+ * @author Larbi Sahli <larbi.sahli@dropgala.com>
  */
 import 'reflect-metadata';
 import 'module-alias/register';
-
 import dotenv from 'dotenv';
 dotenv.config();
 
+import '@cache/store';
 import { Logger } from '@core';
 import gRPC, { createInsecure } from '@services';
 import { RPCPort } from './config';

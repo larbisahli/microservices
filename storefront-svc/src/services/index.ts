@@ -65,7 +65,7 @@ const { ServiceRoutes } = grpc.loadPackageDefinition(
   packageDefinition
 ) as unknown as ProtoGrpcType;
 
-const {
+export const {
   LanguageServiceRoutes,
   CategoryServiceRoutes,
   SliderServiceRoutes,

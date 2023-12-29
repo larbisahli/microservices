@@ -114,7 +114,7 @@ export default class PostgresClient {
       await client.query(setSessionStoreId(id));
     } else {
       await client.query('ROLLBACK');
-      return { error: { message: `Store "${alias}" not found` } };
+      return { error: { message: `Store alias:"${alias}" not found` } };
     }
     return { error: null, alias, storeId: id };
   }
