@@ -10,7 +10,7 @@ const PROTO_PATH = './dist/proto/language.proto';
 @Service()
 export default class LanguagePackage extends protobuf.Root {
   root: protobuf.Root;
-  Config: protobuf.Type;
+  Language: protobuf.Type;
   decodeOptions: {
     enums: StringConstructor; // enums as string names
     longs: StringConstructor; // longs as strings (requires long.js)
@@ -24,7 +24,7 @@ export default class LanguagePackage extends protobuf.Root {
   constructor() {
     super();
     this.root = this.loadSync(PROTO_PATH);
-    this.Config = this.root.lookupType('language.LanguageResponse');
+    this.Language = this.root.lookupType('language.LanguageResponse');
     this.decodeOptions = {
       enums: String,
       longs: String,
@@ -37,7 +37,7 @@ export default class LanguagePackage extends protobuf.Root {
   }
 
   /**
-   * @param {Settings} config
+   * @param {Settings} language
    * @returns {Promise<{ buffer: Uint8Array; error?: unknown }>}
    */
   public encode = (
@@ -45,13 +45,13 @@ export default class LanguagePackage extends protobuf.Root {
   ): Promise<{ buffer: Uint8Array; error?: unknown }> => {
     return new Promise((resolve, reject) => {
       try {
-        const errMsg = this.Config.verify(language);
+        const errMsg = this.Language.verify(language);
         if (errMsg) {
           reject(errMsg);
         }
-        const message = this.Config.create({ language });
+        const message = this.Language.create({ language });
         // Encode the message to a buffer
-        const buffer = this.Config.encode(message).finish();
+        const buffer = this.Language.encode(message).finish();
         resolve({ buffer });
       } catch (error) {
         reject({ error });
@@ -68,11 +68,11 @@ export default class LanguagePackage extends protobuf.Root {
   ): Promise<{ resource: any; error?: unknown }> => {
     return new Promise((resolve, reject) => {
       try {
-        const config = this.Config.toObject(
-          this.Config.decode(buffer),
+        const language = this.Language.toObject(
+          this.Language.decode(buffer),
           this.decodeOptions
         );
-        resolve({ resource: config });
+        resolve({ resource: language });
       } catch (error) {
         reject({ error });
       }

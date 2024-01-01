@@ -2,41 +2,39 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const ResourceCache = new Schema(
+const SliderCache = new Schema(
   {
     key: {
       type: String,
       required: true,
       index: { unique: true },
     },
-    data: {
-      type: Buffer,
-      required: true,
+    storeId: {
+      type: String,
+      require: true,
     },
     alias: {
       type: String,
       required: true,
     },
-    storeId: {
-      type: String,
-      require: true,
-    },
     name: {
       type: String,
+      required: true,
     },
-    page: {
-      type: Number,
+    data: {
+      type: Buffer,
+      required: true,
     },
     size: {
       type: String,
     },
     expireAt: {
       type: Date,
-      expires: 60 * 60 * 24, // 1 day
+      expires: 60 * 60 * 7, // 7 day
       default: Date.now,
     },
   },
-  { collection: 'ResourceCache' }
+  { collection: 'Sliders' }
 );
 
-export default mongoose.model('ResourceCache', ResourceCache);
+export default mongoose.model('Sliders', SliderCache);

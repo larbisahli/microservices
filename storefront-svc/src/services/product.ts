@@ -18,7 +18,6 @@ import {
 } from '@ts-types/interfaces';
 import { offset } from '@utils/index';
 import { Status } from '@grpc/grpc-js/build/src/constants';
-import { ResourceHandler } from '@cache/resource.store';
 import { PopularProductsRequest } from '@proto/generated/product/PopularProductsRequest';
 import { ProductsResponse } from '@proto/generated/product/ProductsResponse';
 import { Product__Output } from '@proto/generated/product/Product';
@@ -27,6 +26,13 @@ import { ProductRequest } from '@proto/generated/product/ProductRequest';
 import { ProductResponse } from '@proto/generated/product/ProductResponse';
 import { productTypeEnum } from '@proto/generated/enum/productTypeEnum';
 import { ResourceNamesEnum } from '@ts-types/index';
+import { ProductsCacheStore } from '@cache/products.store';
+import { ProductCacheStore } from '@cache/product.store';
+import {
+  calcPercentage,
+  calcTaxRate,
+  calcPriceRange,
+} from '@utils/product-utils';
 
 interface ProductInterface extends Product__Output {
   maxComparePrice: number;
@@ -37,107 +43,21 @@ interface ProductInterface extends Product__Output {
   comparePrice: number;
 }
 
-const roundTo3 = (v: number = 0) => Math.round(v * 1000) / 1000;
-const calcTaxRate = (price: number = 0, rate: number = 0) =>
-  roundTo3(Number(price) + Number(price) * (Number(rate) / 100));
-const calcPercentage = (salePrice: number = 0, comparePrice: number = 0) =>
-  roundTo3(
-    ((Number(comparePrice) - Number(salePrice)) / Number(comparePrice)) * 100
-  );
-
-const calcPriceRange = (
-  product: ProductInterface,
-  systemCurrency: CurrencyType,
-  rate: number
-) => {
-  const isConfigurable = product?.type === productTypeEnum.variable;
-
-  if (isConfigurable) {
-    return {
-      priceRange: {
-        maximumPrice: {
-          finalPrice: {
-            currency: {
-              code: systemCurrency?.code,
-            },
-            value: calcTaxRate(product?.maxPrice, rate),
-          },
-          finalPriceExclTax: {
-            currency: {
-              code: systemCurrency?.code,
-            },
-            value: product?.maxPrice,
-          },
-          discount: {
-            amountOff: calcTaxRate(product?.maxComparePrice, rate),
-            percentOff: calcPercentage(
-              calcTaxRate(product?.maxPrice, rate),
-              calcTaxRate(product?.maxComparePrice, rate)
-            ),
-          },
-        },
-        minimumPrice: {
-          finalPrice: {
-            currency: {
-              code: systemCurrency?.code,
-            },
-            value: calcTaxRate(product?.minPrice, rate),
-          },
-          finalPriceExclTax: {
-            currency: {
-              code: systemCurrency?.code,
-            },
-            value: product?.minPrice,
-          },
-          discount: {
-            amountOff: calcTaxRate(product?.minComparePrice, rate),
-            percentOff: calcPercentage(
-              calcTaxRate(product?.minPrice, rate),
-              calcTaxRate(product?.minComparePrice, rate)
-            ),
-          },
-        },
-      },
-    };
-  }
-  return {
-    priceRange: {
-      maximumPrice: {
-        finalPrice: {
-          currency: {
-            code: systemCurrency?.code,
-          },
-          value: calcTaxRate(product?.salePrice, rate),
-        },
-        finalPriceExclTax: {
-          currency: {
-            code: systemCurrency?.code,
-          },
-          value: product?.salePrice,
-        },
-        discount: {
-          amountOff: calcTaxRate(product?.comparePrice, rate),
-          percentOff: calcPercentage(
-            calcTaxRate(product?.salePrice, rate),
-            calcTaxRate(product?.comparePrice, rate)
-          ),
-        },
-      },
-    },
-  };
-};
-
 @Service()
 export default class ProductHandler extends PostgresClient {
   /**
    * @param {ProductQueries} productQueries
-   * @param {ResourceHandler} resourceHandler
+   * @param {SettingsQueries} settingsQueries
+   * @param {CategoryQueries} categoryQueries
+   * @param {ProductsCacheStore} productsCacheStore
+   * @param {ProductCacheStore} productCacheStore
    */
   constructor(
     protected productQueries: ProductQueries,
     protected settingsQueries: SettingsQueries,
     protected categoryQueries: CategoryQueries,
-    protected resourceHandler: ResourceHandler
+    protected productsCacheStore: ProductsCacheStore,
+    protected productCacheStore: ProductCacheStore
   ) {
     super();
   }
@@ -167,10 +87,9 @@ export default class ProductHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.productsCacheStore.getProducts({
       alias,
-      key: 'PopularProducts',
-      name: ResourceNamesEnum.PRODUCTS,
+      key: ResourceNamesEnum.POPULAR_PRODUCTS,
     })) as { products: Product__Output[] | null };
 
     if (resource) {
@@ -217,10 +136,9 @@ export default class ProductHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (products && alias) {
-        this.resourceHandler.setResource({
+        this.productsCacheStore.setProducts({
           store,
-          key: 'PopularProducts',
-          name: ResourceNamesEnum.PRODUCTS,
+          key: ResourceNamesEnum.POPULAR_PRODUCTS,
           resource: products,
         });
       }
@@ -278,10 +196,9 @@ export default class ProductHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.productsCacheStore.getProducts({
       alias,
       key: urlKey,
-      name: ResourceNamesEnum.PRODUCTS,
       page,
     })) as { products: Product__Output[] | null };
 
@@ -335,10 +252,9 @@ export default class ProductHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (products && alias) {
-        this.resourceHandler.setResource({
+        this.productsCacheStore.setProducts({
           store,
           key: urlKey,
-          name: ResourceNamesEnum.PRODUCTS,
           resource: products,
           page,
         });
@@ -400,10 +316,9 @@ export default class ProductHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.productCacheStore.getProductBySlug({
       alias,
-      key: slug,
-      name: ResourceNamesEnum.PRODUCT,
+      slug,
     })) as { product: Product__Output | ProductType | null };
 
     if (resource) {
@@ -608,10 +523,10 @@ export default class ProductHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (product && alias) {
-        this.resourceHandler.setResource({
+        this.productCacheStore.setProduct({
           store,
-          key: slug,
-          name: ResourceNamesEnum.PRODUCT,
+          id: productId,
+          slug,
           resource: product,
         });
       }

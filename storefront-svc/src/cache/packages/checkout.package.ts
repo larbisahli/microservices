@@ -1,16 +1,15 @@
 /**
- * This package helps us encode and decode resources to a binary blob (Uint8Array)
+ * This package helps us turn objects info buffer, useful for storage
  */
-import { Settings } from '@proto/generated/settings/Settings';
 import protobuf from 'protobufjs';
+import { Checkout } from '@proto/generated/checkout/Checkout';
 import { Service } from 'typedi';
 
-const PROTO_PATH = './dist/proto/settings.proto';
+const PROTO_PATH = './dist/proto/checkout.proto';
 
 @Service()
-export default class ConfigPackage extends protobuf.Root {
-  root: protobuf.Root;
-  Config: protobuf.Type;
+export class CheckoutPackage extends protobuf.Root {
+  Cart: protobuf.Type;
   decodeOptions: {
     enums: StringConstructor; // enums as string names
     longs: StringConstructor; // longs as strings (requires long.js)
@@ -23,8 +22,7 @@ export default class ConfigPackage extends protobuf.Root {
 
   constructor() {
     super();
-    this.root = this.loadSync(PROTO_PATH);
-    this.Config = this.root.lookupType('settings.ConfigResponse');
+    this.Cart = this.loadSync(PROTO_PATH).lookupType('checkout.Checkout');
     this.decodeOptions = {
       enums: String,
       longs: String,
@@ -37,21 +35,21 @@ export default class ConfigPackage extends protobuf.Root {
   }
 
   /**
-   * @param {Settings} config
+   * @param {Cart} cart
    * @returns {Promise<{ buffer: Uint8Array; error?: unknown }>}
    */
   public encode = (
-    config: Settings
+    cart: Checkout
   ): Promise<{ buffer: Uint8Array; error?: unknown }> => {
     return new Promise((resolve, reject) => {
       try {
-        const errMsg = this.Config.verify(config);
+        const errMsg = this.Cart.verify(cart);
         if (errMsg) {
-          reject(errMsg);
+          reject({ error: errMsg });
         }
-        const message = this.Config.create({ config });
+        const message = this.Cart.create(cart);
         // Encode the message to a buffer
-        const buffer = this.Config.encode(message).finish();
+        const buffer = this.Cart.encode(message).finish();
         resolve({ buffer });
       } catch (error) {
         reject({ error });
@@ -63,16 +61,14 @@ export default class ConfigPackage extends protobuf.Root {
    * @param {protobuf.Buffer} buffer
    * @returns {Promise<{ resource: any; error?: unknown }>}
    */
-  public decode = (
-    buffer: protobuf.Buffer
-  ): Promise<{ resource: any; error?: unknown }> => {
+  public decode = (buffer: protobuf.Buffer): Promise<Checkout> => {
     return new Promise((resolve, reject) => {
       try {
-        const config = this.Config.toObject(
-          this.Config.decode(buffer),
+        const cart = this.Cart.toObject(
+          this.Cart.decode(buffer),
           this.decodeOptions
         );
-        resolve({ resource: config });
+        resolve(cart);
       } catch (error) {
         reject({ error });
       }

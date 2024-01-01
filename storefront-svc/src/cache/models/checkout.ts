@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const CartCache = new Schema(
+const CheckoutCache = new Schema(
   {
     key: {
       type: String,
@@ -31,7 +31,7 @@ const CartCache = new Schema(
       default: Date.now,
     },
   },
-  { collection: 'Cart' }
+  { collection: 'Checkout' }
 );
 
-export default mongoose.model('Cart', CartCache);
+export default mongoose.model('Checkout', CheckoutCache);

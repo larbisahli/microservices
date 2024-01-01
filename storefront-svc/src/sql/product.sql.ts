@@ -418,8 +418,7 @@ export default class ProductQueryString extends CommonQueryString {
   public getPopularProducts(languageId: number) {
     const text = `SELECT pd.id, slug,
     (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $1),
-    pd.disable_out_of_stock AS "disableOutOfStock",
-    pd.type AS "type",
+    pd.disable_out_of_stock AS "disableOutOfStock", pd.type,
     -- Quantity
     CASE
       WHEN pd.type = 'simple' THEN pd.quantity
@@ -473,8 +472,7 @@ export default class ProductQueryString extends CommonQueryString {
 
   public getStoreProductRelatedProducts(id: number, storeLanguageId: number) {
     const text = `SELECT pd.id, pd.disable_out_of_stock AS "disableOutOfStock", pd.slug,
-    (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $2),
-    jsonb_build_object('id', pd.type) AS "type",
+    (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $2), pd.type,
     -- Quantity
     CASE
       WHEN pd.type = 'simple' THEN pd.quantity
@@ -520,8 +518,7 @@ export default class ProductQueryString extends CommonQueryString {
 
   public getStoreProductUpsellProducts(id: number, storeLanguageId: number) {
     const text = `SELECT pd.id, pd.disable_out_of_stock AS "disableOutOfStock", pd.slug,
-    (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $2),
-    jsonb_build_object('id', pd.type) AS "type",
+    (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $2), pd.type,
     -- Quantity
     CASE
       WHEN pd.type = 'simple' THEN pd.quantity
@@ -567,8 +564,7 @@ export default class ProductQueryString extends CommonQueryString {
 
   public getStoreProductCrossSellProducts(id: number, storeLanguageId: number) {
     const text = `SELECT pd.id, pd.disable_out_of_stock AS "disableOutOfStock", pd.slug,
-    (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $1),
-    jsonb_build_object('id', pd.type) AS "type",
+    (SELECT pt.name FROM product_translation AS pt WHERE store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $1), pd.type,
     -- Quantity
     CASE
       WHEN pd.type = 'simple' THEN pd.quantity
@@ -620,8 +616,7 @@ export default class ProductQueryString extends CommonQueryString {
   ) {
     const text = `SELECT pd.id, pd.slug,
     (SELECT pt.name FROM product_translation as pt WHERE pt.store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = pd.id AND pt.language_id = $2),
-    pd.disable_out_of_stock AS "disableOutOfStock",
-    jsonb_build_object('id', pd.type) AS "type",
+    pd.disable_out_of_stock AS "disableOutOfStock", pd.type,
     -- Quantity
     CASE
       WHEN pd.type = 'simple' THEN pd.quantity

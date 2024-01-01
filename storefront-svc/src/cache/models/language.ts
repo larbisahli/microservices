@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const CartCache = new Schema(
+const LanguageCache = new Schema(
   {
     key: {
       type: String,
@@ -12,7 +12,6 @@ const CartCache = new Schema(
     storeId: {
       type: String,
       require: true,
-      index: { unique: false },
     },
     alias: {
       type: String,
@@ -27,11 +26,11 @@ const CartCache = new Schema(
     },
     expireAt: {
       type: Date,
-      expires: 60 * 60 * 24 * 30, // 30 days
+      expires: 60 * 60 * 7, // 7 day
       default: Date.now,
     },
   },
-  { collection: 'Cart' }
+  { collection: 'Language' }
 );
 
-export default mongoose.model('Cart', CartCache);
+export default mongoose.model('Language', LanguageCache);

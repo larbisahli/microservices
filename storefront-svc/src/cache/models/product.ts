@@ -7,16 +7,12 @@ const Product = new Schema(
     key: {
       type: Number,
       required: true,
-      index: { unique: true }, // storeId:id
+      index: { unique: true }, // product id
     },
     slug: {
       type: String,
       required: true,
-      index: { unique: true }, // storeId:slug
-    },
-    data: {
-      type: Buffer,
-      required: true,
+      index: { unique: true }, // sha(alias:slug)
     },
     alias: {
       type: String,
@@ -26,16 +22,20 @@ const Product = new Schema(
       type: String,
       require: true,
     },
+    data: {
+      type: Buffer,
+      required: true,
+    },
     size: {
       type: String,
     },
     expireAt: {
       type: Date,
-      expires: 60 * 60 * 24, // 1 day
+      expires: 60 * 60 * 7, // 7 day
       default: Date.now,
     },
   },
-  { collection: 'Products' }
+  { collection: 'Product' }
 );
 
-export default mongoose.model('Products', Product);
+export default mongoose.model('Product', Product);

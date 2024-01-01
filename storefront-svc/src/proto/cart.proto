@@ -2,7 +2,24 @@ syntax = "proto3";
 
 package cart;
 
-message Cart {
+import "media.proto";
+import "product.proto";
+
+message Item {
     uint32 id = 1;
     string name = 2;
+    string sku = 3;
+    string type = 4;
+    repeated Image thumbnail = 5;
+    Price price = 6;
+    uint32 quantity = 7;
+    uint32 orderQuantity = 8;
+    VariationOption orderVariationOption = 9;
+    string key = 10;
+}
+
+message Cart {
+    string id = 1;
+    repeated Item items = 2;
+    uint32 totalQuantity = 3;
 }

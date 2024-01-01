@@ -4,7 +4,6 @@ import {
   ServerUnaryCall,
   StatusObject,
 } from '@grpc/grpc-js';
-import { ResourceHandler } from '@cache/resource.store';
 import { Service } from 'typedi';
 import { PageQueries } from '@sql';
 import { Status } from '@grpc/grpc-js/build/src/constants';
@@ -13,16 +12,17 @@ import { PageResponse } from '@proto/generated/page/PageResponse';
 import { Page } from '@proto/generated/page/Page';
 import { isEmpty } from 'underscore';
 import { ResourceNamesEnum } from '@ts-types/index';
+import { PageCacheStore } from '@cache/page.store';
 
 @Service()
 export default class PageHandler extends PostgresClient {
   /**
    * @param {PageQueries} pageQueries
-   * @param {ResourceHandler} resourceHandler
+   * @param {PageCacheStore} pageCacheStore
    */
   constructor(
     protected pageQueries: PageQueries,
-    protected resourceHandler: ResourceHandler
+    protected pageCacheStore: PageCacheStore
   ) {
     super();
   }
@@ -51,10 +51,9 @@ export default class PageHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.pageCacheStore.getPage({
       alias,
       key: slug,
-      name: ResourceNamesEnum.PAGE,
     })) as { page: Page | null };
 
     if (resource) {
@@ -100,10 +99,9 @@ export default class PageHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (page && alias) {
-        this.resourceHandler.setResource({
+        this.pageCacheStore.setPage({
           store,
           key: slug,
-          name: ResourceNamesEnum.PAGE,
           resource: page,
         });
       }

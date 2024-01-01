@@ -7,7 +7,6 @@ import {
 import { Service } from 'typedi';
 import { CategoryQueries } from '@sql';
 import { Status } from '@grpc/grpc-js/build/src/constants';
-import { ResourceHandler } from '@cache/resource.store';
 import { MenuRequest__Output } from '@proto/generated/category/MenuRequest';
 import { MenuResponse } from '@proto/generated/category/MenuResponse';
 import { Menu__Output } from '@proto/generated/category/Menu';
@@ -18,16 +17,17 @@ import { Breadcrumbs } from '@proto/generated/category/Breadcrumbs';
 import { HomePageCategoryResponse__Output } from '@proto/generated/category/HomePageCategoryResponse';
 import { HomePageCategoryRequest__Output } from '@proto/generated/category/HomePageCategoryRequest';
 import { ResourceNamesEnum } from '@ts-types/index';
+import { CategoryCacheStore } from '@cache/category.store';
 
 @Service()
 export default class CategoryHandler extends PostgresClient {
   /**
    * @param {CategoryQueries} categoryQueries
-   * @param {ResourceHandler} resourceHandler
+   * @param {CategoryCacheStore} categoryCacheStore
    */
   constructor(
     protected categoryQueries: CategoryQueries,
-    protected resourceHandler: ResourceHandler
+    protected categoryCacheStore: CategoryCacheStore
   ) {
     super();
   }
@@ -56,10 +56,9 @@ export default class CategoryHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.categoryCacheStore.getResource({
       alias,
       key: ResourceNamesEnum.MENU,
-      name: ResourceNamesEnum.MENU,
     })) as { menu: Menu__Output[] | [] };
 
     if (resource) {
@@ -91,10 +90,9 @@ export default class CategoryHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (menu && alias) {
-        this.resourceHandler.setResource({
+        this.categoryCacheStore.setResource({
           store,
           key: ResourceNamesEnum.MENU,
-          name: ResourceNamesEnum.MENU,
           resource: menu,
         });
       }
@@ -144,10 +142,9 @@ export default class CategoryHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.categoryCacheStore.getResource({
       alias,
       key: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
-      name: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
     })) as { categories: Category__Output[] | [] };
 
     if (resource) {
@@ -179,10 +176,9 @@ export default class CategoryHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (categories && alias) {
-        this.resourceHandler.setResource({
+        this.categoryCacheStore.setResource({
           store,
           key: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
-          name: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
           resource: categories,
         });
       }
@@ -235,10 +231,9 @@ export default class CategoryHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.categoryCacheStore.getResource({
       alias,
       key: urlKey,
-      name: ResourceNamesEnum.CATEGORY,
     })) as { category: Category | null };
 
     if (resource) {
@@ -348,10 +343,9 @@ export default class CategoryHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (category && alias && urlKey) {
-        this.resourceHandler.setResource({
+        this.categoryCacheStore.setResource({
           store,
           key: urlKey,
-          name: ResourceNamesEnum.CATEGORY,
           resource: responseCategory,
         });
       }

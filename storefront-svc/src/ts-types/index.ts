@@ -34,16 +34,12 @@ export interface QueryPermissionType {
 }
 
 export enum ResourceNamesEnum {
-  CONFIG = 'Config',
-  LANGUAGE = 'Language',
-  MENU = 'Menu',
-  CATEGORY = 'Category',
-  HOMEPAGE_CATEGORIES = 'HomepageCategories',
-  HERO_SLIDE = 'HeroSlide',
-  PROMO_SLIDE = 'PromoSlide',
-  PRODUCTS = 'Products',
-  PRODUCT = 'Product',
-  PAGE = 'Page',
+  POPULAR_PRODUCTS = 'POPULAR_PRODUCTS',
+  MENU = 'MENU',
+  CATEGORY = 'CATEGORY',
+  HOMEPAGE_CATEGORIES = 'HOMEPAGE_CATEGORIES',
+  HERO_SLIDE = 'HERO_SLIDE',
+  PROMO_SLIDE = 'PROMO_SLIDE',
 }
 
 export type ResourceNamesType = ResourceNamesEnum;

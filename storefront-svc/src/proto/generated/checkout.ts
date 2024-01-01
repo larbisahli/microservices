@@ -28,6 +28,20 @@ export interface ProtoGrpcType {
     MenuRequest: MessageTypeDefinition;
     MenuResponse: MessageTypeDefinition;
   };
+  checkout: {
+    AppliedCoupon: MessageTypeDefinition;
+    Checkout: MessageTypeDefinition;
+    Discount: MessageTypeDefinition;
+    FinalPrice: MessageTypeDefinition;
+    Geo: MessageTypeDefinition;
+    Metadata: MessageTypeDefinition;
+    PaymentConfiguration: MessageTypeDefinition;
+    Shipments: MessageTypeDefinition;
+    ShippingAddress: MessageTypeDefinition;
+    StepsConfig: MessageTypeDefinition;
+    Summary: MessageTypeDefinition;
+    Tax: MessageTypeDefinition;
+  };
   commons: {
     Country: MessageTypeDefinition;
     Currency: MessageTypeDefinition;

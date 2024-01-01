@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package checkout;
+
+import "cart.proto";
+import "commons.proto";
+import "google/protobuf/timestamp.proto";
+
+message ShippingAddress {
+    string firstname = 1;
+    string lastname = 2;
+    bool marketingOptIn = 3;
+    Country country = 4;
+    string address = 5;
+    string city = 6;
+    string state = 7;
+    string zip = 8;
+    string phone = 9;
+    string email = 10;
+}
+
+message Shipments {
+    string id = 1;
+}
+
+message PaymentConfiguration {
+    string id = 1;
+}
+
+message FinalPrice {
+    Currency currency = 1;
+    double value = 2;
+}
+
+message Discount {
+    string label = 1;
+    FinalPrice amount = 2;
+}
+
+message Summary {
+    FinalPrice grandTotal = 1;
+    FinalPrice subtotalIncludingTax = 2;
+    FinalPrice subtotalExcludingTax = 3;
+    FinalPrice subtotalWithDiscountExcludingTax = 4;
+    FinalPrice totalShippingCost = 5;
+    Discount discount = 6;
+}
+
+message Geo {
+    string city = 1;
+    string region = 2;
+    string latlong = 3;
+}
+
+message Metadata {
+    string ip = 1;
+    Geo geo = 2;
+}
+
+message StepsConfig {
+    repeated string availableSteps = 1;
+    string currentStep = 2;
+}
+
+message AppliedCoupon {
+    string code = 1;
+}
+
+message Tax {
+    string label = 1;
+    double percent = 2;
+    FinalPrice amount = 3;
+}
+
+message Checkout {
+    string cartId = 1;
+    string storeId = 2;
+    string email = 3;
+    Cart cart = 4;
+    ShippingAddress shippingAddress = 5;
+    Shipments shipments = 6;
+    PaymentConfiguration paymentConfiguration = 7;
+    Summary summary = 8;
+    Metadata metadata = 9;
+    StepsConfig stepsConfig = 10;
+    string status = 11;
+    AppliedCoupon appliedCoupon = 12;
+    Tax tax = 13;
+    google.protobuf.Timestamp createdAt = 14;
+    google.protobuf.Timestamp updatedAt = 15;
+}

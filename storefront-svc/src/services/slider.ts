@@ -6,7 +6,6 @@ import {
 } from '@grpc/grpc-js';
 import { Service } from 'typedi';
 import { SliderQueries } from '@sql';
-import { ResourceHandler } from '@cache/resource.store';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 import { HeroSlidesRequest } from '@proto/generated/slides/HeroSlidesRequest';
 import { HeroSlidesResponse } from '@proto/generated/slides/HeroSlidesResponse';
@@ -15,6 +14,7 @@ import { PromoBannerRequest } from '@proto/generated/slides/PromoBannerRequest';
 import { PromoBannerResponse } from '@proto/generated/slides/PromoBannerResponse';
 import { PromoBanner } from '@proto/generated/slides/PromoBanner';
 import { ResourceNamesEnum } from '@ts-types/index';
+import { SliderCacheStore } from '@cache/slider.store';
 
 @Service()
 export default class SlideHandler extends PostgresClient {
@@ -24,7 +24,7 @@ export default class SlideHandler extends PostgresClient {
    */
   constructor(
     protected sliderQueries: SliderQueries,
-    protected resourceHandler: ResourceHandler
+    protected sliderCacheStore: SliderCacheStore
   ) {
     super();
   }
@@ -53,10 +53,9 @@ export default class SlideHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.sliderCacheStore.getResource({
       alias,
       key: ResourceNamesEnum.HERO_SLIDE,
-      name: ResourceNamesEnum.HERO_SLIDE,
     })) as { sliders: HeroSlide__Output[] | null };
 
     if (resource) {
@@ -88,10 +87,9 @@ export default class SlideHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (sliders && alias) {
-        this.resourceHandler.setResource({
+        this.sliderCacheStore.setResource({
           store,
           key: ResourceNamesEnum.HERO_SLIDE,
-          name: ResourceNamesEnum.HERO_SLIDE,
           resource: sliders,
         });
       }
@@ -138,10 +136,9 @@ export default class SlideHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.sliderCacheStore.getResource({
       alias,
       key: ResourceNamesEnum.PROMO_SLIDE,
-      name: ResourceNamesEnum.PROMO_SLIDE,
     })) as { banner: PromoBanner | null };
 
     if (resource) {
@@ -172,8 +169,6 @@ export default class SlideHandler extends PostgresClient {
       const { rows } = await client.query<banner>(getStorePromoSlide());
       const banner = rows[0];
 
-      console.log({ banner });
-
       if (!banner) {
         return {
           response: { banner: {} },
@@ -189,10 +184,9 @@ export default class SlideHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (banner && alias) {
-        this.resourceHandler.setResource({
+        this.sliderCacheStore.setResource({
           store,
           key: ResourceNamesEnum.PROMO_SLIDE,
-          name: ResourceNamesEnum.PROMO_SLIDE,
           resource: banner,
         });
       }

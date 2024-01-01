@@ -39,10 +39,7 @@ export class CartPackage extends protobuf.Root {
    * @param {Settings} config
    * @returns {Promise<{ buffer: Uint8Array; error?: unknown }>}
    */
-  public encodeCart = (cart: {
-    id: string;
-    name: string;
-  }): Promise<Uint8Array> => {
+  public encode = (cart: { id: string; name: string }): Promise<Uint8Array> => {
     return new Promise((resolve, reject) => {
       try {
         const errMsg = this.Cart.verify(cart);
@@ -63,7 +60,7 @@ export class CartPackage extends protobuf.Root {
    * @param {protobuf.Buffer} buffer
    * @returns {Promise<{ resource: any; error?: unknown }>}
    */
-  public decodeCart = (buffer: protobuf.Buffer): Promise<any> => {
+  public decode = (buffer: protobuf.Buffer): Promise<any> => {
     return new Promise((resolve, reject) => {
       try {
         const cart = this.Cart.toObject(

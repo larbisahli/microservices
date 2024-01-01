@@ -14,7 +14,6 @@ import { Stripe as StripeRpcType } from '@proto/generated/payment/Stripe';
 export default class ConfigHandler extends PostgresClient {
   /**
    * @param {SettingsQueries} settingsQueries
-   * @param {ResourceHandler} resourceHandler
    */
   constructor() {
     super();

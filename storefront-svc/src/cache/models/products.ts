@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const CartCache = new Schema(
+const ProductsCache = new Schema(
   {
     key: {
       type: String,
@@ -18,6 +18,9 @@ const CartCache = new Schema(
       type: String,
       required: true,
     },
+    page: {
+      type: Number,
+    },
     data: {
       type: Buffer,
       required: true,
@@ -27,11 +30,11 @@ const CartCache = new Schema(
     },
     expireAt: {
       type: Date,
-      expires: 60 * 60 * 24 * 30, // 30 days
+      expires: 60 * 60 * 7, // 7 day
       default: Date.now,
     },
   },
-  { collection: 'Cart' }
+  { collection: 'Products' }
 );
 
-export default mongoose.model('Cart', CartCache);
+export default mongoose.model('Products', ProductsCache);

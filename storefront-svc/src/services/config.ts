@@ -6,7 +6,6 @@ import {
 } from '@grpc/grpc-js';
 import { Service } from 'typedi';
 import { LanguageQueries, SettingsQueries } from '@sql';
-import { ResourceHandler } from '@cache/resource.store';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 import { ConfigRequest } from '@proto/generated/settings/ConfigRequest';
 import { ConfigResponse } from '@proto/generated/settings/ConfigResponse';
@@ -14,17 +13,21 @@ import { Settings__Output } from '@proto/generated/settings/Settings';
 import { Language } from '@proto/generated/language/Language';
 import { LanguageRequest } from '@proto/generated/language/LanguageRequest';
 import { LanguageResponse } from '@proto/generated/language/LanguageResponse';
-import { ResourceNamesEnum } from '@ts-types/index';
+import { ConfigCacheStore } from '@cache/config.store';
+import { LanguageCacheStore } from '@cache/language.store';
 
 @Service()
 export default class ConfigHandler extends PostgresClient {
   /**
    * @param {SettingsQueries} settingsQueries
-   * @param {ResourceHandler} resourceHandler
+   * @param {ConfigCacheStore} configCacheStore
+   * @param {LanguageCacheStore} languageCacheStore
+   * @param {LanguageQueries} languageQueries
    */
   constructor(
     protected settingsQueries: SettingsQueries,
-    protected resourceHandler: ResourceHandler,
+    protected configCacheStore: ConfigCacheStore,
+    protected languageCacheStore: LanguageCacheStore,
     protected languageQueries: LanguageQueries
   ) {
     super();
@@ -54,10 +57,8 @@ export default class ConfigHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.configCacheStore.getConfig({
       alias,
-      key: ResourceNamesEnum.CONFIG,
-      name: ResourceNamesEnum.CONFIG,
     })) as { config: Settings__Output | null };
 
     if (resource) {
@@ -87,10 +88,8 @@ export default class ConfigHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (config && alias) {
-        this.resourceHandler.setResource({
+        this.configCacheStore.setConfig({
           store,
-          key: ResourceNamesEnum.CONFIG,
-          name: ResourceNamesEnum.CONFIG,
           resource: config,
         });
       }
@@ -137,10 +136,8 @@ export default class ConfigHandler extends PostgresClient {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.resourceHandler.getResource({
+    const resource = (await this.languageCacheStore.getLanguage({
       alias,
-      key: ResourceNamesEnum.LANGUAGE,
-      name: ResourceNamesEnum.LANGUAGE,
     })) as { language: Language | null };
 
     if (resource) {
@@ -170,10 +167,8 @@ export default class ConfigHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (language && alias) {
-        this.resourceHandler.setResource({
+        this.languageCacheStore.setLanguage({
           store,
-          key: ResourceNamesEnum.LANGUAGE,
-          name: ResourceNamesEnum.LANGUAGE,
           resource: language,
         });
       }
