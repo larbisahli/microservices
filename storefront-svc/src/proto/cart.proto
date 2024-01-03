@@ -3,7 +3,18 @@ syntax = "proto3";
 package cart;
 
 import "media.proto";
+import "checkout.proto";
 import "product.proto";
+
+message Discount {
+    string label = 1;
+    FinalPrice amount = 2;
+}
+
+message Total {
+    FinalPrice totalPrice = 1;
+    FinalPrice totalExclTax = 2;
+}
 
 message Item {
     uint32 id = 1;
@@ -11,15 +22,17 @@ message Item {
     string sku = 3;
     string type = 4;
     repeated Image thumbnail = 5;
-    Price price = 6;
     uint32 quantity = 7;
     uint32 orderQuantity = 8;
     VariationOption orderVariationOption = 9;
     string key = 10;
+    double salePrice = 11;
+    double comparePrice = 12;
 }
 
 message Cart {
     string id = 1;
     repeated Item items = 2;
     uint32 totalQuantity = 3;
+    Total total = 4;
 }

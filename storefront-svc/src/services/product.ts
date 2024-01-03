@@ -14,6 +14,7 @@ import {
   ProductTranslationType,
   ProductType,
   ProductVariationOptions,
+  TagType,
   VariationType,
 } from '@ts-types/interfaces';
 import { offset } from '@utils/index';
@@ -24,15 +25,9 @@ import { Product__Output } from '@proto/generated/product/Product';
 import { CategoryProductsRequest } from '@proto/generated/product/CategoryProductsRequest';
 import { ProductRequest } from '@proto/generated/product/ProductRequest';
 import { ProductResponse } from '@proto/generated/product/ProductResponse';
-import { productTypeEnum } from '@proto/generated/enum/productTypeEnum';
 import { ResourceNamesEnum } from '@ts-types/index';
 import { ProductsCacheStore } from '@cache/products.store';
 import { ProductCacheStore } from '@cache/product.store';
-import {
-  calcPercentage,
-  calcTaxRate,
-  calcPriceRange,
-} from '@utils/product-utils';
 
 interface ProductInterface extends Product__Output {
   maxComparePrice: number;
@@ -301,7 +296,6 @@ export default class ProductHandler extends PostgresClient {
       getStoreProductRelatedProducts,
       getStoreProductUpsellProducts,
     } = this.productQueries;
-    const { getStorTaxRate, getStoreSystemCurrency } = this.settingsQueries;
 
     const { alias, storeId, storeLanguageId, slug } = call.request;
 
@@ -350,9 +344,6 @@ export default class ProductHandler extends PostgresClient {
 
       const content = productContent[0] ?? {};
 
-      const isVariable = content?.type === productTypeEnum.variable;
-      const isSimple = content?.type === productTypeEnum.simple;
-
       const { id: productId } = content;
 
       // Translation
@@ -387,10 +378,12 @@ export default class ProductHandler extends PostgresClient {
       );
 
       // ProductTag
-      // const { rows: tags } = await client.query<TagType>(getProductTags(id));
+      const { rows: tags } = await client.query<TagType>(
+        getProductTags(productId, storeLanguageId)
+      );
 
       // variationOptions
-      const { rows: variationOptionsRows } =
+      const { rows: variationOptions } =
         await client.query<ProductVariationOptions>(
           getProductVariationOptions(productId)
         );
@@ -401,77 +394,19 @@ export default class ProductHandler extends PostgresClient {
       );
 
       // relatedProducts
-      const { rows: relatedProductsRows } =
-        await client.query<ProductInterface>(
-          getStoreProductRelatedProducts(productId, storeLanguageId)
-        );
+      const { rows: relatedProducts } = await client.query<ProductInterface>(
+        getStoreProductRelatedProducts(productId, storeLanguageId)
+      );
 
       // upsellProducts
-      const { rows: upsellProductsRows } = await client.query<ProductInterface>(
+      const { rows: upsellProducts } = await client.query<ProductInterface>(
         getStoreProductUpsellProducts(productId, storeLanguageId)
       );
 
       // crossSellProducts
-      const { rows: crossSellProductsRows } =
-        await client.query<ProductInterface>(
-          getStoreProductUpsellProducts(productId, storeLanguageId)
-        );
-
-      const { rows: taxRateRows } = await client.query<{ rate: number }>(
-        getStorTaxRate()
+      const { rows: crossSellProducts } = await client.query<ProductInterface>(
+        getStoreProductUpsellProducts(productId, storeLanguageId)
       );
-      const { rows: systemCurrencyRows } = await client.query<{
-        systemCurrency: CurrencyType;
-      }>(getStoreSystemCurrency());
-
-      const { rate } = taxRateRows[0] ?? {};
-      const { systemCurrency } = systemCurrencyRows[0] ?? {};
-
-      const variationOptions = variationOptionsRows?.map((option) => {
-        return {
-          ...option,
-          price: {
-            finalPrice: {
-              currency: {
-                code: systemCurrency?.code,
-              },
-              value: calcTaxRate(option?.salePrice!, rate),
-            },
-            finalPriceExclTax: {
-              currency: {
-                code: systemCurrency?.code,
-              },
-              value: option?.salePrice,
-            },
-            discount: {
-              amountOff: calcTaxRate(option?.comparePrice, rate),
-              percentOff: calcPercentage(
-                calcTaxRate(option?.salePrice, rate),
-                calcTaxRate(option?.comparePrice, rate)
-              ),
-            },
-          },
-        };
-      });
-
-      const relatedProducts = relatedProductsRows?.map((product) => {
-        return {
-          ...product,
-          ...calcPriceRange(product, systemCurrency, rate),
-        };
-      });
-      const upsellProducts = upsellProductsRows?.map((product) => {
-        return {
-          ...product,
-          ...calcPriceRange(product, systemCurrency, rate),
-        };
-      });
-      const crossSellProducts = crossSellProductsRows?.map((product) => {
-        return {
-          ...product,
-          ...calcPriceRange(product, systemCurrency, rate),
-        };
-      });
 
       const product = {
         ...content,
@@ -480,7 +415,7 @@ export default class ProductHandler extends PostgresClient {
         thumbnail,
         gallery,
         categories,
-        // tags,
+        tags,
         variationOptions,
         variations,
         productSeo: {
@@ -492,33 +427,6 @@ export default class ProductHandler extends PostgresClient {
         relatedProducts,
         upsellProducts,
         crossSellProducts,
-        ...{
-          ...(isSimple
-            ? {
-                price: {
-                  finalPrice: {
-                    currency: {
-                      code: systemCurrency?.code,
-                    },
-                    value: calcTaxRate(content?.salePrice!, rate),
-                  },
-                  finalPriceExclTax: {
-                    currency: {
-                      code: systemCurrency?.code,
-                    },
-                    value: content?.salePrice,
-                  },
-                  discount: {
-                    amountOff: calcTaxRate(content?.comparePrice, rate),
-                    percentOff: calcPercentage(
-                      calcTaxRate(content?.salePrice, rate),
-                      calcTaxRate(content?.comparePrice, rate)
-                    ),
-                  },
-                },
-              }
-            : {}),
-        },
       };
 
       /** Set the resources in the cache store */

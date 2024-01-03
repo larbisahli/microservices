@@ -133,3 +133,24 @@ const checkout = {
     "createdAt": "2023-12-29T19:14:45.798541Z",
     "updatedAt": "2023-12-29T19:44:52.56639Z"
 }
+
+// message FinalPrice {
+//     Currency currency = 1;
+//     double value = 2;
+//   }
+
+//   message Price {
+//     FinalPrice finalPrice = 1;
+//     FinalPrice finalPriceExclTax = 2;
+//     Discount discount = 3;
+//   }
+
+//   message PriceRange {
+//     Price maximumPrice = 1;
+//     Price minimumPrice = 2;
+//   }
+
+//   message Discount {
+//     double amountOff = 1;
+//     double percentOff = 2;
+//   }

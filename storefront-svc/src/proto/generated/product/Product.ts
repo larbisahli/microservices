@@ -5,10 +5,6 @@ import type {
   Image__Output as _media_Image__Output,
 } from '../media/Image';
 import type {
-  PriceRange as _product_PriceRange,
-  PriceRange__Output as _product_PriceRange__Output,
-} from '../product/PriceRange';
-import type {
   Variation as _product_Variation,
   Variation__Output as _product_Variation__Output,
 } from '../product/Variation';
@@ -36,10 +32,6 @@ import type {
   Product as _product_Product,
   Product__Output as _product_Product__Output,
 } from '../product/Product';
-import type {
-  Price as _product_Price,
-  Price__Output as _product_Price__Output,
-} from '../product/Price';
 
 export interface Product {
   id?: number;
@@ -51,7 +43,6 @@ export interface Product {
   thumbnail?: _media_Image[];
   gallery?: _media_Image[];
   inStock?: boolean;
-  priceRange?: _product_PriceRange | null;
   quantity?: number;
   disableOutOfStock?: boolean;
   variations?: _product_Variation[];
@@ -63,7 +54,12 @@ export interface Product {
   relatedProducts?: _product_Product[];
   upsellProducts?: _product_Product[];
   crossSellProducts?: _product_Product[];
-  price?: _product_Price | null;
+  salePrice?: number | string;
+  maxSalePrice?: number | string;
+  minSalePrice?: number | string;
+  comparePrice?: number | string;
+  maxComparePrice?: number | string;
+  minComparePrice?: number | string;
   ratingSummary?: number;
   reviewCount?: number;
 }
@@ -78,7 +74,6 @@ export interface Product__Output {
   thumbnail: _media_Image__Output[];
   gallery: _media_Image__Output[];
   inStock: boolean;
-  priceRange: _product_PriceRange__Output | null;
   quantity: number;
   disableOutOfStock: boolean;
   variations: _product_Variation__Output[];
@@ -90,7 +85,12 @@ export interface Product__Output {
   relatedProducts: _product_Product__Output[];
   upsellProducts: _product_Product__Output[];
   crossSellProducts: _product_Product__Output[];
-  price: _product_Price__Output | null;
+  salePrice: number;
+  maxSalePrice: number;
+  minSalePrice: number;
+  comparePrice: number;
+  maxComparePrice: number;
+  minComparePrice: number;
   ratingSummary: number;
   reviewCount: number;
 }

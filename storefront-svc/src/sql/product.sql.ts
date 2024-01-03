@@ -83,22 +83,15 @@ export default class ProductQueryString extends CommonQueryString {
     };
   }
 
-  public getProductTags(
-    languageId: number,
-    defaultLanguageId: number,
-    id: number
-  ) {
-    const text = `SELECT tg.id,
-    -- Translation
-    (SELECT ttl.name FROM tag_translation AS ttl WHERE ttl.store_id = current_setting('app.current_store_id')::uuid AND ttl.tag_id = tg.id AND ttl.language_id = $1),
-    (SELECT json_build_object('name', (SELECT ttd.name FROM tag_translation AS ttd WHERE ttd.store_id = current_setting('app.current_store_id')::uuid AND ttd.tag_id = tg.id AND ttd.language_id = $2))) AS translated
+  public getProductTags(languageId: number, id: number) {
+    const text = `SELECT tg.id, (SELECT ttl.name FROM tag_translation AS ttl WHERE ttl.store_id = current_setting('app.current_store_id')::uuid AND ttl.tag_id = tg.id AND ttl.language_id = $2)
     FROM tag AS tg WHERE store_id = current_setting('app.current_store_id')::uuid
-    AND id IN (SELECT pt.tag_id FROM product_tag pt WHERE pt.store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = $3)`;
+    AND id IN (SELECT pt.tag_id FROM product_tag pt WHERE pt.store_id = current_setting('app.current_store_id')::uuid AND pt.product_id = $1)`;
 
     return {
       name: 'get-product-tags',
       text,
-      values: [languageId, defaultLanguageId, id],
+      values: [id, languageId],
     };
   }
 

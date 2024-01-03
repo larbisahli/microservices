@@ -15,7 +15,9 @@ export interface ProtoGrpcType {
   };
   cart: {
     Cart: MessageTypeDefinition;
+    Discount: MessageTypeDefinition;
     Item: MessageTypeDefinition;
+    Total: MessageTypeDefinition;
   };
   category: {
     Breadcrumbs: MessageTypeDefinition;
@@ -27,6 +29,20 @@ export interface ProtoGrpcType {
     Menu: MessageTypeDefinition;
     MenuRequest: MessageTypeDefinition;
     MenuResponse: MessageTypeDefinition;
+  };
+  checkout: {
+    AppliedCoupon: MessageTypeDefinition;
+    Checkout: MessageTypeDefinition;
+    Discount: MessageTypeDefinition;
+    FinalPrice: MessageTypeDefinition;
+    Geo: MessageTypeDefinition;
+    Metadata: MessageTypeDefinition;
+    PaymentConfiguration: MessageTypeDefinition;
+    Shipments: MessageTypeDefinition;
+    ShippingAddress: MessageTypeDefinition;
+    StepsConfig: MessageTypeDefinition;
+    Summary: MessageTypeDefinition;
+    Tax: MessageTypeDefinition;
   };
   commons: {
     Country: MessageTypeDefinition;
@@ -47,11 +63,7 @@ export interface ProtoGrpcType {
   };
   product: {
     CategoryProductsRequest: MessageTypeDefinition;
-    Discount: MessageTypeDefinition;
-    FinalPrice: MessageTypeDefinition;
     PopularProductsRequest: MessageTypeDefinition;
-    Price: MessageTypeDefinition;
-    PriceRange: MessageTypeDefinition;
     Product: MessageTypeDefinition;
     ProductRequest: MessageTypeDefinition;
     ProductResponse: MessageTypeDefinition;

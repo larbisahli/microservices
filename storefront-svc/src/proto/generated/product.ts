@@ -43,11 +43,7 @@ export interface ProtoGrpcType {
   };
   product: {
     CategoryProductsRequest: MessageTypeDefinition;
-    Discount: MessageTypeDefinition;
-    FinalPrice: MessageTypeDefinition;
     PopularProductsRequest: MessageTypeDefinition;
-    Price: MessageTypeDefinition;
-    PriceRange: MessageTypeDefinition;
     Product: MessageTypeDefinition;
     ProductRequest: MessageTypeDefinition;
     ProductResponse: MessageTypeDefinition;
