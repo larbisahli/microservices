@@ -32,8 +32,8 @@ import { ProductCacheStore } from '@cache/product.store';
 interface ProductInterface extends Product__Output {
   maxComparePrice: number;
   minComparePrice: number;
-  maxPrice: number;
-  minPrice: number;
+  maxSalePrice: number;
+  minSalePrice: number;
   salePrice: number;
   comparePrice: number;
 }
@@ -68,7 +68,6 @@ export default class ProductHandler extends PostgresClient {
     response: { products: Product__Output[] | null };
   }> => {
     const { getPopularProducts } = this.productQueries;
-    const { getStorTaxRate, getStoreSystemCurrency } = this.settingsQueries;
     const { alias, storeId, storeLanguageId } = call.request;
 
     if (!alias || !storeLanguageId) {
@@ -108,26 +107,21 @@ export default class ProductHandler extends PostgresClient {
         };
       }
 
-      const { rows: taxRateRows } = await client.query<{ rate: number }>(
-        getStorTaxRate()
-      );
-      const { rows: systemCurrencyRows } = await client.query<{
-        systemCurrency: CurrencyType;
-      }>(getStoreSystemCurrency());
-
-      const { rate } = taxRateRows[0] ?? {};
-      const { systemCurrency } = systemCurrencyRows[0] ?? {};
-
       const { rows } = await client.query<ProductInterface>(
         getPopularProducts(storeLanguageId)
       );
 
-      const products = rows?.map((product) => {
-        return {
-          ...product,
-          ...calcPriceRange(product, systemCurrency, rate),
-        };
-      });
+      const products = rows?.map((product) => ({
+        ...product,
+        price: {
+          maxComparePrice: product?.maxComparePrice,
+          minComparePrice: product?.minComparePrice,
+          maxSalePrice: product?.maxSalePrice,
+          minSalePrice: product?.minSalePrice,
+          salePrice: product?.salePrice,
+          comparePrice: product?.comparePrice,
+        },
+      }));
 
       /** Set the resources in the cache store */
       if (products && alias) {
@@ -165,13 +159,13 @@ export default class ProductHandler extends PostgresClient {
 
   /**
    * @param { ServerUnaryCall<CategoryProductsRequest, ProductsResponse>} call
-   * @returns {Promise<Product__Output[]>}
+   * @returns {Promise<ProductInterface[]>}
    */
   public getCategoryProducts = async (
     call: ServerUnaryCall<CategoryProductsRequest, ProductsResponse>
   ): Promise<{
     error: ServerErrorResponse | Partial<StatusObject> | null;
-    response: { products: Product__Output[] | null };
+    response: { products: ProductInterface[] | null };
   }> => {
     const { getCategoryProducts } = this.productQueries;
     const { getStoreCategoryIdByUrlKey } = this.categoryQueries;
@@ -195,7 +189,7 @@ export default class ProductHandler extends PostgresClient {
       alias,
       key: urlKey,
       page,
-    })) as { products: Product__Output[] | null };
+    })) as { products: ProductInterface[] | null };
 
     if (resource) {
       return { error: null, response: resource };
@@ -234,7 +228,7 @@ export default class ProductHandler extends PostgresClient {
         };
       }
 
-      const { rows } = await client.query<Product__Output>(
+      const { rows } = await client.query<ProductInterface>(
         getCategoryProducts(
           categoryId,
           storeLanguageId,
@@ -243,7 +237,17 @@ export default class ProductHandler extends PostgresClient {
         )
       );
 
-      const products = rows;
+      const products = rows?.map((product) => ({
+        ...product,
+        price: {
+          maxComparePrice: product?.maxComparePrice,
+          minComparePrice: product?.minComparePrice,
+          maxSalePrice: product?.maxSalePrice,
+          minSalePrice: product?.minSalePrice,
+          salePrice: product?.salePrice,
+          comparePrice: product?.comparePrice,
+        },
+      }));
 
       /** Set the resources in the cache store */
       if (products && alias) {
@@ -276,7 +280,7 @@ export default class ProductHandler extends PostgresClient {
 
   /**
    * @param { ServerUnaryCall<ProductRequest, ProductResponse>} call
-   * @returns {Promise<Product__Output>}
+   * @returns {Promise<ProductInterface>}
    */
   public getProduct = async (
     call: ServerUnaryCall<ProductRequest, ProductResponse>
@@ -394,19 +398,56 @@ export default class ProductHandler extends PostgresClient {
       );
 
       // relatedProducts
-      const { rows: relatedProducts } = await client.query<ProductInterface>(
+      const { rows: relatedProductRows } = await client.query<ProductInterface>(
         getStoreProductRelatedProducts(productId, storeLanguageId)
       );
 
+      const relatedProducts = relatedProductRows?.map((product) => ({
+        ...product,
+        price: {
+          maxComparePrice: product?.maxComparePrice,
+          minComparePrice: product?.minComparePrice,
+          maxSalePrice: product?.maxSalePrice,
+          minSalePrice: product?.minSalePrice,
+          salePrice: product?.salePrice,
+          comparePrice: product?.comparePrice,
+        },
+      }));
+
       // upsellProducts
-      const { rows: upsellProducts } = await client.query<ProductInterface>(
+      const { rows: upsellProductRows } = await client.query<ProductInterface>(
         getStoreProductUpsellProducts(productId, storeLanguageId)
       );
 
+      const upsellProducts = upsellProductRows?.map((product) => ({
+        ...product,
+        price: {
+          maxComparePrice: product?.maxComparePrice,
+          minComparePrice: product?.minComparePrice,
+          maxSalePrice: product?.maxSalePrice,
+          minSalePrice: product?.minSalePrice,
+          salePrice: product?.salePrice,
+          comparePrice: product?.comparePrice,
+        },
+      }));
+
       // crossSellProducts
-      const { rows: crossSellProducts } = await client.query<ProductInterface>(
-        getStoreProductUpsellProducts(productId, storeLanguageId)
-      );
+      const { rows: crossSellProductRows } =
+        await client.query<ProductInterface>(
+          getStoreProductUpsellProducts(productId, storeLanguageId)
+        );
+
+      const crossSellProducts = crossSellProductRows?.map((product) => ({
+        ...product,
+        price: {
+          maxComparePrice: product?.maxComparePrice,
+          minComparePrice: product?.minComparePrice,
+          maxSalePrice: product?.maxSalePrice,
+          minSalePrice: product?.minSalePrice,
+          salePrice: product?.salePrice,
+          comparePrice: product?.comparePrice,
+        },
+      }));
 
       const product = {
         ...content,
@@ -427,6 +468,10 @@ export default class ProductHandler extends PostgresClient {
         relatedProducts,
         upsellProducts,
         crossSellProducts,
+        price: {
+          salePrice: content?.salePrice,
+          comparePrice: content?.comparePrice,
+        },
       };
 
       /** Set the resources in the cache store */

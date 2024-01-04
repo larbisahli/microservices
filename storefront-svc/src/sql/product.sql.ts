@@ -295,8 +295,8 @@ export default class ProductQueryString extends CommonQueryString {
                   FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE) END AS "quantity",
 
                 -- Price
-                CASE WHEN pd.type = 'variable' THEN (SELECT MAX(vp.sale_price) FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE) END AS "maxPrice",
-                CASE WHEN pd.type = 'variable' THEN (SELECT MIN(vp.sale_price) FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE) END AS "minPrice",
+                CASE WHEN pd.type = 'variable' THEN (SELECT MAX(vp.sale_price) FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE) END AS "maxSalePrice",
+                CASE WHEN pd.type = 'variable' THEN (SELECT MIN(vp.sale_price) FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE) END AS "minSalePrice",
                 CASE WHEN pd.type = 'simple' THEN pd.sale_price END AS "salePrice",
 
                 -- Thumbnail
@@ -343,8 +343,8 @@ export default class ProductQueryString extends CommonQueryString {
                   FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE) END AS "quantity",
 
                 -- Price
-                CASE WHEN pd.type = 'variable' THEN (SELECT MAX(vp.sale_price) FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE) END AS "maxPrice",
-                CASE WHEN pd.type = 'variable' THEN (SELECT MIN(vp.sale_price) FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE) END AS "minPrice",
+                CASE WHEN pd.type = 'variable' THEN (SELECT MAX(vp.sale_price) FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE) END AS "maxSalePrice",
+                CASE WHEN pd.type = 'variable' THEN (SELECT MIN(vp.sale_price) FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE) END AS "minSalePrice",
                 CASE WHEN pd.type = 'simple' THEN pd.sale_price END AS "salePrice",
 
                 -- Thumbnail
@@ -441,15 +441,15 @@ export default class ProductQueryString extends CommonQueryString {
       WHEN pd.type = 'variable' THEN (SELECT DISTINCT ON(vp.compare_price) vp.compare_price
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE ORDER BY vp.compare_price DESC LIMIT 1)
       WHEN pd.type = 'simple' THEN pd.compare_price END AS "maxComparePrice",
-    -- maxPrice/minPrice
+    -- maxSalePrice/minSalePrice
     CASE
       WHEN pd.type = 'variable' THEN (SELECT Max(vp.sale_price)
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE)
-      WHEN pd.type = 'simple' THEN 0 END AS "maxPrice",
+      WHEN pd.type = 'simple' THEN 0 END AS "maxSalePrice",
     CASE
       WHEN pd.type = 'variable' THEN (SELECT MIN(vp.sale_price)
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE)
-      WHEN pd.type = 'simple' THEN 0 END AS "minPrice",
+      WHEN pd.type = 'simple' THEN 0 END AS "minSalePrice",
     -- Thumbnail
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
@@ -486,15 +486,15 @@ export default class ProductQueryString extends CommonQueryString {
       WHEN pd.type = 'variable' THEN (SELECT DISTINCT ON(vp.compare_price) vp.compare_price
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE ORDER BY vp.compare_price LIMIT 1)
       WHEN pd.type = 'simple' THEN pd.compare_price END AS "comparePrice",
-    -- maxPrice/minPrice
+    -- maxSalePrice/minSalePrice
     CASE
       WHEN pd.type = 'variable' THEN (SELECT Max(vp.sale_price)
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE)
-      WHEN pd.type = 'simple' THEN 0 END AS "maxPrice",
+      WHEN pd.type = 'simple' THEN 0 END AS "maxSalePrice",
     CASE
       WHEN pd.type = 'variable' THEN (SELECT MIN(vp.sale_price)
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE)
-      WHEN pd.type = 'simple' THEN 0 END AS "minPrice",
+      WHEN pd.type = 'simple' THEN 0 END AS "minSalePrice",
     -- Thumbnail
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
@@ -532,15 +532,15 @@ export default class ProductQueryString extends CommonQueryString {
       WHEN pd.type = 'variable' THEN (SELECT DISTINCT ON(vp.compare_price) vp.compare_price
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE ORDER BY vp.compare_price LIMIT 1)
       WHEN pd.type = 'simple' THEN pd.compare_price END AS "comparePrice",
-    -- maxPrice/minPrice
+    -- maxSalePrice/minSalePrice
     CASE
       WHEN pd.type = 'variable' THEN (SELECT Max(vp.sale_price)
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE)
-      WHEN pd.type = 'simple' THEN 0 END AS "maxPrice",
+      WHEN pd.type = 'simple' THEN 0 END AS "maxSalePrice",
     CASE
       WHEN pd.type = 'variable' THEN (SELECT MIN(vp.sale_price)
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE)
-      WHEN pd.type = 'simple' THEN 0 END AS "minPrice",
+      WHEN pd.type = 'simple' THEN 0 END AS "minSalePrice",
     -- Thumbnail
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
@@ -578,15 +578,15 @@ export default class ProductQueryString extends CommonQueryString {
       WHEN pd.type = 'variable' THEN (SELECT DISTINCT ON(vp.compare_price) vp.compare_price
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE ORDER BY vp.compare_price LIMIT 1)
       WHEN pd.type = 'simple' THEN pd.compare_price END AS "comparePrice",
-    -- maxPrice/minPrice
+    -- maxSalePrice/minSalePrice
     CASE
       WHEN pd.type = 'variable' THEN (SELECT Max(vp.sale_price)
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE)
-      WHEN pd.type = 'simple' THEN 0 END AS "maxPrice",
+      WHEN pd.type = 'simple' THEN 0 END AS "maxSalePrice",
     CASE
       WHEN pd.type = 'variable' THEN (SELECT MIN(vp.sale_price)
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE)
-      WHEN pd.type = 'simple' THEN 0 END AS "minPrice",
+      WHEN pd.type = 'simple' THEN 0 END AS "minSalePrice",
     -- Thumbnail
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
@@ -630,15 +630,15 @@ export default class ProductQueryString extends CommonQueryString {
       WHEN pd.type = 'variable' THEN (SELECT DISTINCT ON(vp.compare_price) vp.compare_price
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE ORDER BY vp.compare_price LIMIT 1)
       WHEN pd.type = 'simple' THEN pd.compare_price END AS "comparePrice",
-    -- maxPrice/minPrice
+    -- maxSalePrice/minSalePrice
     CASE
       WHEN pd.type = 'variable' THEN (SELECT Max(vp.sale_price)
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE)
-      WHEN pd.type = 'simple' THEN 0 END AS "maxPrice",
+      WHEN pd.type = 'simple' THEN 0 END AS "maxSalePrice",
     CASE
       WHEN pd.type = 'variable' THEN (SELECT MIN(vp.sale_price)
       FROM variant_option vp WHERE vp.product_id = pd.id AND vp.active IS TRUE)
-      WHEN pd.type = 'simple' THEN 0 END AS "minPrice",
+      WHEN pd.type = 'simple' THEN 0 END AS "minSalePrice",
     -- Thumbnail
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal

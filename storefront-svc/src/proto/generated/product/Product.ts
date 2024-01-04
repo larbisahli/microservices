@@ -32,6 +32,10 @@ import type {
   Product as _product_Product,
   Product__Output as _product_Product__Output,
 } from '../product/Product';
+import type {
+  Price as _product_Price,
+  Price__Output as _product_Price__Output,
+} from '../product/Price';
 
 export interface Product {
   id?: number;
@@ -54,12 +58,7 @@ export interface Product {
   relatedProducts?: _product_Product[];
   upsellProducts?: _product_Product[];
   crossSellProducts?: _product_Product[];
-  salePrice?: number | string;
-  maxSalePrice?: number | string;
-  minSalePrice?: number | string;
-  comparePrice?: number | string;
-  maxComparePrice?: number | string;
-  minComparePrice?: number | string;
+  price?: _product_Price | null;
   ratingSummary?: number;
   reviewCount?: number;
 }
@@ -85,12 +84,7 @@ export interface Product__Output {
   relatedProducts: _product_Product__Output[];
   upsellProducts: _product_Product__Output[];
   crossSellProducts: _product_Product__Output[];
-  salePrice: number;
-  maxSalePrice: number;
-  minSalePrice: number;
-  comparePrice: number;
-  maxComparePrice: number;
-  minComparePrice: number;
+  price: _product_Price__Output | null;
   ratingSummary: number;
   reviewCount: number;
 }

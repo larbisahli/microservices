@@ -49,6 +49,15 @@ message ProductSeo {
   repeated Image metaImage = 6;
 }
 
+message Price {
+  double salePrice = 1;
+  double maxSalePrice = 2;
+  double minSalePrice = 3;
+  double comparePrice = 4;
+  double maxComparePrice = 5;
+  double minComparePrice = 6;
+}
+
 message Product {
     uint32 id = 1;
     string name = 2;
@@ -70,14 +79,9 @@ message Product {
     repeated Product relatedProducts = 18 [lazy = true];
     repeated Product upsellProducts = 19 [lazy = true];
     repeated Product crossSellProducts = 20 [lazy = true];
-    double salePrice = 21;
-    double maxSalePrice = 22;
-    double minSalePrice = 23;
-    double comparePrice = 24;
-    double maxComparePrice = 25;
-    double minComparePrice = 26;
-    uint32 ratingSummary = 27;
-    uint32 reviewCount = 28;
+    Price price = 21;
+    uint32 ratingSummary = 22;
+    uint32 reviewCount = 23;
 }
 
 message PopularProductsRequest {

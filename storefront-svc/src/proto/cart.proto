@@ -26,8 +26,7 @@ message Item {
     uint32 orderQuantity = 8;
     VariationOption orderVariationOption = 9;
     string key = 10;
-    double salePrice = 11;
-    double comparePrice = 12;
+    Price price = 11;
 }
 
 message Cart {

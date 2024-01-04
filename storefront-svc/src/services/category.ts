@@ -58,6 +58,7 @@ export default class CategoryHandler extends PostgresClient {
     /** Check if resource is in the cache store */
     const resource = (await this.categoryCacheStore.getResource({
       alias,
+      packageName: ResourceNamesEnum.MENU,
       key: ResourceNamesEnum.MENU,
     })) as { menu: Menu__Output[] | [] };
 
@@ -92,6 +93,7 @@ export default class CategoryHandler extends PostgresClient {
       if (menu && alias) {
         this.categoryCacheStore.setResource({
           store,
+          packageName: ResourceNamesEnum.MENU,
           key: ResourceNamesEnum.MENU,
           resource: menu,
         });
@@ -144,6 +146,7 @@ export default class CategoryHandler extends PostgresClient {
     /** Check if resource is in the cache store */
     const resource = (await this.categoryCacheStore.getResource({
       alias,
+      packageName: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
       key: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
     })) as { categories: Category__Output[] | [] };
 
@@ -178,6 +181,7 @@ export default class CategoryHandler extends PostgresClient {
       if (categories && alias) {
         this.categoryCacheStore.setResource({
           store,
+          packageName: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
           key: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
           resource: categories,
         });
@@ -233,6 +237,7 @@ export default class CategoryHandler extends PostgresClient {
     /** Check if resource is in the cache store */
     const resource = (await this.categoryCacheStore.getResource({
       alias,
+      packageName: ResourceNamesEnum.CATEGORY,
       key: urlKey,
     })) as { category: Category | null };
 
@@ -345,6 +350,7 @@ export default class CategoryHandler extends PostgresClient {
       if (category && alias && urlKey) {
         this.categoryCacheStore.setResource({
           store,
+          packageName: ResourceNamesEnum.CATEGORY,
           key: urlKey,
           resource: responseCategory,
         });

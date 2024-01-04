@@ -49,9 +49,11 @@ export class CategoryCacheStore {
 
   public getResource = async ({
     alias,
+    packageName,
     key,
   }: {
     alias: string;
+    packageName: ResourceNamesType;
     key: ResourceNamesType | string;
   }) => {
     try {
@@ -66,7 +68,8 @@ export class CategoryCacheStore {
       /**
        * Convert the data from Buffer to object
        */
-      return (await this.packages[key].decode(resource?.data!))?.resource;
+      return (await this.packages[packageName].decode(resource?.data!))
+        ?.resource;
     } catch (error) {
       Logger.system.error((error as Error).message);
       console.log('category-getResource >>', { error });
@@ -76,10 +79,12 @@ export class CategoryCacheStore {
 
   public setResource = async ({
     store,
+    packageName,
     key,
     resource,
   }: {
     store: { alias: string; storeId: string };
+    packageName: ResourceNamesType;
     key: ResourceNamesType | string;
     resource: any;
   }) => {
@@ -87,7 +92,9 @@ export class CategoryCacheStore {
       /**
        * Storing the buffer directly into the db will save up to 46% storage space
        */
-      const { buffer, error } = await this.packages[key].encode(resource);
+      const { buffer, error } = await this.packages[packageName].encode(
+        resource
+      );
 
       if (error) {
         throw error;

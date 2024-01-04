@@ -8,6 +8,10 @@ import type {
   VariationOption as _product_VariationOption,
   VariationOption__Output as _product_VariationOption__Output,
 } from '../product/VariationOption';
+import type {
+  Price as _product_Price,
+  Price__Output as _product_Price__Output,
+} from '../product/Price';
 
 export interface Item {
   id?: number;
@@ -19,8 +23,7 @@ export interface Item {
   orderQuantity?: number;
   orderVariationOption?: _product_VariationOption | null;
   key?: string;
-  salePrice?: number | string;
-  comparePrice?: number | string;
+  price?: _product_Price | null;
 }
 
 export interface Item__Output {
@@ -33,6 +36,5 @@ export interface Item__Output {
   orderQuantity: number;
   orderVariationOption: _product_VariationOption__Output | null;
   key: string;
-  salePrice: number;
-  comparePrice: number;
+  price: _product_Price__Output | null;
 }
