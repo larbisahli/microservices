@@ -9,7 +9,7 @@ const PROTO_PATH = './dist/proto/checkout.proto';
 
 @Service()
 export class CheckoutPackage extends protobuf.Root {
-  Cart: protobuf.Type;
+  Checkout: protobuf.Type;
   decodeOptions: {
     enums: StringConstructor; // enums as string names
     longs: StringConstructor; // longs as strings (requires long.js)
@@ -22,7 +22,7 @@ export class CheckoutPackage extends protobuf.Root {
 
   constructor() {
     super();
-    this.Cart = this.loadSync(PROTO_PATH).lookupType('checkout.Checkout');
+    this.Checkout = this.loadSync(PROTO_PATH).lookupType('checkout.Checkout');
     this.decodeOptions = {
       enums: String,
       longs: String,
@@ -39,17 +39,17 @@ export class CheckoutPackage extends protobuf.Root {
    * @returns {Promise<{ buffer: Uint8Array; error?: unknown }>}
    */
   public encode = (
-    cart: Checkout
+    checkout: Checkout
   ): Promise<{ buffer: Uint8Array; error?: unknown }> => {
     return new Promise((resolve, reject) => {
       try {
-        const errMsg = this.Cart.verify(cart);
+        const errMsg = this.Checkout.verify(checkout);
         if (errMsg) {
           reject({ error: errMsg });
         }
-        const message = this.Cart.create(cart);
+        const message = this.Checkout.create(checkout);
         // Encode the message to a buffer
-        const buffer = this.Cart.encode(message).finish();
+        const buffer = this.Checkout.encode(message).finish();
         resolve({ buffer });
       } catch (error) {
         reject({ error });
@@ -64,11 +64,11 @@ export class CheckoutPackage extends protobuf.Root {
   public decode = (buffer: protobuf.Buffer): Promise<Checkout> => {
     return new Promise((resolve, reject) => {
       try {
-        const cart = this.Cart.toObject(
-          this.Cart.decode(buffer),
+        const checkout = this.Checkout.toObject(
+          this.Checkout.decode(buffer),
           this.decodeOptions
         );
-        resolve(cart);
+        resolve(checkout);
       } catch (error) {
         reject({ error });
       }

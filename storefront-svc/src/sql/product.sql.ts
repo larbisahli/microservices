@@ -16,7 +16,7 @@ export default class ProductQueryString extends CommonQueryString {
     };
   }
 
-  public getProductContent(slug: string) {
+  public getProductContentBySlug(slug: string) {
     const text = `SELECT pd.id ,pd.sale_price AS "salePrice", pd.compare_price AS "comparePrice", pd.slug, pd.type,
     pd.disable_out_of_stock AS "disableOutOfStock", pd.quantity, pd.published, pd.sku,
     -- og-image
@@ -25,7 +25,32 @@ export default class ProductQueryString extends CommonQueryString {
     FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.slug = $1`;
 
     return {
-      name: 'get-store-product-content',
+      name: 'get-store-product-content-slug',
+      text,
+      values: [slug],
+    };
+  }
+
+  public getProductContentById(id: number) {
+    const text = `SELECT pd.id ,pd.sale_price AS "salePrice", pd.compare_price AS "comparePrice", pd.slug, pd.type,
+    pd.disable_out_of_stock AS "disableOutOfStock", pd.quantity, pd.published, pd.sku,
+    -- og-image
+    ARRAY(SELECT json_build_object('id', photo.id ,'image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
+    photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = pd.og_media_id) AS "metaImage"
+    FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.id = $1`;
+
+    return {
+      name: 'get-store-product-content-id',
+      text,
+      values: [id],
+    };
+  }
+
+  public getProductIdBySlug(slug: string) {
+    const text = `SELECT id FROM product WHERE store_id = current_setting('app.current_store_id')::uuid AND slug = $1`;
+
+    return {
+      name: 'get-store-product-id-by-slug',
       text,
       values: [slug],
     };

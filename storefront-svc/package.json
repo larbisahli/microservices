@@ -20,6 +20,7 @@
   "_moduleAliases": {
     "@config": "dist/config/index",
     "@cache": "dist/cache",
+    "@repository": "dist/repository",
     "@services": "dist/services/index",
     "@database": "dist/database/index",
     "@database/*": "dist/database/*",

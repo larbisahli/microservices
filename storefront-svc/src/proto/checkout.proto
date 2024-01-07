@@ -76,16 +76,22 @@ message Checkout {
     string cartId = 1;
     string storeId = 2;
     string email = 3;
-    Cart cart = 4;
-    ShippingAddress shippingAddress = 5;
-    Shipments shipments = 6;
-    PaymentConfiguration paymentConfiguration = 7;
-    Summary summary = 8;
-    Metadata metadata = 9;
-    StepsConfig stepsConfig = 10;
-    string status = 11;
-    AppliedCoupon appliedCoupon = 12;
-    Tax tax = 13;
-    google.protobuf.Timestamp createdAt = 14;
-    google.protobuf.Timestamp updatedAt = 15;
+    ShippingAddress shippingAddress = 4;
+    Shipments shipments = 5;
+    PaymentConfiguration paymentConfiguration = 6;
+    Summary summary = 7;
+    Metadata metadata = 8;
+    StepsConfig stepsConfig = 9;
+    string status = 10;
+    AppliedCoupon appliedCoupon = 11;
+    google.protobuf.Timestamp createdAt = 12;
+    google.protobuf.Timestamp updatedAt = 13;
+}
+
+message CheckoutRequest {
+    required string cuid = 1;
+}
+
+message CheckoutResponse {
+    Checkout checkout = 1;
 }

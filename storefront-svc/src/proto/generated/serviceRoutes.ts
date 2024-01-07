@@ -6,6 +6,10 @@ import type {
   CategoryServiceRoutesDefinition as _ServiceRoutes_CategoryServiceRoutesDefinition,
 } from './ServiceRoutes/CategoryServiceRoutes';
 import type {
+  CheckoutServiceRoutesClient as _ServiceRoutes_CheckoutServiceRoutesClient,
+  CheckoutServiceRoutesDefinition as _ServiceRoutes_CheckoutServiceRoutesDefinition,
+} from './ServiceRoutes/CheckoutServiceRoutes';
+import type {
   ConfigServiceRoutesClient as _ServiceRoutes_ConfigServiceRoutesClient,
   ConfigServiceRoutesDefinition as _ServiceRoutes_ConfigServiceRoutesDefinition,
 } from './ServiceRoutes/ConfigServiceRoutes';
@@ -43,6 +47,10 @@ export interface ProtoGrpcType {
       typeof grpc.Client,
       _ServiceRoutes_CategoryServiceRoutesClient
     > & { service: _ServiceRoutes_CategoryServiceRoutesDefinition };
+    CheckoutServiceRoutes: SubtypeConstructor<
+      typeof grpc.Client,
+      _ServiceRoutes_CheckoutServiceRoutesClient
+    > & { service: _ServiceRoutes_CheckoutServiceRoutesDefinition };
     ConfigServiceRoutes: SubtypeConstructor<
       typeof grpc.Client,
       _ServiceRoutes_ConfigServiceRoutesClient
@@ -72,6 +80,14 @@ export interface ProtoGrpcType {
     Attribute: MessageTypeDefinition;
     AttributeValue: MessageTypeDefinition;
   };
+  cart: {
+    Cart: MessageTypeDefinition;
+    CartRequest: MessageTypeDefinition;
+    CartResponse: MessageTypeDefinition;
+    Discount: MessageTypeDefinition;
+    Item: MessageTypeDefinition;
+    Total: MessageTypeDefinition;
+  };
   category: {
     Breadcrumbs: MessageTypeDefinition;
     Category: MessageTypeDefinition;
@@ -82,6 +98,22 @@ export interface ProtoGrpcType {
     Menu: MessageTypeDefinition;
     MenuRequest: MessageTypeDefinition;
     MenuResponse: MessageTypeDefinition;
+  };
+  checkout: {
+    AppliedCoupon: MessageTypeDefinition;
+    Checkout: MessageTypeDefinition;
+    CheckoutRequest: MessageTypeDefinition;
+    CheckoutResponse: MessageTypeDefinition;
+    Discount: MessageTypeDefinition;
+    FinalPrice: MessageTypeDefinition;
+    Geo: MessageTypeDefinition;
+    Metadata: MessageTypeDefinition;
+    PaymentConfiguration: MessageTypeDefinition;
+    Shipments: MessageTypeDefinition;
+    ShippingAddress: MessageTypeDefinition;
+    StepsConfig: MessageTypeDefinition;
+    Summary: MessageTypeDefinition;
+    Tax: MessageTypeDefinition;
   };
   commons: {
     Country: MessageTypeDefinition;

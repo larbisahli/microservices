@@ -27,6 +27,7 @@ message Item {
     VariationOption orderVariationOption = 9;
     string key = 10;
     Price price = 11;
+    string slug = 12;
 }
 
 message Cart {
@@ -34,4 +35,15 @@ message Cart {
     repeated Item items = 2;
     uint32 totalQuantity = 3;
     Total total = 4;
+}
+
+message CartRequest {
+    required string alias = 1;
+    required uint32 storeLanguageId = 2;
+    required string cuid = 3;
+    optional string storeId = 4;
+}
+
+message CartResponse {
+    Cart cart = 1;
 }

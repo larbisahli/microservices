@@ -8,7 +8,12 @@ import { ACTION_PRIVILEGES, RESOURCES } from '@ts-types/enums';
 //   TransactionError,
 // } from '@core/Errors';
 import { Logger } from '@core';
-import { getStoreIdByAlias, setSessionAlias, setSessionStoreId } from '@sql';
+import {
+  getAliasByStoreId,
+  getStoreIdByAlias,
+  setSessionAlias,
+  setSessionStoreId,
+} from '@sql';
 
 declare module 'pg' {
   export interface PoolClient {
@@ -87,6 +92,10 @@ export default class PostgresClient {
     { alias, storeId }: { alias: string; storeId?: string }
   ) {
     let store: StoreType | null = null;
+
+    if (!alias) {
+      return { error: { message: `Store alias and storeId not found` } };
+    }
 
     if (alias) {
       /** Set alias session for RLS **/

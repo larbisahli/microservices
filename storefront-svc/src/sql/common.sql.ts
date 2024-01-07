@@ -54,7 +54,16 @@ export default class CommonQueryString {
   }
 }
 
-const { setSessionAlias, setSessionStoreId, getStoreIdByAlias } =
-  Container.get(CommonQueryString);
+const {
+  setSessionAlias,
+  getAliasByStoreId,
+  setSessionStoreId,
+  getStoreIdByAlias,
+} = Container.get(CommonQueryString);
 
-export { setSessionAlias, setSessionStoreId, getStoreIdByAlias };
+export {
+  setSessionAlias,
+  getAliasByStoreId,
+  setSessionStoreId,
+  getStoreIdByAlias,
+};

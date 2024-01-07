@@ -35,6 +35,9 @@
       "@database": [
         "src/database/index"
       ],
+      "@repository/*": [
+        "src/repository/*"
+      ],
       "@ts-types/*": [
         "src/ts-types/*"
       ],

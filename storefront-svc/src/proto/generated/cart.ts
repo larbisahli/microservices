@@ -15,6 +15,8 @@ export interface ProtoGrpcType {
   };
   cart: {
     Cart: MessageTypeDefinition;
+    CartRequest: MessageTypeDefinition;
+    CartResponse: MessageTypeDefinition;
     Discount: MessageTypeDefinition;
     Item: MessageTypeDefinition;
     Total: MessageTypeDefinition;
@@ -33,6 +35,8 @@ export interface ProtoGrpcType {
   checkout: {
     AppliedCoupon: MessageTypeDefinition;
     Checkout: MessageTypeDefinition;
+    CheckoutRequest: MessageTypeDefinition;
+    CheckoutResponse: MessageTypeDefinition;
     Discount: MessageTypeDefinition;
     FinalPrice: MessageTypeDefinition;
     Geo: MessageTypeDefinition;

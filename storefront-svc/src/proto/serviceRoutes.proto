@@ -9,6 +9,8 @@ import "settings.proto";
 import "language.proto";
 import "page.proto";
 import "payment.proto";
+import "cart.proto";
+import "checkout.proto";
 
 service LanguageServiceRoutes {
   rpc getLanguage(LanguageRequest)                       returns (LanguageResponse);
@@ -29,7 +31,7 @@ service ProductServiceRoutes {
   rpc getPopularProducts(PopularProductsRequest)         returns (ProductsResponse);
   rpc getCategoryProducts(CategoryProductsRequest)       returns (ProductsResponse);
   rpc getProduct(ProductRequest)                         returns (ProductResponse);
-  rpc product(ProductResponse)                            returns (ProductResponse);
+  rpc product(ProductResponse)                           returns (ProductResponse);
 }
 
 service PageServiceRoutes {
@@ -42,4 +44,9 @@ service ConfigServiceRoutes {
 
 service PaymentServiceRoutes {
   rpc getStripeClientSecret(StipePaymentRequest)         returns (StipePaymentResponse);
+}
+
+service CheckoutServiceRoutes {
+  rpc getClientCart(CartRequest)                         returns (CartResponse);
+  rpc getClientCheckout(CheckoutRequest)                 returns (CheckoutResponse);
 }

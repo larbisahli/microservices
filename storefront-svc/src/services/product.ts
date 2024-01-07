@@ -28,6 +28,7 @@ import { ProductResponse } from '@proto/generated/product/ProductResponse';
 import { ResourceNamesEnum } from '@ts-types/index';
 import { ProductsCacheStore } from '@cache/products.store';
 import { ProductCacheStore } from '@cache/product.store';
+import ProductRepository from '@repository/product.repository';
 
 interface ProductInterface extends Product__Output {
   maxComparePrice: number;
@@ -52,7 +53,8 @@ export default class ProductHandler extends PostgresClient {
     protected settingsQueries: SettingsQueries,
     protected categoryQueries: CategoryQueries,
     protected productsCacheStore: ProductsCacheStore,
-    protected productCacheStore: ProductCacheStore
+    protected productCacheStore: ProductCacheStore,
+    protected productRepository: ProductRepository
   ) {
     super();
   }
@@ -288,18 +290,7 @@ export default class ProductHandler extends PostgresClient {
     error: ServerErrorResponse | Partial<StatusObject> | null;
     response: { product: Product__Output | ProductType | null };
   }> => {
-    const {
-      getProductTranslation,
-      getProductGallery,
-      getProductContent,
-      getProductShippingInfo,
-      getStoreProductCategories,
-      getProductTags,
-      getProductVariationOptions,
-      getProductVariationForStore,
-      getStoreProductRelatedProducts,
-      getStoreProductUpsellProducts,
-    } = this.productQueries;
+    const { getProductIdBySlug } = this.productQueries;
 
     const { alias, storeId, storeLanguageId, slug } = call.request;
 
@@ -329,165 +320,36 @@ export default class ProductHandler extends PostgresClient {
       // TODO use promise.all
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      await this.setupStoreSessions(client, { alias, storeId });
 
-      if (store?.error) {
-        return {
-          error: {
-            code: Status.FAILED_PRECONDITION,
-            details: store?.error.message,
-          },
-          response: { product: null },
-        };
-      }
-
-      // ProductContent
       const { rows: productContent } = await client.query<ProductType>(
-        getProductContent(slug)
+        getProductIdBySlug(slug)
       );
 
       const content = productContent[0] ?? {};
 
       const { id: productId } = content;
 
-      // Translation
-      const { rows: productTranslationRows } =
-        await client.query<ProductTranslationType>(
-          getProductTranslation(productId, storeLanguageId)
-        );
+      const { product, error } = await this.productRepository.getProduct({
+        id: productId,
+        alias,
+        storeId,
+        storeLanguageId,
+      });
 
-      const productTranslation = productTranslationRows[0] ?? {};
-
-      // Thumbnail
-      const { rows: thumbnail } = await client.query<ImageType>(
-        getProductGallery(productId, true)
-      );
-
-      // Gallery
-      const { rows: gallery } = await client.query<ImageType>(
-        getProductGallery(productId, false)
-      );
-
-      // ProductShippingInfo
-      const { rows: productShippingInfoRows } =
-        await client.query<ProductShippingInfo>(
-          getProductShippingInfo(productId)
-        );
-
-      const productShippingInfo = productShippingInfoRows[0];
-
-      // ProductCategory
-      const { rows: categories } = await client.query<CategoryType>(
-        getStoreProductCategories(productId, storeLanguageId)
-      );
-
-      // ProductTag
-      const { rows: tags } = await client.query<TagType>(
-        getProductTags(productId, storeLanguageId)
-      );
-
-      // variationOptions
-      const { rows: variationOptions } =
-        await client.query<ProductVariationOptions>(
-          getProductVariationOptions(productId)
-        );
-
-      // variations
-      const { rows: variations } = await client.query<VariationType>(
-        getProductVariationForStore(productId, storeLanguageId)
-      );
-
-      // relatedProducts
-      const { rows: relatedProductRows } = await client.query<ProductInterface>(
-        getStoreProductRelatedProducts(productId, storeLanguageId)
-      );
-
-      const relatedProducts = relatedProductRows?.map((product) => ({
-        ...product,
-        price: {
-          maxComparePrice: product?.maxComparePrice,
-          minComparePrice: product?.minComparePrice,
-          maxSalePrice: product?.maxSalePrice,
-          minSalePrice: product?.minSalePrice,
-          salePrice: product?.salePrice,
-          comparePrice: product?.comparePrice,
-        },
-      }));
-
-      // upsellProducts
-      const { rows: upsellProductRows } = await client.query<ProductInterface>(
-        getStoreProductUpsellProducts(productId, storeLanguageId)
-      );
-
-      const upsellProducts = upsellProductRows?.map((product) => ({
-        ...product,
-        price: {
-          maxComparePrice: product?.maxComparePrice,
-          minComparePrice: product?.minComparePrice,
-          maxSalePrice: product?.maxSalePrice,
-          minSalePrice: product?.minSalePrice,
-          salePrice: product?.salePrice,
-          comparePrice: product?.comparePrice,
-        },
-      }));
-
-      // crossSellProducts
-      const { rows: crossSellProductRows } =
-        await client.query<ProductInterface>(
-          getStoreProductUpsellProducts(productId, storeLanguageId)
-        );
-
-      const crossSellProducts = crossSellProductRows?.map((product) => ({
-        ...product,
-        price: {
-          maxComparePrice: product?.maxComparePrice,
-          minComparePrice: product?.minComparePrice,
-          maxSalePrice: product?.maxSalePrice,
-          minSalePrice: product?.minSalePrice,
-          salePrice: product?.salePrice,
-          comparePrice: product?.comparePrice,
-        },
-      }));
-
-      const product = {
-        ...content,
-        name: productTranslation?.name,
-        description: productTranslation?.description,
-        thumbnail,
-        gallery,
-        categories,
-        tags,
-        variationOptions,
-        variations,
-        productSeo: {
-          slug: content.slug,
-          metaImage: content?.metaImage,
-          ...productTranslation,
-        },
-        productShippingInfo,
-        relatedProducts,
-        upsellProducts,
-        crossSellProducts,
-        price: {
-          salePrice: content?.salePrice,
-          comparePrice: content?.comparePrice,
-        },
-      };
-
-      /** Set the resources in the cache store */
-      if (product && alias) {
-        this.productCacheStore.setProduct({
-          store,
-          id: productId,
-          slug,
-          resource: product,
-        });
+      if (error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: error.message,
+          },
+          response: { product: null },
+        };
       }
 
       await client.query('COMMIT');
 
       return {
-        // @ts-ignore
         response: { product },
         error: null,
       };

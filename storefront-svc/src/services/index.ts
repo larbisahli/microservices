@@ -41,6 +41,12 @@ import { LanguageRequest } from '@proto/generated/language/LanguageRequest';
 import { LanguageResponse } from '@proto/generated/language/LanguageResponse';
 import { HomePageCategoryRequest__Output } from '@proto/generated/category/HomePageCategoryRequest';
 import { HomePageCategoryResponse__Output } from '@proto/generated/category/HomePageCategoryResponse';
+import CheckoutHandler from './checkout';
+import CartHandler from './cart';
+import { CheckoutRequest } from '@proto/generated/checkout/CheckoutRequest';
+import { CheckoutResponse } from '@proto/generated/checkout/CheckoutResponse';
+import { Cart } from '@proto/generated/cart/Cart';
+import { Checkout } from '@proto/generated/checkout/Checkout';
 
 const PROTO_PATH = './dist/proto/serviceRoutes.proto';
 
@@ -72,6 +78,7 @@ export const {
   ProductServiceRoutes,
   ConfigServiceRoutes,
   PageServiceRoutes,
+  CheckoutServiceRoutes,
 } = ServiceRoutes;
 
 @Service()
@@ -82,13 +89,17 @@ class gRPC extends grpc.Server {
    * @param {SlideHandler} slideHandler
    * @param {ConfigHandler} configHandler
    * @param {PageHandler} pageHandler
+   * @param {CheckoutHandler} checkoutHandler
+   * @param {CartHandler} cartHandler
    */
   constructor(
     protected productHandler: ProductHandler,
     protected categoryHandler: CategoryHandler,
     protected slideHandler: SlideHandler,
     protected configHandler: ConfigHandler,
-    protected pageHandler: PageHandler
+    protected pageHandler: PageHandler,
+    protected checkoutHandler: CheckoutHandler,
+    protected cartHandler: CartHandler
   ) {
     super();
 
@@ -119,6 +130,10 @@ class gRPC extends grpc.Server {
 
     this.addService(PageServiceRoutes.service, {
       getPage: this.getPage,
+    });
+    this.addService(CheckoutServiceRoutes.service, {
+      getClientCart: this.getClientCart,
+      getClientCheckout: this.getClientCheckout,
     });
   }
 
@@ -301,6 +316,38 @@ class gRPC extends grpc.Server {
       response: { banner },
     } = await this.slideHandler.getPromoSlider(call);
     callback(error, { banner });
+  };
+
+  /**
+   * Cart request handler.
+   * @param {EventEmitter} call Call object for the handler to process
+   * @param {function(Error, {banner: PromoBanner})} callback Response callback
+   */
+  protected getClientCart = async (
+    call: grpc.ServerUnaryCall<CheckoutRequest, CheckoutResponse>,
+    callback: grpc.sendUnaryData<{ cart: Cart | null }>
+  ) => {
+    const {
+      error,
+      response: { cart },
+    } = await this.cartHandler.getCart(call);
+    callback(error, { cart });
+  };
+
+  /**
+   * Checkout request handler.
+   * @param {EventEmitter} call Call object for the handler to process
+   * @param {function(Error, {banner: PromoBanner})} callback Response callback
+   */
+  protected getClientCheckout = async (
+    call: grpc.ServerUnaryCall<CheckoutRequest, CheckoutRequest>,
+    callback: grpc.sendUnaryData<{ checkout: Checkout | null }>
+  ) => {
+    const {
+      error,
+      response: { checkout },
+    } = await this.checkoutHandler.getCheckout(call);
+    callback(error, { checkout });
   };
 }
 

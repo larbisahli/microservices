@@ -24,6 +24,7 @@ export interface Item {
   orderVariationOption?: _product_VariationOption | null;
   key?: string;
   price?: _product_Price | null;
+  slug?: string;
 }
 
 export interface Item__Output {
@@ -37,4 +38,5 @@ export interface Item__Output {
   orderVariationOption: _product_VariationOption__Output | null;
   key: string;
   price: _product_Price__Output | null;
+  slug: string;
 }
