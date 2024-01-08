@@ -182,19 +182,21 @@ export default class SlideHandler extends PostgresClient {
 
       const { direction, sliders } = slide[0];
 
+      const storeBanner = { ...banner, direction, sliders };
+
       /** Set the resources in the cache store */
       if (banner && alias) {
         this.sliderCacheStore.setResource({
           store,
           key: ResourceNamesEnum.PROMO_SLIDE,
-          resource: banner,
+          resource: storeBanner,
         });
       }
 
       await client.query('COMMIT');
 
       return {
-        response: { banner: { ...banner, direction, sliders } },
+        response: { banner: storeBanner },
         error: null,
       };
     } catch (error: any) {
