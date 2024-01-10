@@ -6,8 +6,7 @@ import type {
 } from '../commons/Country';
 
 export interface ShippingAddress {
-  firstname?: string;
-  lastname?: string;
+  fullName?: string;
   marketingOptIn?: boolean;
   country?: _commons_Country | null;
   address?: string;
@@ -19,8 +18,7 @@ export interface ShippingAddress {
 }
 
 export interface ShippingAddress__Output {
-  firstname: string;
-  lastname: string;
+  fullName: string;
   marketingOptIn: boolean;
   country: _commons_Country__Output | null;
   address: string;

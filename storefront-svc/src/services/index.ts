@@ -27,7 +27,7 @@ import { ProductResponse } from '@proto/generated/product/ProductResponse';
 import { ProductType } from '@ts-types/interfaces';
 import { MenuRequest__Output } from '@proto/generated/category/MenuRequest';
 import { MenuResponse } from '@proto/generated/category/MenuResponse';
-import { Menu, Menu__Output } from '@proto/generated/category/Menu';
+import { Menu__Output } from '@proto/generated/category/Menu';
 import { CategoryRequest } from '@proto/generated/category/CategoryRequest';
 import { CategoryResponse } from '@proto/generated/category/CategoryResponse';
 import { Category, Category__Output } from '@proto/generated/category/Category';
@@ -47,6 +47,10 @@ import { CheckoutRequest } from '@proto/generated/checkout/CheckoutRequest';
 import { CheckoutResponse } from '@proto/generated/checkout/CheckoutResponse';
 import { Cart } from '@proto/generated/cart/Cart';
 import { Checkout } from '@proto/generated/checkout/Checkout';
+import { ShippingRequest } from '@proto/generated/shipping/ShippingRequest';
+import { ShippingResponse } from '@proto/generated/shipping/ShippingResponse';
+import { Shipping } from '@proto/generated/shipping/Shipping';
+import ShippingHandler from './shipping';
 
 const PROTO_PATH = './dist/proto/serviceRoutes.proto';
 
@@ -79,6 +83,7 @@ export const {
   ConfigServiceRoutes,
   PageServiceRoutes,
   CheckoutServiceRoutes,
+  ShippingServiceRoutes,
 } = ServiceRoutes;
 
 @Service()
@@ -99,6 +104,7 @@ class gRPC extends grpc.Server {
     protected configHandler: ConfigHandler,
     protected pageHandler: PageHandler,
     protected checkoutHandler: CheckoutHandler,
+    protected shippingHandler: ShippingHandler,
     protected cartHandler: CartHandler
   ) {
     super();
@@ -131,9 +137,14 @@ class gRPC extends grpc.Server {
     this.addService(PageServiceRoutes.service, {
       getPage: this.getPage,
     });
+
     this.addService(CheckoutServiceRoutes.service, {
       getClientCart: this.getClientCart,
       getClientCheckout: this.getClientCheckout,
+    });
+
+    this.addService(ShippingServiceRoutes.service, {
+      getAvailableShippings: this.getAvailableShippings,
     });
   }
 
@@ -156,7 +167,7 @@ class gRPC extends grpc.Server {
   /**
    * Store Language request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {config: Settings})} callback Response callback
+   * @param {function(Error, {language: Language | null })} callback Response callback
    */
   protected getLanguage = async (
     call: grpc.ServerUnaryCall<LanguageRequest, LanguageResponse>,
@@ -220,7 +231,7 @@ class gRPC extends grpc.Server {
   /**
    * Store product request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {products: Product__Output})} callback Response callback
+   * @param {function(Error, {products: Product | ProductType | null})} callback Response callback
    */
   protected getProduct = async (
     call: grpc.ServerUnaryCall<ProductRequest, ProductResponse>,
@@ -254,7 +265,7 @@ class gRPC extends grpc.Server {
   /**
    * Store menu request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {menu: Menu__Output[]})} callback Response callback
+   * @param {function(Error, {categories: Category__Output[]})} callback Response callback
    */
   protected getHomePageCategories = async (
     call: grpc.ServerUnaryCall<
@@ -321,7 +332,7 @@ class gRPC extends grpc.Server {
   /**
    * Cart request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {banner: PromoBanner})} callback Response callback
+   * @param {function(Error, {cart: Cart | null})} callback Response callback
    */
   protected getClientCart = async (
     call: grpc.ServerUnaryCall<CheckoutRequest, CheckoutResponse>,
@@ -337,7 +348,7 @@ class gRPC extends grpc.Server {
   /**
    * Checkout request handler.
    * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {banner: PromoBanner})} callback Response callback
+   * @param {function(Error, { checkout: Checkout | null })} callback Response callback
    */
   protected getClientCheckout = async (
     call: grpc.ServerUnaryCall<CheckoutRequest, CheckoutRequest>,
@@ -348,6 +359,22 @@ class gRPC extends grpc.Server {
       response: { checkout },
     } = await this.checkoutHandler.getCheckout(call);
     callback(error, { checkout });
+  };
+
+  /**
+   * Available Shippings request handler.
+   * @param {EventEmitter} call Call object for the handler to process
+   * @param {function(Error, { shippings: Shipping[] | null })} callback Response callback
+   */
+  protected getAvailableShippings = async (
+    call: grpc.ServerUnaryCall<ShippingRequest, ShippingResponse>,
+    callback: grpc.sendUnaryData<{ shippings: Shipping[] | null }>
+  ) => {
+    const {
+      error,
+      response: { shippings },
+    } = await this.shippingHandler.getShippings(call);
+    callback(error, { shippings });
   };
 }
 

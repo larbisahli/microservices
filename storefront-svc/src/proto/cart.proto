@@ -6,16 +6,6 @@ import "media.proto";
 import "checkout.proto";
 import "product.proto";
 
-message Discount {
-    string label = 1;
-    FinalPrice amount = 2;
-}
-
-message Total {
-    FinalPrice totalPrice = 1;
-    FinalPrice totalExclTax = 2;
-}
-
 message Item {
     uint32 id = 1;
     string name = 2;
@@ -34,7 +24,6 @@ message Cart {
     string id = 1;
     repeated Item items = 2;
     uint32 totalQuantity = 3;
-    Total total = 4;
 }
 
 message CartRequest {

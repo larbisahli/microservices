@@ -4,10 +4,6 @@ import {
   StatusObject,
 } from '@grpc/grpc-js';
 import { Service } from 'typedi';
-import { Status } from '@grpc/grpc-js/build/src/constants';
-import { MenuRequest__Output } from '@proto/generated/category/MenuRequest';
-import { MenuResponse } from '@proto/generated/category/MenuResponse';
-import { Menu__Output } from '@proto/generated/category/Menu';
 import { CheckoutCacheStore } from '@cache/checkout.store';
 import { CheckoutRequest } from '@proto/generated/checkout/CheckoutRequest';
 import { CheckoutResponse } from '@proto/generated/checkout/CheckoutResponse';
@@ -23,7 +19,7 @@ export default class CheckoutHandler {
 
   /**
    * @param { ServerUnaryCall<MenuRequest__Output, MenuResponse>} call
-   * @returns {Promise<Menu__Output[]>}
+   * @returns {Promise<Checkout>}
    */
   public getCheckout = async (
     call: ServerUnaryCall<CheckoutRequest, CheckoutResponse>
@@ -41,16 +37,16 @@ export default class CheckoutHandler {
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.checkoutCacheStore.getCheckout({
+    const checkout = (await this.checkoutCacheStore.getCheckout({
       cuid,
-    })) as { checkout: Checkout | null };
+    })) as Checkout | null;
 
-    if (isEmpty(resource?.checkout)) {
+    if (isEmpty(checkout)) {
       return {
         error: null,
         response: { checkout: null },
       };
     }
-    return { error: null, response: resource };
+    return { error: null, response: { checkout } };
   };
 }

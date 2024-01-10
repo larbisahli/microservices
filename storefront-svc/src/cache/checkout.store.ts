@@ -2,7 +2,7 @@ import { Logger } from '@core';
 import { Service } from 'typedi';
 import { isEmpty } from 'underscore';
 import { CheckoutPackage } from './packages/checkout.package';
-import CheckoutCache from './models/category';
+import CheckoutCache from './models/checkout';
 
 @Service()
 export class CheckoutCacheStore {

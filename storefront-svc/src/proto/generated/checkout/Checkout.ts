@@ -5,17 +5,13 @@ import type {
   ShippingAddress__Output as _checkout_ShippingAddress__Output,
 } from '../checkout/ShippingAddress';
 import type {
-  Shipments as _checkout_Shipments,
-  Shipments__Output as _checkout_Shipments__Output,
-} from '../checkout/Shipments';
+  Shipment as _checkout_Shipment,
+  Shipment__Output as _checkout_Shipment__Output,
+} from '../checkout/Shipment';
 import type {
   PaymentConfiguration as _checkout_PaymentConfiguration,
   PaymentConfiguration__Output as _checkout_PaymentConfiguration__Output,
 } from '../checkout/PaymentConfiguration';
-import type {
-  Summary as _checkout_Summary,
-  Summary__Output as _checkout_Summary__Output,
-} from '../checkout/Summary';
 import type {
   Metadata as _checkout_Metadata,
   Metadata__Output as _checkout_Metadata__Output,
@@ -28,25 +24,20 @@ import type {
   AppliedCoupon as _checkout_AppliedCoupon,
   AppliedCoupon__Output as _checkout_AppliedCoupon__Output,
 } from '../checkout/AppliedCoupon';
-import type {
-  Timestamp as _google_protobuf_Timestamp,
-  Timestamp__Output as _google_protobuf_Timestamp__Output,
-} from '../google/protobuf/Timestamp';
 
 export interface Checkout {
   cartId?: string;
   storeId?: string;
   email?: string;
   shippingAddress?: _checkout_ShippingAddress | null;
-  shipments?: _checkout_Shipments | null;
+  shipment?: _checkout_Shipment | null;
   paymentConfiguration?: _checkout_PaymentConfiguration | null;
-  summary?: _checkout_Summary | null;
   metadata?: _checkout_Metadata | null;
   stepsConfig?: _checkout_StepsConfig | null;
   status?: string;
   appliedCoupon?: _checkout_AppliedCoupon | null;
-  createdAt?: _google_protobuf_Timestamp | null;
-  updatedAt?: _google_protobuf_Timestamp | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Checkout__Output {
@@ -54,13 +45,12 @@ export interface Checkout__Output {
   storeId: string;
   email: string;
   shippingAddress: _checkout_ShippingAddress__Output | null;
-  shipments: _checkout_Shipments__Output | null;
+  shipment: _checkout_Shipment__Output | null;
   paymentConfiguration: _checkout_PaymentConfiguration__Output | null;
-  summary: _checkout_Summary__Output | null;
   metadata: _checkout_Metadata__Output | null;
   stepsConfig: _checkout_StepsConfig__Output | null;
   status: string;
   appliedCoupon: _checkout_AppliedCoupon__Output | null;
-  createdAt: _google_protobuf_Timestamp__Output | null;
-  updatedAt: _google_protobuf_Timestamp__Output | null;
+  createdAt: string;
+  updatedAt: string;
 }

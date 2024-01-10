@@ -4,7 +4,6 @@ package checkout;
 
 import "cart.proto";
 import "commons.proto";
-import "google/protobuf/timestamp.proto";
 
 message ShippingAddress {
     string fullName = 1;
@@ -18,31 +17,12 @@ message ShippingAddress {
     string email = 9;
 }
 
-message Shipments {
+message Shipment {
     string id = 1;
 }
 
 message PaymentConfiguration {
     string id = 1;
-}
-
-message FinalPrice {
-    Currency currency = 1;
-    double value = 2;
-}
-
-message Discount {
-    string label = 1;
-    FinalPrice amount = 2;
-}
-
-message Summary {
-    FinalPrice grandTotal = 1;
-    FinalPrice subtotalIncludingTax = 2;
-    FinalPrice subtotalExcludingTax = 3;
-    FinalPrice subtotalWithDiscountExcludingTax = 4;
-    FinalPrice totalShippingCost = 5;
-    Discount discount = 6;
 }
 
 message Geo {
@@ -65,26 +45,19 @@ message AppliedCoupon {
     string code = 1;
 }
 
-message Tax {
-    string label = 1;
-    double percent = 2;
-    FinalPrice amount = 3;
-}
-
 message Checkout {
     string cartId = 1;
     string storeId = 2;
     string email = 3;
     ShippingAddress shippingAddress = 4;
-    Shipments shipments = 5;
+    Shipment shipment = 5;
     PaymentConfiguration paymentConfiguration = 6;
-    Summary summary = 7;
-    Metadata metadata = 8;
-    StepsConfig stepsConfig = 9;
-    string status = 10;
-    AppliedCoupon appliedCoupon = 11;
-    google.protobuf.Timestamp createdAt = 12;
-    google.protobuf.Timestamp updatedAt = 13;
+    Metadata metadata = 7;
+    StepsConfig stepsConfig = 8;
+    string status = 9;
+    AppliedCoupon appliedCoupon = 10;
+    string createdAt = 11;
+    string updatedAt = 12;
 }
 
 message CheckoutRequest {

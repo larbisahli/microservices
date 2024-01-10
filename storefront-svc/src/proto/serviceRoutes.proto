@@ -11,6 +11,7 @@ import "page.proto";
 import "payment.proto";
 import "cart.proto";
 import "checkout.proto";
+import "shipping.proto";
 
 service LanguageServiceRoutes {
   rpc getLanguage(LanguageRequest)                       returns (LanguageResponse);
@@ -49,4 +50,8 @@ service PaymentServiceRoutes {
 service CheckoutServiceRoutes {
   rpc getClientCart(CartRequest)                         returns (CartResponse);
   rpc getClientCheckout(CheckoutRequest)                 returns (CheckoutResponse);
+}
+
+service ShippingServiceRoutes {
+  rpc getAvailableShippings(ShippingRequest)             returns (ShippingResponse);
 }

@@ -30,6 +30,10 @@ import type {
   ProductServiceRoutesDefinition as _ServiceRoutes_ProductServiceRoutesDefinition,
 } from './ServiceRoutes/ProductServiceRoutes';
 import type {
+  ShippingServiceRoutesClient as _ServiceRoutes_ShippingServiceRoutesClient,
+  ShippingServiceRoutesDefinition as _ServiceRoutes_ShippingServiceRoutesDefinition,
+} from './ServiceRoutes/ShippingServiceRoutes';
+import type {
   SliderServiceRoutesClient as _ServiceRoutes_SliderServiceRoutesClient,
   SliderServiceRoutesDefinition as _ServiceRoutes_SliderServiceRoutesDefinition,
 } from './ServiceRoutes/SliderServiceRoutes';
@@ -71,6 +75,10 @@ export interface ProtoGrpcType {
       typeof grpc.Client,
       _ServiceRoutes_ProductServiceRoutesClient
     > & { service: _ServiceRoutes_ProductServiceRoutesDefinition };
+    ShippingServiceRoutes: SubtypeConstructor<
+      typeof grpc.Client,
+      _ServiceRoutes_ShippingServiceRoutesClient
+    > & { service: _ServiceRoutes_ShippingServiceRoutesDefinition };
     SliderServiceRoutes: SubtypeConstructor<
       typeof grpc.Client,
       _ServiceRoutes_SliderServiceRoutesClient
@@ -84,9 +92,7 @@ export interface ProtoGrpcType {
     Cart: MessageTypeDefinition;
     CartRequest: MessageTypeDefinition;
     CartResponse: MessageTypeDefinition;
-    Discount: MessageTypeDefinition;
     Item: MessageTypeDefinition;
-    Total: MessageTypeDefinition;
   };
   category: {
     Breadcrumbs: MessageTypeDefinition;
@@ -104,16 +110,12 @@ export interface ProtoGrpcType {
     Checkout: MessageTypeDefinition;
     CheckoutRequest: MessageTypeDefinition;
     CheckoutResponse: MessageTypeDefinition;
-    Discount: MessageTypeDefinition;
-    FinalPrice: MessageTypeDefinition;
     Geo: MessageTypeDefinition;
     Metadata: MessageTypeDefinition;
     PaymentConfiguration: MessageTypeDefinition;
-    Shipments: MessageTypeDefinition;
+    Shipment: MessageTypeDefinition;
     ShippingAddress: MessageTypeDefinition;
     StepsConfig: MessageTypeDefinition;
-    Summary: MessageTypeDefinition;
-    Tax: MessageTypeDefinition;
   };
   commons: {
     Country: MessageTypeDefinition;
@@ -166,6 +168,12 @@ export interface ProtoGrpcType {
     ConfigRequest: MessageTypeDefinition;
     ConfigResponse: MessageTypeDefinition;
     Settings: MessageTypeDefinition;
+  };
+  shipping: {
+    DeliveryTime: MessageTypeDefinition;
+    Shipping: MessageTypeDefinition;
+    ShippingRequest: MessageTypeDefinition;
+    ShippingResponse: MessageTypeDefinition;
   };
   slides: {
     HeroSlide: MessageTypeDefinition;
