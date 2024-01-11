@@ -171,6 +171,7 @@ export interface ProtoGrpcType {
   };
   shipping: {
     DeliveryTime: MessageTypeDefinition;
+    Rate: MessageTypeDefinition;
     Shipping: MessageTypeDefinition;
     ShippingRequest: MessageTypeDefinition;
     ShippingResponse: MessageTypeDefinition;

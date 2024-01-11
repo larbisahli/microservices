@@ -368,7 +368,7 @@ class gRPC extends grpc.Server {
    */
   protected getAvailableShippings = async (
     call: grpc.ServerUnaryCall<ShippingRequest, ShippingResponse>,
-    callback: grpc.sendUnaryData<{ shippings: Shipping[] | null }>
+    callback: grpc.sendUnaryData<{ shippings: Shipping[] | [] }>
   ) => {
     const {
       error,
