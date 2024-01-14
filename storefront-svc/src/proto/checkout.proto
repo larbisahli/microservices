@@ -4,6 +4,7 @@ package checkout;
 
 import "cart.proto";
 import "commons.proto";
+import "shipping.proto";
 
 message ShippingAddress {
     string fullName = 1;
@@ -18,7 +19,13 @@ message ShippingAddress {
 }
 
 message Shipment {
-    string id = 1;
+    uint32 id = 1;
+    string name = 2;
+    DeliveryTime deliveryTime = 3;
+    bool freeShipping = 4;
+    repeated Image logo = 5;
+    string rateType = 6;
+    double price = 7;
 }
 
 message PaymentConfiguration {
@@ -45,6 +52,21 @@ message AppliedCoupon {
     string code = 1;
 }
 
+message FinalPrice {
+    double value = 1;
+}
+
+message Summary {
+    FinalPrice grandInclTotal = 1;
+    FinalPrice grandExclTotal = 2;
+    FinalPrice subtotalInclTax = 3;
+    FinalPrice subtotalExclTax = 4;
+    FinalPrice subtotalWithDiscountInclTax = 5;
+    FinalPrice subtotalWithDiscountExclTax = 6;
+    FinalPrice totalShippingInclCost = 7;
+    FinalPrice totalShippingExclCost = 8;
+}
+
 message Checkout {
     string cartId = 1;
     string storeId = 2;
@@ -58,10 +80,14 @@ message Checkout {
     AppliedCoupon appliedCoupon = 10;
     string createdAt = 11;
     string updatedAt = 12;
+    Cart cart = 13;
+    Summary summary = 14;
 }
 
 message CheckoutRequest {
-    required string cuid = 1;
+    required string alias = 1;
+    required uint32 storeLanguageId = 2;
+    required string cuid = 3;
 }
 
 message CheckoutResponse {

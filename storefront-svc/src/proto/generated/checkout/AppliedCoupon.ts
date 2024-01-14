@@ -1,9 +1,10 @@
 // Original file: src/proto/checkout.proto
 
+
 export interface AppliedCoupon {
-  code?: string;
+  'code'?: (string);
 }
 
 export interface AppliedCoupon__Output {
-  code: string;
+  'code': (string);
 }

@@ -18,6 +18,7 @@ message Item {
     string key = 10;
     Price price = 11;
     string slug = 12;
+    ProductShippingInfo productShippingInfo = 13;
 }
 
 message Cart {

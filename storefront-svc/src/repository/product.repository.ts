@@ -75,7 +75,6 @@ export default class ProductRepository extends PostgresClient {
     const client = await this.transaction();
 
     try {
-      // TODO use promise.all
       await client.query('BEGIN');
 
       const store = await this.setupStoreSessions(client, { alias, storeId });

@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package shipping;
+
+import "media.proto";
+import "commons.proto";
+
+message DeliveryTime {
+    commons.Unit unit = 1;
+    uint32 min = 2;
+    uint32 max = 3;
+}
+
+message Rate {
+    uint32 id = 1;
+    uint32 shippingZoneId = 2;
+    Unit weightUnit = 3;
+    double min = 4;
+    double max = 5;
+    bool noMax = 6;
+    double price = 7;
+}
+
+message Shipping {
+    uint32 id = 1;
+    DeliveryTime deliveryTime = 2;
+    bool freeShipping = 3;
+    string name = 4;
+    repeated Image logo = 5;
+    string rateType = 6;
+    repeated Rate rates = 7;
+    repeated Country zones = 8;
+}
+
+message ShippingRequest {
+    required string alias = 1;
+    optional string storeId = 2;
+}
+
+message ShippingResponse {
+    repeated Shipping shippings = 1;
+}

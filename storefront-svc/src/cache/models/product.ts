@@ -31,7 +31,7 @@ const Product = new Schema(
     },
     expireAt: {
       type: Date,
-      expires: 60 * 60 * 7, // 7 day
+      expires: 60 * 60 * 24 * 7, // 7 day
       default: Date.now,
     },
   },

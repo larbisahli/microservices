@@ -15,6 +15,7 @@ import { LanguageRequest } from '@proto/generated/language/LanguageRequest';
 import { LanguageResponse } from '@proto/generated/language/LanguageResponse';
 import { ConfigCacheStore } from '@cache/config.store';
 import { LanguageCacheStore } from '@cache/language.store';
+import ConfigRepository from '@repository/config.repository';
 
 @Service()
 export default class ConfigHandler extends PostgresClient {
@@ -28,7 +29,8 @@ export default class ConfigHandler extends PostgresClient {
     protected settingsQueries: SettingsQueries,
     protected configCacheStore: ConfigCacheStore,
     protected languageCacheStore: LanguageCacheStore,
-    protected languageQueries: LanguageQueries
+    protected languageQueries: LanguageQueries,
+    protected configRepository: ConfigRepository
   ) {
     super();
   }
@@ -43,9 +45,7 @@ export default class ConfigHandler extends PostgresClient {
     error: ServerErrorResponse | Partial<StatusObject> | null;
     response: { config: Settings__Output | null };
   }> => {
-    const { getStoreSettings } = this.settingsQueries;
     const { alias, storeId } = call.request;
-
     if (!alias) {
       return {
         error: {
@@ -55,50 +55,19 @@ export default class ConfigHandler extends PostgresClient {
         response: { config: null },
       };
     }
-
-    /** Check if resource is in the cache store */
-    const resource = (await this.configCacheStore.getConfig({
-      alias,
-    })) as { config: Settings__Output | null };
-
-    if (resource) {
-      return { error: null, response: resource };
-    }
-
-    const client = await this.transaction();
-
     try {
-      await client.query('BEGIN');
-
-      const store = await this.setupStoreSessions(client, { alias, storeId });
-
-      if (store?.error) {
+      const {config, error} = await this.configRepository.getStoreConfig({alias, storeId})
+      if (error) {
         return {
           error: {
             code: Status.FAILED_PRECONDITION,
-            details: store?.error.message,
+            details: error.message,
           },
           response: { config: null },
         };
       }
-
-      const { rows } = await client.query<Settings__Output>(getStoreSettings());
-
-      const config = rows[0];
-
-      /** Set the resources in the cache store */
-      if (config && alias) {
-        this.configCacheStore.setConfig({
-          store,
-          resource: config,
-        });
-      }
-
-      await client.query('COMMIT');
-
       return { response: { config }, error: null };
     } catch (error: any) {
-      await client.query('ROLLBACK');
       const message = error?.message as string;
       return {
         error: {
@@ -107,8 +76,6 @@ export default class ConfigHandler extends PostgresClient {
         },
         response: { config: null },
       };
-    } finally {
-      client.release();
     }
   };
 

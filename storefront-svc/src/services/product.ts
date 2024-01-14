@@ -7,15 +7,7 @@ import {
 import { Service } from 'typedi';
 import { CategoryQueries, ProductQueries, SettingsQueries } from '@sql';
 import {
-  CategoryType,
-  CurrencyType,
-  ImageType,
-  ProductShippingInfo,
-  ProductTranslationType,
   ProductType,
-  ProductVariationOptions,
-  TagType,
-  VariationType,
 } from '@ts-types/interfaces';
 import { offset } from '@utils/index';
 import { Status } from '@grpc/grpc-js/build/src/constants';
