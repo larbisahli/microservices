@@ -5,7 +5,6 @@ import { Shipping } from '@proto/generated/shipping/Shipping';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 import { ShippingCacheStore } from '@cache/shipping.store';
 
-
 @Service()
 export default class ShippingRepository extends PostgresClient {
   /**
@@ -24,17 +23,14 @@ export default class ShippingRepository extends PostgresClient {
    * @returns {Promise<ProductInterface>}
    */
   public getShippings = async ({
-    alias, storeId
+    alias,
+    storeId,
   }: {
     alias: string;
     storeId?: string;
   }): Promise<{ shippings: Shipping[] | []; error: any }> => {
-
-    const {
-      getShippingZones,
-      getZones,
-      getShippingRates
-    } = this.shippingQueries;
+    const { getShippingZones, getZones, getShippingRates } =
+      this.shippingQueries;
 
     /** Check if resource is in the cache store */
     const resource = (await this.shippingCacheStore.getShippings(alias)) as {

@@ -1,10 +1,9 @@
 // Original file: src/proto/checkout.proto
 
-
 export interface PaymentConfiguration {
-  'id'?: (string);
+  id?: string;
 }
 
 export interface PaymentConfiguration__Output {
-  'id': (string);
+  id: string;
 }

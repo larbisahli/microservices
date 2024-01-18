@@ -6,15 +6,14 @@ import { Settings__Output } from '@proto/generated/settings/Settings';
 import { ConfigCacheStore } from '@cache/config.store';
 import { LanguageCacheStore } from '@cache/language.store';
 
-
 @Service()
 export default class ConfigRepository extends PostgresClient {
   /**
-  * @param {SettingsQueries} settingsQueries
-  * @param {ConfigCacheStore} configCacheStore
-  * @param {LanguageCacheStore} languageCacheStore
-  * @param {LanguageQueries} languageQueries
-  */
+   * @param {SettingsQueries} settingsQueries
+   * @param {ConfigCacheStore} configCacheStore
+   * @param {LanguageCacheStore} languageCacheStore
+   * @param {LanguageQueries} languageQueries
+   */
   constructor(
     protected settingsQueries: SettingsQueries,
     protected configCacheStore: ConfigCacheStore,
@@ -29,12 +28,12 @@ export default class ConfigRepository extends PostgresClient {
    * @returns {Promise<ProductInterface>}
    */
   public getStoreConfig = async ({
-    alias, storeId
+    alias,
+    storeId,
   }: {
     alias: string;
     storeId?: string;
   }): Promise<{ config: Settings__Output | null; error: any }> => {
-
     const { getStoreSettings } = this.settingsQueries;
 
     /** Check if resource is in the cache store */
@@ -59,7 +58,7 @@ export default class ConfigRepository extends PostgresClient {
             code: Status.FAILED_PRECONDITION,
             details: store?.error.message,
           },
-          config: null
+          config: null,
         };
       }
 

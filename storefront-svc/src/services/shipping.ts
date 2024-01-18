@@ -15,9 +15,7 @@ export default class ShippingHandler {
   /**
    * @param {ShippingRepository} shippingRepository
    */
-  constructor(
-    protected shippingRepository: ShippingRepository
-  ) { }
+  constructor(protected shippingRepository: ShippingRepository) {}
 
   /**
    * @param { ServerUnaryCall<MenuRequest__Output, MenuResponse>} call
@@ -29,7 +27,6 @@ export default class ShippingHandler {
     error: ServerErrorResponse | Partial<StatusObject> | null;
     response: { shippings: Shipping[] | [] };
   }> => {
-
     const { alias, storeId } = call.request;
 
     if (!alias) {
@@ -44,7 +41,10 @@ export default class ShippingHandler {
 
     try {
       /** Check if resource is in the cache store */
-      const { shippings, error } = await this.shippingRepository.getShippings({ alias, storeId })
+      const { shippings, error } = await this.shippingRepository.getShippings({
+        alias,
+        storeId,
+      });
 
       if (error) {
         return {

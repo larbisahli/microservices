@@ -6,9 +6,7 @@ import {
 } from '@grpc/grpc-js';
 import { Service } from 'typedi';
 import { CategoryQueries, ProductQueries, SettingsQueries } from '@sql';
-import {
-  ProductType,
-} from '@ts-types/interfaces';
+import { ProductType } from '@ts-types/interfaces';
 import { offset } from '@utils/index';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 import { PopularProductsRequest } from '@proto/generated/product/PopularProductsRequest';

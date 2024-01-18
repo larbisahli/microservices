@@ -56,7 +56,10 @@ export default class ConfigHandler extends PostgresClient {
       };
     }
     try {
-      const {config, error} = await this.configRepository.getStoreConfig({alias, storeId})
+      const { config, error } = await this.configRepository.getStoreConfig({
+        alias,
+        storeId,
+      });
       if (error) {
         return {
           error: {

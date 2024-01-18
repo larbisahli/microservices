@@ -50,6 +50,8 @@ message StepsConfig {
 
 message AppliedCoupon {
     string code = 1;
+    double discountValue = 2;
+    string discountType = 3;
 }
 
 message FinalPrice {
@@ -61,10 +63,9 @@ message Summary {
     FinalPrice grandExclTotal = 2;
     FinalPrice subtotalInclTax = 3;
     FinalPrice subtotalExclTax = 4;
-    FinalPrice subtotalWithDiscountInclTax = 5;
-    FinalPrice subtotalWithDiscountExclTax = 6;
-    FinalPrice totalShippingInclCost = 7;
-    FinalPrice totalShippingExclCost = 8;
+    FinalPrice subtotalWithDiscount = 5;
+    FinalPrice totalShippingInclCost = 6;
+    FinalPrice totalShippingExclCost = 7;
 }
 
 message Checkout {

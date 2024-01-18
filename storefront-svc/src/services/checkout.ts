@@ -22,103 +22,112 @@ import { ConfigCacheStore } from '@cache/config.store';
 import ConfigRepository from '@repository/config.repository';
 import { Unit } from '@proto/generated/product/Unit';
 import { ShippingAddress } from '@proto/generated/checkout/ShippingAddress';
+import { CouponDiscountsType } from '@ts-types/interfaces';
 
 export enum RateTypes {
   price = 'price',
-  weight = 'weight'
+  weight = 'weight',
 }
 
 export enum UnitTypes {
   G = 'g',
-  KG = 'kg'
+  KG = 'kg',
 }
 
-
-export const roundTo3 = (v: number = 0) => Math.round(v * 1000) / 1000
+export const roundTo3 = (v: number = 0) => Math.round(v * 1000) / 1000;
 
 export const calcTaxRate = (price: number = 0, rate: number = 0) =>
-  roundTo3(Number(price) + Number(price) * (Number(rate) / 100))
+  roundTo3(Number(price) + Number(price) * (Number(rate) / 100));
 
 export const ConvertToGram = (weight: number | null, unit: Unit | null) => {
-  if (!weight || !unit) return 0
+  if (!weight || !unit) return 0;
   if (unit?.unit === UnitTypes.G) {
-    return Number(weight)
+    return Number(weight);
   } else if (unit?.unit === UnitTypes?.KG) {
-    return Number(weight) * 1000
+    return Number(weight) * 1000;
   }
-}
+};
 
-const getCartItemsTotalInclTaxPrice = (items: Item[], rate: number, shippingPrice?: number) => {
+const getCartItemsTotalInclTaxPrice = (
+  items: Item[],
+  rate: number,
+  shippingPrice?: number
+) => {
   let total = items!.reduce((total: number, item: Item) => {
-    const isVariableType = item!.type === productTypeEnum.variable
+    const isVariableType = item!.type === productTypeEnum.variable;
     const selectedPrice = isVariableType
       ? calcTaxRate(Number(item?.orderVariationOption?.salePrice ?? 0), rate)
-      : calcTaxRate(Number(item?.price?.salePrice ?? 0), rate)
-    return total + (Number(selectedPrice) ?? 0) * item.orderQuantity!
-  }, 0)
-  return roundTo3(total + (shippingPrice ?? 0))
-}
+      : calcTaxRate(Number(item?.price?.salePrice ?? 0), rate);
+    return total + (Number(selectedPrice) ?? 0) * item.orderQuantity!;
+  }, 0);
+  return roundTo3(total + (shippingPrice ?? 0));
+};
 
-const getCartItemsTotalPriceExclTax = (items: Item[], shippingPriceExclTax?: number) => {
+const getCartItemsTotalPriceExclTax = (
+  items: Item[],
+  shippingPriceExclTax?: number
+) => {
   let total = items!.reduce((total: number, item: Item) => {
-    const isVariableType = item!.type === productTypeEnum.variable
+    const isVariableType = item!.type === productTypeEnum.variable;
     const selectedTaxPrice = isVariableType
       ? item?.orderVariationOption?.salePrice
-      : item.price?.salePrice
-    return total + (Number(selectedTaxPrice) ?? 0) * item.orderQuantity!
-  }, 0)
-  return roundTo3(total + (shippingPriceExclTax ?? 0))
-}
+      : item.price?.salePrice;
+    return total + (Number(selectedTaxPrice) ?? 0) * item.orderQuantity!;
+  }, 0);
+  return roundTo3(total + (shippingPriceExclTax ?? 0));
+};
 
 const getTotalShippingCost = (
   items: Item[],
   shipping: Shipping | null | undefined,
   shippingAddress: ShippingAddress | null | undefined
-  ) => {
-  const { iso2 = null } = shippingAddress?.country ?? {}
-  if (!iso2) return 0
+) => {
+  const { iso2 = null } = shippingAddress?.country ?? {};
+  if (!iso2) return 0;
 
-  const zones = shipping?.zones?.map(zone => zone.iso2)
-  let rates = shipping?.rates
-  const rateType = shipping?.rateType
+  const zones = shipping?.zones?.map((zone) => zone.iso2);
+  let rates = shipping?.rates;
+  const rateType = shipping?.rateType;
 
   // ***** Check the shipment zone *****
   if (zones?.includes(iso2)) {
-    console.log('++++++++++++++++++++++++')
+    console.log('++++++++++++++++++++++++ includes(iso2)');
   }
 
   // ***** Convert rates to gram *****
   if (rates && rateType === RateTypes.price) {
-    rates = rates?.map(rate => {
-      rate.min = ConvertToGram(Number(rate.min ?? 0), rate.weightUnit!)
-      rate.max = ConvertToGram(Number(rate.max), rate.weightUnit!)
-      return rate
-    })
+    rates = rates?.map((rate) => {
+      rate.min = ConvertToGram(Number(rate.min ?? 0), rate.weightUnit!);
+      rate.max = ConvertToGram(Number(rate.max), rate.weightUnit!);
+      return rate;
+    });
   }
 
   const total = items!.reduce((total: number, item: Item) => {
-    const { weight = null, weightUnit = null } = item?.productShippingInfo ?? {}
-    const weightInGram = ConvertToGram(weight, weightUnit)
-    return total + ((Number(weightInGram) ?? 0) * item?.orderQuantity!??0)
-  }, 0)
+    const { weight = null, weightUnit = null } =
+      item?.productShippingInfo ?? {};
+    const weightInGram = ConvertToGram(weight, weightUnit);
+    return total + ((Number(weightInGram) ?? 0) * item?.orderQuantity! ?? 0);
+  }, 0);
 
-  const selectedRate = rates?.find(rate => {
-    if(rateType === RateTypes.price){
-      if(rate.min === 0 && rate.max === 0){
-        return true
+  const selectedRate = rates?.find((rate) => {
+    if (rateType === RateTypes.price) {
+      if (rate.min === 0 && rate.max === 0) {
+        return true;
       }
     }
-    return Number((rate.min ?? 0)) <= roundTo3(total)
-    && roundTo3(total) <= Number((rate.max ?? 0))
-  })
+    return (
+      Number(rate.min ?? 0) <= roundTo3(total) &&
+      roundTo3(total) <= Number(rate.max ?? 0)
+    );
+  });
 
   if (rateType === RateTypes.price || rateType === RateTypes.weight) {
-    const selectedPrice = selectedRate?.price
-    return Number(selectedPrice ?? 0)
+    const selectedPrice = selectedRate?.price;
+    return Number(selectedPrice ?? 0);
   }
-  return 0
-}
-
+  return 0;
+};
 
 @Service()
 export default class CheckoutHandler {
@@ -133,71 +142,109 @@ export default class CheckoutHandler {
     protected configCacheStore: ConfigCacheStore,
     protected productRepository: ProductRepository,
     protected configRepository: ConfigRepository
-  ) { }
+  ) {}
 
-  private calcShippingIncTaxRate = (items: Item[], shipping: Shipping | null | undefined, shippingAddress: ShippingAddress, rate: number) => {
-    if (isEmpty(shipping)) return 0
-    return calcTaxRate(getTotalShippingCost(items, shipping, shippingAddress), rate)
-  }
+  private calcShippingIncTaxRate = (
+    items: Item[],
+    shipping: Shipping | null | undefined,
+    shippingAddress: ShippingAddress,
+    rate: number
+  ) => {
+    if (isEmpty(shipping)) return 0;
+    return calcTaxRate(
+      getTotalShippingCost(items, shipping, shippingAddress),
+      rate
+    );
+  };
 
-  private calcShippingRateExclTax = (items: Item[], shipping: Shipping | null | undefined, shippingAddress: ShippingAddress) => {
-    if (isEmpty(shipping)) return 0
-    return getTotalShippingCost(items, shipping, shippingAddress)
-  }
+  private calcShippingRateExclTax = (
+    items: Item[],
+    shipping: Shipping | null | undefined,
+    shippingAddress: ShippingAddress
+  ) => {
+    if (isEmpty(shipping)) return 0;
+    return getTotalShippingCost(items, shipping, shippingAddress);
+  };
 
   private calcCheckoutSummary = ({
     shipping,
     shippingAddress,
     taxRate,
-    items
+    items,
+    discount,
   }: {
-    shipping: Shipping | null | undefined,
-    shippingAddress: ShippingAddress,
-    taxRate: number,
-    items: Item[]
+    shipping: Shipping | null | undefined;
+    shippingAddress: ShippingAddress;
+    taxRate: number;
+    items: Item[];
+    discount: Checkout['appliedCoupon'];
   }) => {
-    const shipmentInclTaxPrice = this.calcShippingIncTaxRate(items, shipping, shippingAddress, taxRate)
-    const shippingPriceExclTax = this.calcShippingRateExclTax(items, shipping, shippingAddress)
-    const subtotalInclTax = getCartItemsTotalInclTaxPrice(items, taxRate)
-    const subtotalExclTax = getCartItemsTotalPriceExclTax(items, taxRate)
-    const subtotalWithDiscountInclTax = 0
-    const subtotalWithDiscountExclTax = 0
+    let shipmentInclTaxPrice = this.calcShippingIncTaxRate(
+      items,
+      shipping,
+      shippingAddress,
+      taxRate
+    );
+    let shippingPriceExclTax = this.calcShippingRateExclTax(
+      items,
+      shipping,
+      shippingAddress
+    );
+    let subtotalInclTax = getCartItemsTotalInclTaxPrice(items, taxRate);
+    let subtotalExclTax = getCartItemsTotalPriceExclTax(items, taxRate);
+    let grandInclTotal = subtotalInclTax + shipmentInclTaxPrice;
+    let grandExclTotal = subtotalExclTax + shippingPriceExclTax;
+    let subtotalWithDiscount = 0;
+
+    // *** DISCOUNT ***
+    if (discount) {
+      const discountValue = Number(discount?.discountValue ?? 0);
+      const discountType = discount?.discountType;
+      if (discountType === CouponDiscountsType.Fixed) {
+        subtotalWithDiscount = discountValue;
+        grandInclTotal -=
+          grandInclTotal >= discountValue ? grandInclTotal : discountValue;
+        grandExclTotal -=
+          discountValue >= discountValue ? discountValue : discountValue;
+      } else if (discountType === CouponDiscountsType.Percentage) {
+        const value = roundTo3(
+          Number(grandExclTotal) * (Number(discountValue) / 100)
+        );
+        subtotalWithDiscount = value;
+        grandInclTotal -= value;
+        grandExclTotal -= value;
+      } else if (discountType === CouponDiscountsType.FreeShipping) {
+        grandInclTotal -= shipmentInclTaxPrice;
+        grandExclTotal -= shippingPriceExclTax;
+        shipmentInclTaxPrice = 0;
+        shippingPriceExclTax = 0;
+      }
+    }
 
     return {
       grandInclTotal: {
-        value: (
-          subtotalInclTax
-          + shipmentInclTaxPrice
-          + subtotalWithDiscountInclTax
-        )
+        value: roundTo3(grandInclTotal),
       },
       grandExclTotal: {
-        value: (
-          subtotalExclTax
-          + shippingPriceExclTax
-          + subtotalWithDiscountExclTax
-        )
+        value: roundTo3(grandExclTotal),
       },
       subtotalInclTax: {
-        value: subtotalInclTax
+        value: subtotalInclTax,
       },
       subtotalExclTax: {
-        value: subtotalExclTax
+        value: subtotalExclTax,
       },
-      subtotalWithDiscountInclTax: {
-        value: subtotalWithDiscountInclTax
-      },
-      subtotalWithDiscountExclTax: {
-        value: subtotalWithDiscountExclTax
+      subtotalWithDiscount: {
+        value: subtotalWithDiscount,
       },
       totalShippingInclCost: {
-        value: shipmentInclTaxPrice
+        value: shipmentInclTaxPrice,
       },
       totalShippingExclCost: {
-        value: shippingPriceExclTax
-      }
-    }
-  }
+        value: shippingPriceExclTax,
+      },
+    };
+  };
 
   /**
    * @param { ServerUnaryCall<MenuRequest__Output, MenuResponse>} call
@@ -253,7 +300,9 @@ export default class CheckoutHandler {
     }
 
     /** ****** Store config ****** */
-    const { config, error } = await this.configRepository.getStoreConfig({ alias })
+    const { config, error } = await this.configRepository.getStoreConfig({
+      alias,
+    });
 
     if (error) {
       return {
@@ -303,14 +352,18 @@ export default class CheckoutHandler {
       }
     }
 
-    cart.items = items
-    let selectedShipping = null
+    cart.items = items;
+    let selectedShipping = null;
 
     // ****** Shipment ******
     if (checkout?.shipment?.id) {
       /** Check if resource is in the cache store */
-      const { shippings } = await this.shippingRepository.getShippings({ alias })
-      selectedShipping = shippings?.find(shipping => shipping.id === checkout?.shipment?.id)
+      const { shippings } = await this.shippingRepository.getShippings({
+        alias,
+      });
+      selectedShipping = shippings?.find(
+        (shipping) => shipping.id === checkout?.shipment?.id
+      );
       checkout.shipment = {
         id: selectedShipping?.id,
         name: selectedShipping?.name,
@@ -318,18 +371,19 @@ export default class CheckoutHandler {
         freeShipping: selectedShipping?.freeShipping,
         logo: selectedShipping?.logo,
         rateType: selectedShipping?.rateType,
-      }
+      };
     }
 
-    // const discount = checkout?.discount ?? {}
-    const taxRate = config?.tax?.rate!
-    checkout!.cart = cart
+    const discount = checkout?.appliedCoupon ?? {};
+    const taxRate = config?.tax?.rate!;
+    checkout!.cart = cart;
     checkout!.summary = this.calcCheckoutSummary({
       shipping: selectedShipping,
       shippingAddress: checkout?.shippingAddress!,
       taxRate,
-      items: cart.items
-    })
+      items: cart.items,
+      discount,
+    });
 
     return { error: null, response: { checkout } };
   };
