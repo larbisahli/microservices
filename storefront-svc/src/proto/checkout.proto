@@ -64,8 +64,8 @@ message Summary {
     FinalPrice subtotalInclTax = 3;
     FinalPrice subtotalExclTax = 4;
     FinalPrice subtotalWithDiscount = 5;
-    FinalPrice totalShippingInclCost = 6;
-    FinalPrice totalShippingExclCost = 7;
+    FinalPrice totalShippingInclTax = 6;
+    FinalPrice totalShippingExclTax = 7;
 }
 
 message Checkout {

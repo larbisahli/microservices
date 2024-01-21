@@ -95,7 +95,7 @@ const getTotalShippingCost = (
   }
 
   // ***** Convert rates to gram *****
-  if (rates && rateType === RateTypes.price) {
+  if (rates && rateType === RateTypes.weight) {
     rates = rates?.map((rate) => {
       rate.min = ConvertToGram(Number(rate.min ?? 0), rate.weightUnit!);
       rate.max = ConvertToGram(Number(rate.max), rate.weightUnit!);
@@ -191,7 +191,7 @@ export default class CheckoutHandler {
       shippingAddress
     );
     let subtotalInclTax = getCartItemsTotalInclTaxPrice(items, taxRate);
-    let subtotalExclTax = getCartItemsTotalPriceExclTax(items, taxRate);
+    let subtotalExclTax = getCartItemsTotalPriceExclTax(items);
     let grandInclTotal = subtotalInclTax + shipmentInclTaxPrice;
     let grandExclTotal = subtotalExclTax + shippingPriceExclTax;
     let subtotalWithDiscount = 0;
@@ -203,9 +203,9 @@ export default class CheckoutHandler {
       if (discountType === CouponDiscountsType.Fixed) {
         subtotalWithDiscount = discountValue;
         grandInclTotal -=
-          grandInclTotal >= discountValue ? grandInclTotal : discountValue;
+          grandInclTotal >= discountValue ? discountValue : grandInclTotal;
         grandExclTotal -=
-          discountValue >= discountValue ? discountValue : discountValue;
+          grandExclTotal >= discountValue ? discountValue : grandExclTotal;
       } else if (discountType === CouponDiscountsType.Percentage) {
         const value = roundTo3(
           Number(grandExclTotal) * (Number(discountValue) / 100)
@@ -237,10 +237,10 @@ export default class CheckoutHandler {
       subtotalWithDiscount: {
         value: subtotalWithDiscount,
       },
-      totalShippingInclCost: {
+      totalShippingInclTax: {
         value: shipmentInclTaxPrice,
       },
-      totalShippingExclCost: {
+      totalShippingExclTax: {
         value: shippingPriceExclTax,
       },
     };
