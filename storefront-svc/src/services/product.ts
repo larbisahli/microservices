@@ -19,6 +19,7 @@ import { ResourceNamesEnum } from '@ts-types/index';
 import { ProductsCacheStore } from '@cache/products.store';
 import { ProductCacheStore } from '@cache/product.store';
 import ProductRepository from '@repository/product.repository';
+import { CryptoUtils } from '@core';
 
 interface ProductInterface extends Product__Output {
   maxComparePrice: number;
@@ -44,7 +45,8 @@ export default class ProductHandler extends PostgresClient {
     protected categoryQueries: CategoryQueries,
     protected productsCacheStore: ProductsCacheStore,
     protected productCacheStore: ProductCacheStore,
-    protected productRepository: ProductRepository
+    protected productRepository: ProductRepository,
+    protected cryptoUtils: CryptoUtils
   ) {
     super();
   }
@@ -60,7 +62,7 @@ export default class ProductHandler extends PostgresClient {
     response: { products: Product__Output[] | null };
   }> => {
     const { getPopularProducts } = this.productQueries;
-    const { alias, storeId, storeLanguageId } = call.request;
+    const { alias, suid, storeLanguageId } = call.request;
 
     if (!alias || !storeLanguageId) {
       return {
@@ -72,9 +74,26 @@ export default class ProductHandler extends PostgresClient {
       };
     }
 
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier is not defined',
+        },
+        response: { products: [] },
+      };
+    }
+
     /** Check if resource is in the cache store */
     const resource = (await this.productsCacheStore.getProducts({
-      alias,
+      storeId,
       key: ResourceNamesEnum.POPULAR_PRODUCTS,
     })) as { products: Product__Output[] | null };
 
@@ -87,7 +106,7 @@ export default class ProductHandler extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -116,9 +135,9 @@ export default class ProductHandler extends PostgresClient {
       }));
 
       /** Set the resources in the cache store */
-      if (products && alias) {
+      if (products && storeId) {
         this.productsCacheStore.setProducts({
-          store,
+          storeId,
           key: ResourceNamesEnum.POPULAR_PRODUCTS,
           resource: products,
         });
@@ -162,7 +181,7 @@ export default class ProductHandler extends PostgresClient {
     const { getCategoryProducts } = this.productQueries;
     const { getStoreCategoryIdByUrlKey } = this.categoryQueries;
 
-    const { alias, storeId, storeLanguageId, urlKey, page = 0 } = call.request;
+    const { alias, suid, storeLanguageId, urlKey, page = 0 } = call.request;
 
     const limit = 5;
 
@@ -176,9 +195,26 @@ export default class ProductHandler extends PostgresClient {
       };
     }
 
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier is not defined',
+        },
+        response: { products: [] },
+      };
+    }
+
     /** Check if resource is in the cache store */
     const resource = (await this.productsCacheStore.getProducts({
-      alias,
+      storeId,
       key: urlKey,
       page,
     })) as { products: ProductInterface[] | null };
@@ -192,7 +228,7 @@ export default class ProductHandler extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -242,9 +278,9 @@ export default class ProductHandler extends PostgresClient {
       }));
 
       /** Set the resources in the cache store */
-      if (products && alias) {
+      if (products && storeId) {
         this.productsCacheStore.setProducts({
-          store,
+          storeId,
           key: urlKey,
           resource: products,
           page,
@@ -282,7 +318,7 @@ export default class ProductHandler extends PostgresClient {
   }> => {
     const { getProductIdBySlug } = this.productQueries;
 
-    const { alias, storeId, storeLanguageId, slug } = call.request;
+    const { alias, suid, storeLanguageId, slug } = call.request;
 
     if (!alias || !slug || !storeLanguageId) {
       return {
@@ -294,9 +330,26 @@ export default class ProductHandler extends PostgresClient {
       };
     }
 
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier is not defined',
+        },
+        response: { product: null },
+      };
+    }
+
     /** Check if resource is in the cache store */
     const resource = (await this.productCacheStore.getProductBySlug({
-      alias,
+      storeId,
       slug,
     })) as { product: Product__Output | ProductType | null };
 
@@ -307,10 +360,9 @@ export default class ProductHandler extends PostgresClient {
     const client = await this.transaction();
 
     try {
-      // TODO use promise.all
       await client.query('BEGIN');
 
-      await this.setupStoreSessions(client, { alias, storeId });
+      await this.setupStoreSessions(client, storeId);
 
       const { rows: productContent } = await client.query<ProductType>(
         getProductIdBySlug(slug)
@@ -322,8 +374,7 @@ export default class ProductHandler extends PostgresClient {
 
       const { product, error } = await this.productRepository.getProduct({
         id: productId,
-        alias,
-        storeId,
+        storeId: storeId,
         storeLanguageId,
       });
 

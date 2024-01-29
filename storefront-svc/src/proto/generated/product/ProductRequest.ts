@@ -3,15 +3,15 @@
 export interface ProductRequest {
   alias?: string;
   storeLanguageId?: number;
-  storeId?: string;
+  suid?: string;
   slug?: string;
-  _storeId?: 'storeId';
+  _suid?: 'suid';
 }
 
 export interface ProductRequest__Output {
   alias: string;
   storeLanguageId: number;
-  storeId?: string;
+  suid?: string;
   slug: string;
-  _storeId: 'storeId';
+  _suid: 'suid';
 }

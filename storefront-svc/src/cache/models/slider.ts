@@ -13,10 +13,6 @@ const SliderCache = new Schema(
       type: String,
       require: true,
     },
-    alias: {
-      type: String,
-      required: true,
-    },
     name: {
       type: String,
       required: true,

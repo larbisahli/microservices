@@ -23,6 +23,8 @@ import ConfigRepository from '@repository/config.repository';
 import { Unit } from '@proto/generated/product/Unit';
 import { ShippingAddress } from '@proto/generated/checkout/ShippingAddress';
 import { CouponDiscountsType } from '@ts-types/interfaces';
+import PostgresClient from '@database';
+import { CryptoUtils } from '@core';
 
 export enum RateTypes {
   price = 'price',
@@ -130,7 +132,7 @@ const getTotalShippingCost = (
 };
 
 @Service()
-export default class CheckoutHandler {
+export default class CheckoutHandler extends PostgresClient {
   /**
    * @param {CheckoutCacheStore} checkoutCacheStore
    */
@@ -141,8 +143,11 @@ export default class CheckoutHandler {
     protected cartCacheStore: CartCacheStore,
     protected configCacheStore: ConfigCacheStore,
     protected productRepository: ProductRepository,
-    protected configRepository: ConfigRepository
-  ) {}
+    protected configRepository: ConfigRepository,
+    protected cryptoUtils: CryptoUtils
+  ) {
+    super();
+  }
 
   private calcShippingIncTaxRate = (
     items: Item[],
@@ -256,7 +261,7 @@ export default class CheckoutHandler {
     error: ServerErrorResponse | Partial<StatusObject> | null;
     response: { checkout: Checkout | null };
   }> => {
-    const { cuid, alias, storeLanguageId } = call.request;
+    const { cuid, alias, suid, storeLanguageId } = call.request;
 
     if (!alias || !storeLanguageId) {
       return {
@@ -275,6 +280,23 @@ export default class CheckoutHandler {
       };
     }
 
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier is not defined',
+        },
+        response: { checkout: null },
+      };
+    }
+
     /** Check if resource is in the cache store */
     const checkout = (await this.checkoutCacheStore.getCheckout({
       cuid,
@@ -287,7 +309,7 @@ export default class CheckoutHandler {
       };
     }
 
-    /** Check if resource is in the cache store */
+    /** Get client cart */
     const resource = (await this.cartCacheStore.getClientCart({
       cartId: cuid,
     })) as { cart: Cart | null };
@@ -300,9 +322,9 @@ export default class CheckoutHandler {
     }
 
     /** ****** Store config ****** */
-    const { config, error } = await this.configRepository.getStoreConfig({
-      alias,
-    });
+    const { config, error } = await this.configRepository.getStoreConfig(
+      storeId
+    );
 
     if (error) {
       return {
@@ -327,7 +349,7 @@ export default class CheckoutHandler {
     for await (const { id, ...rest } of cart?.items ?? []) {
       const { product } = await this.productRepository.getProduct({
         id: id!,
-        alias,
+        storeId,
         storeLanguageId,
       });
       if (product) {
@@ -358,9 +380,7 @@ export default class CheckoutHandler {
     // ****** Shipment ******
     if (checkout?.shipment?.id) {
       /** Check if resource is in the cache store */
-      const { shippings } = await this.shippingRepository.getShippings({
-        alias,
-      });
+      const { shippings } = await this.shippingRepository.getShippings(storeId);
       selectedShipping = shippings?.find(
         (shipping) => shipping.id === checkout?.shipment?.id
       );

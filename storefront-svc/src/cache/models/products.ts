@@ -14,10 +14,6 @@ const ProductsCache = new Schema(
       require: true,
       index: { unique: false },
     },
-    alias: {
-      type: String,
-      required: true,
-    },
     page: {
       type: Number,
     },

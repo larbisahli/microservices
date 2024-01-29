@@ -11,14 +11,23 @@ import { Page } from '@proto/generated/page/Page';
 export class PageCacheStore {
   constructor(protected pagePackage: PagePackage) {}
 
-  private getId = ({ alias, key }: { alias: string; key: string }) => {
-    return crypto.createHash('sha256').update(`${alias}:${key}`).digest('hex');
+  private getId = ({ storeId, key }: { storeId: string; key: string }) => {
+    return crypto
+      .createHash('sha256')
+      .update(`${storeId}:${key}`)
+      .digest('hex');
   };
 
-  public getPage = async ({ alias, key }: { alias: string; key: string }) => {
+  public getPage = async ({
+    storeId,
+    key,
+  }: {
+    storeId: string;
+    key: string;
+  }) => {
     try {
       const resource = await PageCache.findOne({
-        key: { $eq: this.getId({ alias, key }) },
+        key: { $eq: this.getId({ storeId, key }) },
       });
 
       if (isEmpty(resource && resource.data)) {
@@ -37,11 +46,11 @@ export class PageCacheStore {
   };
 
   public setPage = async ({
-    store,
+    storeId,
     key,
     resource,
   }: {
-    store: { alias: string; storeId: string };
+    storeId: string;
     key: string;
     resource: Page;
   }) => {
@@ -64,12 +73,9 @@ export class PageCacheStore {
         precision: 2,
       });
 
-      const { alias, storeId } = store;
-
       const respond = await PageCache.create({
-        key: this.getId({ alias, key }),
+        key: this.getId({ storeId, key }),
         data: buffer,
-        alias,
         slug: key,
         storeId,
         size: `${value}${unit}`,
@@ -83,15 +89,15 @@ export class PageCacheStore {
   };
 
   public invalidatePageCache = async ({
-    alias,
+    storeId,
     key,
   }: {
-    alias: string;
+    storeId: string;
     key: string;
   }) => {
     try {
       const respond = await PageCache.deleteOne({
-        key: { $eq: this.getId({ alias, key }) },
+        key: { $eq: this.getId({ storeId, key }) },
       });
       console.log({ respond });
     } catch (error) {

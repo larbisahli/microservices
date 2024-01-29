@@ -87,7 +87,7 @@ message Product {
 message PopularProductsRequest {
   required string alias = 1;
   required uint32 storeLanguageId = 2;
-  optional string storeId = 3;
+  optional string suid = 3;
 }
 
 message ProductsResponse {
@@ -97,7 +97,7 @@ message ProductsResponse {
 message CategoryProductsRequest {
   required string alias = 1;
   required uint32 storeLanguageId = 2;
-  optional string storeId = 3;
+  optional string suid = 3;
   required string urlKey = 4;
   required uint32 page = 5;
 }
@@ -105,7 +105,7 @@ message CategoryProductsRequest {
 message ProductRequest {
   required string alias = 1;
   required uint32 storeLanguageId = 2;
-  optional string storeId = 3;
+  optional string suid = 3;
   required string slug = 4;
 }
 

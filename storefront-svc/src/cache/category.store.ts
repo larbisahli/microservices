@@ -38,27 +38,30 @@ export class CategoryCacheStore {
   }
 
   private getId = ({
-    alias,
+    storeId,
     key,
   }: {
-    alias: string;
+    storeId: string;
     key: ResourceNamesType | string;
   }) => {
-    return crypto.createHash('sha256').update(`${alias}:${key}`).digest('hex');
+    return crypto
+      .createHash('sha256')
+      .update(`${storeId}:${key}`)
+      .digest('hex');
   };
 
   public getResource = async ({
-    alias,
+    storeId,
     packageName,
     key,
   }: {
-    alias: string;
+    storeId: string;
     packageName: ResourceNamesType;
     key: ResourceNamesType | string;
   }) => {
     try {
       const resource = await CategoryCache.findOne({
-        key: { $eq: this.getId({ alias, key }) },
+        key: { $eq: this.getId({ storeId, key }) },
       });
 
       if (isEmpty(resource && resource.data)) {
@@ -78,12 +81,12 @@ export class CategoryCacheStore {
   };
 
   public setResource = async ({
-    store,
+    storeId,
     packageName,
     key,
     resource,
   }: {
-    store: { alias: string; storeId: string };
+    storeId: string;
     packageName: ResourceNamesType;
     key: ResourceNamesType | string;
     resource: any;
@@ -109,12 +112,9 @@ export class CategoryCacheStore {
         precision: 2,
       });
 
-      const { alias, storeId } = store;
-
       const respond = await CategoryCache.create({
-        key: this.getId({ alias, key }),
+        key: this.getId({ storeId, key }),
         data: buffer,
-        alias,
         name: key,
         storeId,
         size: `${value}${unit}`,
@@ -128,15 +128,15 @@ export class CategoryCacheStore {
   };
 
   public invalidateResourceCache = async ({
-    alias,
+    storeId,
     key,
   }: {
-    alias: string;
+    storeId: string;
     key: ResourceNamesType;
   }) => {
     try {
       const respond = await CategoryCache.deleteOne({
-        key: { $eq: this.getId({ alias, key }) },
+        key: { $eq: this.getId({ storeId, key }) },
       });
       console.log({ respond });
     } catch (error) {

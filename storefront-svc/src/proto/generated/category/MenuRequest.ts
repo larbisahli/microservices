@@ -3,13 +3,13 @@
 export interface MenuRequest {
   alias?: string;
   storeLanguageId?: number;
-  storeId?: string;
-  _storeId?: 'storeId';
+  suid?: string;
+  _suid?: 'suid';
 }
 
 export interface MenuRequest__Output {
   alias: string;
   storeLanguageId: number;
-  storeId?: string;
-  _storeId: 'storeId';
+  suid?: string;
+  _suid: 'suid';
 }

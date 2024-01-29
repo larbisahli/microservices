@@ -11,14 +11,14 @@ import crypto from 'crypto';
 export class ShippingCacheStore {
   constructor(protected shippingPackage: ShippingPackage) {}
 
-  private getId = (alias: string) => {
-    return crypto.createHash('sha256').update(alias).digest('hex');
+  private getId = (storeId: string) => {
+    return crypto.createHash('sha256').update(storeId).digest('hex');
   };
 
-  public getShippings = async (alias: string) => {
+  public getShippings = async (storeId: string) => {
     try {
       const resource = await ShippingCache.findOne({
-        key: { $eq: this.getId(alias) },
+        key: { $eq: this.getId(storeId) },
       });
 
       if (isEmpty(resource && resource.data)) {
@@ -37,10 +37,10 @@ export class ShippingCacheStore {
   };
 
   public setShippings = async ({
-    store,
+    storeId,
     resource,
   }: {
-    store: { alias: string; storeId: string };
+    storeId: string;
     resource: Shipping[];
   }) => {
     try {
@@ -62,12 +62,9 @@ export class ShippingCacheStore {
         precision: 2,
       });
 
-      const { alias, storeId } = store;
-
       const respond = await ShippingCache.create({
-        key: this.getId(alias),
+        key: this.getId(storeId),
         data: buffer,
-        alias,
         storeId,
         size: `${value}${unit}`,
       });
@@ -79,10 +76,10 @@ export class ShippingCacheStore {
     }
   };
 
-  public invalidateShippingCache = async (alias: string) => {
+  public invalidateShippingCache = async (storeId: string) => {
     try {
       const respond = await ShippingCache.deleteOne({
-        key: { $eq: this.getId(alias) },
+        key: { $eq: this.getId(storeId) },
       });
       console.log({ respond });
     } catch (error) {

@@ -11,14 +11,14 @@ import { Settings__Output } from '@proto/generated/settings/Settings';
 export class ConfigCacheStore {
   constructor(protected configPackage: ConfigPackage) {}
 
-  private getId = ({ alias }: { alias: string }) => {
-    return crypto.createHash('sha256').update(alias).digest('hex');
+  private getId = (storeId: string) => {
+    return crypto.createHash('sha256').update(storeId).digest('hex');
   };
 
-  public getConfig = async ({ alias }: { alias: string }) => {
+  public getConfig = async (storeId: string) => {
     try {
       const resource = await ConfigCache.findOne({
-        key: { $eq: this.getId({ alias }) },
+        key: { $eq: this.getId(storeId) },
       });
 
       if (isEmpty(resource && resource.data)) {
@@ -37,10 +37,10 @@ export class ConfigCacheStore {
   };
 
   public setConfig = async ({
-    store,
+    storeId,
     resource,
   }: {
-    store: { alias: string; storeId: string };
+    storeId: string;
     resource: Settings__Output;
   }) => {
     try {
@@ -62,12 +62,9 @@ export class ConfigCacheStore {
         precision: 2,
       });
 
-      const { alias, storeId } = store;
-
       const respond = await ConfigCache.create({
-        key: this.getId({ alias }),
+        key: this.getId(storeId),
         data: buffer,
-        alias,
         storeId,
         size: `${value}${unit}`,
       });
@@ -79,10 +76,10 @@ export class ConfigCacheStore {
     }
   };
 
-  public invalidateConfigCache = async ({ alias }: { alias: string }) => {
+  public invalidateConfigCache = async (storeId: string) => {
     try {
       const respond = await ConfigCache.deleteOne({
-        key: { $eq: this.getId({ alias }) },
+        key: { $eq: this.getId(storeId) },
       });
       console.log({ respond });
     } catch (error) {

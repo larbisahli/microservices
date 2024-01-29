@@ -11,8 +11,8 @@ import { PageRequest } from '@proto/generated/page/PageRequest';
 import { PageResponse } from '@proto/generated/page/PageResponse';
 import { Page } from '@proto/generated/page/Page';
 import { isEmpty } from 'underscore';
-import { ResourceNamesEnum } from '@ts-types/index';
 import { PageCacheStore } from '@cache/page.store';
+import { CryptoUtils } from '@core';
 
 @Service()
 export default class PageHandler extends PostgresClient {
@@ -22,7 +22,8 @@ export default class PageHandler extends PostgresClient {
    */
   constructor(
     protected pageQueries: PageQueries,
-    protected pageCacheStore: PageCacheStore
+    protected pageCacheStore: PageCacheStore,
+    protected cryptoUtils: CryptoUtils
   ) {
     super();
   }
@@ -38,7 +39,7 @@ export default class PageHandler extends PostgresClient {
     response: { page: Page | null };
   }> => {
     const { getPage, getPageTranslation } = this.pageQueries;
-    const { alias, slug, storeId, storeLanguageId } = call.request;
+    const { alias, slug, suid, storeLanguageId } = call.request;
 
     if (!alias || !slug || !storeLanguageId) {
       return {
@@ -50,9 +51,26 @@ export default class PageHandler extends PostgresClient {
       };
     }
 
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier is not defined',
+        },
+        response: { page: null },
+      };
+    }
+
     /** Check if resource is in the cache store */
     const resource = (await this.pageCacheStore.getPage({
-      alias,
+      storeId,
       key: slug,
     })) as { page: Page | null };
 
@@ -65,7 +83,7 @@ export default class PageHandler extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -98,9 +116,9 @@ export default class PageHandler extends PostgresClient {
       const translation = pageTranslationRows[0];
 
       /** Set the resources in the cache store */
-      if (page && alias) {
+      if (page && storeId) {
         this.pageCacheStore.setPage({
-          store,
+          storeId,
           key: slug,
           resource: page,
         });

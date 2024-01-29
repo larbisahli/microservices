@@ -3,17 +3,17 @@
 export interface CategoryProductsRequest {
   alias?: string;
   storeLanguageId?: number;
-  storeId?: string;
+  suid?: string;
   urlKey?: string;
   page?: number;
-  _storeId?: 'storeId';
+  _suid?: 'suid';
 }
 
 export interface CategoryProductsRequest__Output {
   alias: string;
   storeLanguageId: number;
-  storeId?: string;
+  suid?: string;
   urlKey: string;
   page: number;
-  _storeId: 'storeId';
+  _suid: 'suid';
 }

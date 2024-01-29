@@ -33,7 +33,7 @@ message Language {
 message LanguageRequest {
     required uint32 id = 1;
     required string alias = 2;
-    optional string storeId = 3;
+    optional string suid = 3;
 }
 
 message LanguageResponse {

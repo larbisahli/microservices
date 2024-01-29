@@ -3,13 +3,13 @@
 export interface PopularProductsRequest {
   alias?: string;
   storeLanguageId?: number;
-  storeId?: string;
-  _storeId?: 'storeId';
+  suid?: string;
+  _suid?: 'suid';
 }
 
 export interface PopularProductsRequest__Output {
   alias: string;
   storeLanguageId: number;
-  storeId?: string;
-  _storeId: 'storeId';
+  suid?: string;
+  _suid: 'suid';
 }

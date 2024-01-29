@@ -3,13 +3,13 @@
 export interface PromoBannerRequest {
   alias?: string;
   storeLanguageId?: number;
-  storeId?: string;
-  _storeId?: 'storeId';
+  suid?: string;
+  _suid?: 'suid';
 }
 
 export interface PromoBannerRequest__Output {
   alias: string;
   storeLanguageId: number;
-  storeId?: string;
-  _storeId: 'storeId';
+  suid?: string;
+  _suid: 'suid';
 }

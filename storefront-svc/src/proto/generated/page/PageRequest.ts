@@ -3,15 +3,15 @@
 export interface PageRequest {
   alias?: string;
   storeLanguageId?: number;
-  storeId?: string;
+  suid?: string;
   slug?: string;
-  _storeId?: 'storeId';
+  _suid?: 'suid';
 }
 
 export interface PageRequest__Output {
   alias: string;
   storeLanguageId: number;
-  storeId?: string;
+  suid?: string;
   slug: string;
-  _storeId: 'storeId';
+  _suid: 'suid';
 }

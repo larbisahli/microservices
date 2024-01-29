@@ -18,6 +18,7 @@ import { HomePageCategoryResponse__Output } from '@proto/generated/category/Home
 import { HomePageCategoryRequest__Output } from '@proto/generated/category/HomePageCategoryRequest';
 import { ResourceNamesEnum } from '@ts-types/index';
 import { CategoryCacheStore } from '@cache/category.store';
+import { CryptoUtils } from '@core';
 
 @Service()
 export default class CategoryHandler extends PostgresClient {
@@ -27,7 +28,8 @@ export default class CategoryHandler extends PostgresClient {
    */
   constructor(
     protected categoryQueries: CategoryQueries,
-    protected categoryCacheStore: CategoryCacheStore
+    protected categoryCacheStore: CategoryCacheStore,
+    protected cryptoUtils: CryptoUtils
   ) {
     super();
   }
@@ -43,7 +45,7 @@ export default class CategoryHandler extends PostgresClient {
     response: { menu: Menu__Output[] | [] };
   }> => {
     const { getMenu } = this.categoryQueries;
-    const { alias, storeLanguageId, storeId } = call.request;
+    const { alias, storeLanguageId, suid } = call.request;
 
     if (!alias || !storeLanguageId) {
       return {
@@ -55,9 +57,36 @@ export default class CategoryHandler extends PostgresClient {
       };
     }
 
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier is not defined',
+        },
+        response: { menu: [] },
+      };
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'storeId is not defined',
+        },
+        response: { menu: [] },
+      };
+    }
+
     /** Check if resource is in the cache store */
     const resource = (await this.categoryCacheStore.getResource({
-      alias,
+      storeId,
       packageName: ResourceNamesEnum.MENU,
       key: ResourceNamesEnum.MENU,
     })) as { menu: Menu__Output[] | [] };
@@ -71,7 +100,7 @@ export default class CategoryHandler extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -90,9 +119,9 @@ export default class CategoryHandler extends PostgresClient {
       const menu = rows;
 
       /** Set the resources in the cache store */
-      if (menu && alias) {
+      if (menu && storeId) {
         this.categoryCacheStore.setResource({
-          store,
+          storeId,
           packageName: ResourceNamesEnum.MENU,
           key: ResourceNamesEnum.MENU,
           resource: menu,
@@ -131,7 +160,7 @@ export default class CategoryHandler extends PostgresClient {
     response: { categories: Category__Output[] | [] };
   }> => {
     const { getHomePageCategories } = this.categoryQueries;
-    const { alias, storeLanguageId, storeId } = call.request;
+    const { alias, storeLanguageId, suid } = call.request;
 
     if (!alias || !storeLanguageId) {
       return {
@@ -143,9 +172,26 @@ export default class CategoryHandler extends PostgresClient {
       };
     }
 
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier is not defined',
+        },
+        response: { categories: [] },
+      };
+    }
+
     /** Check if resource is in the cache store */
     const resource = (await this.categoryCacheStore.getResource({
-      alias,
+      storeId,
       packageName: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
       key: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
     })) as { categories: Category__Output[] | [] };
@@ -159,7 +205,7 @@ export default class CategoryHandler extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -178,9 +224,9 @@ export default class CategoryHandler extends PostgresClient {
       const categories = rows;
 
       /** Set the resources in the cache store */
-      if (categories && alias) {
+      if (categories && storeId) {
         this.categoryCacheStore.setResource({
-          store,
+          storeId,
           packageName: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
           key: ResourceNamesEnum.HOMEPAGE_CATEGORIES,
           resource: categories,
@@ -222,7 +268,7 @@ export default class CategoryHandler extends PostgresClient {
       getStoreCategoryTranslation,
     } = this.categoryQueries;
 
-    const { urlKey, alias, storeLanguageId, storeId } = call.request;
+    const { urlKey, alias, storeLanguageId, suid } = call.request;
 
     if (!alias || !urlKey || !storeLanguageId) {
       return {
@@ -234,9 +280,26 @@ export default class CategoryHandler extends PostgresClient {
       };
     }
 
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier is not defined',
+        },
+        response: { category: null },
+      };
+    }
+
     /** Check if resource is in the cache store */
     const resource = (await this.categoryCacheStore.getResource({
-      alias,
+      storeId,
       packageName: ResourceNamesEnum.CATEGORY,
       key: urlKey,
     })) as { category: Category | null };
@@ -250,7 +313,7 @@ export default class CategoryHandler extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -347,9 +410,9 @@ export default class CategoryHandler extends PostgresClient {
       };
 
       /** Set the resources in the cache store */
-      if (category && alias && urlKey) {
+      if (category && storeId && urlKey) {
         this.categoryCacheStore.setResource({
-          store,
+          storeId,
           packageName: ResourceNamesEnum.CATEGORY,
           key: urlKey,
           resource: responseCategory,

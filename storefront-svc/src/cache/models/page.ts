@@ -13,10 +13,6 @@ const PageCache = new Schema(
       type: String,
       require: true,
     },
-    alias: {
-      type: String,
-      required: true,
-    },
     slug: {
       type: String,
       required: true,

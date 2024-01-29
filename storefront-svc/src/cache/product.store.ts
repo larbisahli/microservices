@@ -10,11 +10,20 @@ import byteSize from 'byte-size';
 export class ProductCacheStore {
   constructor(protected productPackage: ProductPackage) {}
 
-  private getBySlug = ({ alias, slug }: { alias: string; slug: string }) => {
-    return crypto.createHash('sha256').update(`${alias}:${slug}`).digest('hex');
+  private getBySlug = ({
+    storeId,
+    slug,
+  }: {
+    storeId: string;
+    slug: string;
+  }) => {
+    return crypto
+      .createHash('sha256')
+      .update(`${storeId}:${slug}`)
+      .digest('hex');
   };
 
-  public getProductById = async ({ id }: { id: number }) => {
+  public getProductById = async (id: number) => {
     try {
       const resource = await ProductCache.findOne({
         key: { $eq: id },
@@ -37,15 +46,15 @@ export class ProductCacheStore {
   };
 
   public getProductBySlug = async ({
-    alias,
+    storeId,
     slug,
   }: {
-    alias: string;
+    storeId: string;
     slug: string;
   }) => {
     try {
       const resource = await ProductCache.findOne({
-        slug: { $eq: this.getBySlug({ alias, slug }) },
+        slug: { $eq: this.getBySlug({ storeId, slug }) },
       });
 
       if (isEmpty(resource && resource.data)) {
@@ -65,12 +74,12 @@ export class ProductCacheStore {
   };
 
   public setProduct = async ({
-    store,
+    storeId,
     id,
     slug,
     resource,
   }: {
-    store: { alias: string; storeId: string };
+    storeId: string;
     id: number;
     slug: string;
     resource: any;
@@ -95,12 +104,9 @@ export class ProductCacheStore {
         precision: 2,
       });
 
-      const { alias, storeId } = store;
-
       const respond = await ProductCache.create({
         key: id,
-        slug: this.getBySlug({ alias, slug }),
-        alias,
+        slug: this.getBySlug({ storeId, slug }),
         storeId,
         data: buffer,
         size: `${value}${unit}`,

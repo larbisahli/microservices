@@ -15,16 +15,19 @@ import { PromoBannerResponse } from '@proto/generated/slides/PromoBannerResponse
 import { PromoBanner } from '@proto/generated/slides/PromoBanner';
 import { ResourceNamesEnum } from '@ts-types/index';
 import { SliderCacheStore } from '@cache/slider.store';
+import { CryptoUtils } from '@core';
 
 @Service()
 export default class SlideHandler extends PostgresClient {
   /**
    * @param {SliderQueries} sliderQueries
    * @param {ResourceHandler} resourceHandler
+   * @param {CryptoUtils} cryptoUtils
    */
   constructor(
     protected sliderQueries: SliderQueries,
-    protected sliderCacheStore: SliderCacheStore
+    protected sliderCacheStore: SliderCacheStore,
+    protected cryptoUtils: CryptoUtils
   ) {
     super();
   }
@@ -40,7 +43,7 @@ export default class SlideHandler extends PostgresClient {
     response: { sliders: HeroSlide__Output[] | null };
   }> => {
     const { getHeroSlides } = this.sliderQueries;
-    const { alias, storeId, storeLanguageId } = call.request;
+    const { alias, suid, storeLanguageId } = call.request;
 
     if (!alias || !storeLanguageId) {
       return {
@@ -52,9 +55,26 @@ export default class SlideHandler extends PostgresClient {
       };
     }
 
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier is not defined',
+        },
+        response: { sliders: [] },
+      };
+    }
+
     /** Check if resource is in the cache store */
     const resource = (await this.sliderCacheStore.getResource({
-      alias,
+      storeId,
       key: ResourceNamesEnum.HERO_SLIDE,
     })) as { sliders: HeroSlide__Output[] | null };
 
@@ -67,7 +87,7 @@ export default class SlideHandler extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -86,9 +106,9 @@ export default class SlideHandler extends PostgresClient {
       const sliders = rows;
 
       /** Set the resources in the cache store */
-      if (sliders && alias) {
+      if (sliders && storeId) {
         this.sliderCacheStore.setResource({
-          store,
+          storeId,
           key: ResourceNamesEnum.HERO_SLIDE,
           resource: sliders,
         });
@@ -123,7 +143,7 @@ export default class SlideHandler extends PostgresClient {
     response: { banner: PromoBanner | null };
   }> => {
     const { getStorePromoSlide, getPromoSlideTranslation } = this.sliderQueries;
-    const { alias, storeId, storeLanguageId } = call.request;
+    const { alias, suid, storeLanguageId } = call.request;
 
     if (!alias || !storeLanguageId) {
       return {
@@ -135,9 +155,26 @@ export default class SlideHandler extends PostgresClient {
       };
     }
 
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier is not defined',
+        },
+        response: { banner: null },
+      };
+    }
+
     /** Check if resource is in the cache store */
     const resource = (await this.sliderCacheStore.getResource({
-      alias,
+      storeId: storeId,
       key: ResourceNamesEnum.PROMO_SLIDE,
     })) as { banner: PromoBanner | null };
 
@@ -150,7 +187,7 @@ export default class SlideHandler extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -185,9 +222,9 @@ export default class SlideHandler extends PostgresClient {
       const storeBanner = { ...banner, direction, sliders };
 
       /** Set the resources in the cache store */
-      if (banner && alias) {
+      if (banner && storeId) {
         this.sliderCacheStore.setResource({
-          store,
+          storeId: storeId,
           key: ResourceNamesEnum.PROMO_SLIDE,
           resource: storeBanner,
         });

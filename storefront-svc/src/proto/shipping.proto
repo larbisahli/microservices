@@ -34,7 +34,7 @@ message Shipping {
 
 message ShippingRequest {
     required string alias = 1;
-    optional string storeId = 2;
+    optional string suid = 2;
 }
 
 message ShippingResponse {

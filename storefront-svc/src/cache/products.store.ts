@@ -12,39 +12,39 @@ export class ProductsCacheStore {
   constructor(protected productPackage: ProductPackage) {}
 
   private getId = ({
-    alias,
+    storeId,
     key,
     page = null,
   }: {
-    alias: string;
+    storeId: string;
     key: string;
     page?: number | null;
   }) => {
     if (page) {
       return crypto
         .createHash('sha256')
-        .update(`${alias}:${key}:${page}`)
+        .update(`${storeId}:${key}:${page}`)
         .digest('hex');
     } else {
       return crypto
         .createHash('sha256')
-        .update(`${alias}:${key}`)
+        .update(`${storeId}:${key}`)
         .digest('hex');
     }
   };
 
   public getProducts = async ({
-    alias,
+    storeId,
     key,
     page = null,
   }: {
-    alias: string;
+    storeId: string;
     key: ResourceNamesType | string;
     page?: number | null;
   }) => {
     try {
       const resource = await ProductsCache.findOne({
-        key: { $eq: this.getId({ alias, key, page }) },
+        key: { $eq: this.getId({ storeId, key, page }) },
       });
 
       if (isEmpty(resource && resource.data)) {
@@ -64,12 +64,12 @@ export class ProductsCacheStore {
   };
 
   public setProducts = async ({
-    store,
+    storeId,
     key,
     resource,
     page = null,
   }: {
-    store: { alias: string; storeId: string };
+    storeId: string;
     key: ResourceNamesType | string;
     resource: any;
     page?: number | null;
@@ -95,12 +95,9 @@ export class ProductsCacheStore {
         precision: 2,
       });
 
-      const { alias, storeId } = store;
-
       const respond = await ProductsCache.create({
-        key: this.getId({ alias, key, page }),
+        key: this.getId({ storeId, key, page }),
         data: buffer,
-        alias,
         storeId,
         page,
         size: `${value}${unit}`,

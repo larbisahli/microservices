@@ -41,14 +41,12 @@ export default class ProductRepository extends PostgresClient {
    */
   public getProduct = async ({
     id,
-    alias,
     storeLanguageId,
     storeId,
   }: {
     id: number;
-    alias: string;
     storeLanguageId: number;
-    storeId?: string;
+    storeId: string;
   }): Promise<{ product: Product__Output | null; error: any }> => {
     const {
       getProductTranslation,
@@ -64,7 +62,7 @@ export default class ProductRepository extends PostgresClient {
     } = this.productQueries;
 
     /** Check if resource is in the cache store */
-    const resource = (await this.productCacheStore.getProductById({ id })) as {
+    const resource = (await this.productCacheStore.getProductById(id)) as {
       product: Product__Output | null;
     };
 
@@ -77,7 +75,7 @@ export default class ProductRepository extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -196,13 +194,15 @@ export default class ProductRepository extends PostgresClient {
         },
       } as unknown as Product__Output;
 
-      /** Set the resources in the cache store */
-      this.productCacheStore.setProduct({
-        store: { alias: store?.alias!, storeId: store?.storeId! },
-        id: productId,
-        slug,
-        resource: product,
-      });
+      if (productId && storeId) {
+        /** Set the resources in the cache store */
+        this.productCacheStore.setProduct({
+          storeId,
+          id: productId,
+          slug,
+          resource: product,
+        });
+      }
 
       await client.query('COMMIT');
 

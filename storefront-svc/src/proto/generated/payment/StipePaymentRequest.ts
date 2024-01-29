@@ -2,12 +2,12 @@
 
 export interface StipePaymentRequest {
   alias?: string;
-  storeId?: string;
-  _storeId?: 'storeId';
+  suid?: string;
+  _suid?: 'suid';
 }
 
 export interface StipePaymentRequest__Output {
   alias: string;
-  storeId?: string;
-  _storeId: 'storeId';
+  suid?: string;
+  _suid: 'suid';
 }

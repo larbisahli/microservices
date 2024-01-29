@@ -16,6 +16,7 @@ import { LanguageResponse } from '@proto/generated/language/LanguageResponse';
 import { ConfigCacheStore } from '@cache/config.store';
 import { LanguageCacheStore } from '@cache/language.store';
 import ConfigRepository from '@repository/config.repository';
+import { CryptoUtils } from '@core';
 
 @Service()
 export default class ConfigHandler extends PostgresClient {
@@ -30,7 +31,8 @@ export default class ConfigHandler extends PostgresClient {
     protected configCacheStore: ConfigCacheStore,
     protected languageCacheStore: LanguageCacheStore,
     protected languageQueries: LanguageQueries,
-    protected configRepository: ConfigRepository
+    protected configRepository: ConfigRepository,
+    protected cryptoUtils: CryptoUtils
   ) {
     super();
   }
@@ -45,21 +47,39 @@ export default class ConfigHandler extends PostgresClient {
     error: ServerErrorResponse | Partial<StatusObject> | null;
     response: { config: Settings__Output | null };
   }> => {
-    const { alias, storeId } = call.request;
+    const { alias, suid } = call.request;
+
     if (!alias) {
       return {
         error: {
           code: Status.CANCELLED,
-          details: 'Store identifier is not defined',
+          details: 'Store identifier 1 is not defined',
         },
         response: { config: null },
       };
     }
+
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier 2 is not defined',
+        },
+        response: { config: null },
+      };
+    }
+
     try {
-      const { config, error } = await this.configRepository.getStoreConfig({
-        alias,
-        storeId,
-      });
+      const { config, error } = await this.configRepository.getStoreConfig(
+        storeId
+      );
       if (error) {
         return {
           error: {
@@ -93,22 +113,39 @@ export default class ConfigHandler extends PostgresClient {
     response: { language: Language | null };
   }> => {
     const { getLanguage } = this.languageQueries;
-    const { alias, storeId, id } = call.request;
+    const { alias, suid, id } = call.request;
 
     if (!alias || !id) {
       return {
         error: {
           code: Status.CANCELLED,
-          details: 'Store identifier is not defined',
+          details: 'Store identifier 1 is not defined',
+        },
+        response: { language: null },
+      };
+    }
+
+    let storeId: string | null;
+    if (suid) {
+      storeId = await this.cryptoUtils.decrypt(suid);
+    } else {
+      storeId = await this.getStoreId({ alias });
+    }
+
+    if (!storeId) {
+      return {
+        error: {
+          code: Status.CANCELLED,
+          details: 'store identifier 2 is not defined',
         },
         response: { language: null },
       };
     }
 
     /** Check if resource is in the cache store */
-    const resource = (await this.languageCacheStore.getLanguage({
-      alias,
-    })) as { language: Language | null };
+    const resource = (await this.languageCacheStore.getLanguage(storeId)) as {
+      language: Language | null;
+    };
 
     if (resource) {
       return { error: null, response: resource };
@@ -119,7 +156,7 @@ export default class ConfigHandler extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -136,9 +173,9 @@ export default class ConfigHandler extends PostgresClient {
       const language = rows[0];
 
       /** Set the resources in the cache store */
-      if (language && alias) {
+      if (language && storeId) {
         this.languageCacheStore.setLanguage({
-          store,
+          storeId,
           resource: language,
         });
       }

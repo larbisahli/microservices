@@ -4,14 +4,14 @@ export interface CategoryRequest {
   urlKey?: string;
   alias?: string;
   storeLanguageId?: number;
-  storeId?: string;
-  _storeId?: 'storeId';
+  suid?: string;
+  _suid?: 'suid';
 }
 
 export interface CategoryRequest__Output {
   urlKey: string;
   alias: string;
   storeLanguageId: number;
-  storeId?: string;
-  _storeId: 'storeId';
+  suid?: string;
+  _suid: 'suid';
 }

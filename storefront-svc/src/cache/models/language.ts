@@ -13,10 +13,6 @@ const LanguageCache = new Schema(
       type: String,
       require: true,
     },
-    alias: {
-      type: String,
-      required: true,
-    },
     data: {
       type: Buffer,
       required: true,

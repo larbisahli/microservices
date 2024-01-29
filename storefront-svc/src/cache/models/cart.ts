@@ -14,10 +14,6 @@ const CartCache = new Schema(
       require: true,
       index: { unique: false },
     },
-    alias: {
-      type: String,
-      required: true,
-    },
     data: {
       type: Buffer,
       required: true,

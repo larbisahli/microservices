@@ -87,22 +87,32 @@ export default class PostgresClient {
     return await ReadPool.query<T>(queryConfig);
   }
 
-  protected async setupStoreSessions(
-    client: PoolClient,
-    { alias, storeId }: { alias: string; storeId?: string }
-  ) {
+  protected async setupStoreSessions(client: PoolClient, storeId: string) {
+    if (storeId) {
+      /** Set store id session for RLS **/
+      await client.query(setSessionStoreId(storeId));
+    } else {
+      await client.query('ROLLBACK');
+      return { error: { message: `Store id not found` } };
+    }
+    return { error: null, storeId };
+  }
+
+  protected async getStoreId({ alias }: { alias: string }) {
     let store: StoreType | null = null;
 
     if (!alias) {
-      return { error: { message: `Store alias and storeId not found` } };
+      return null;
     }
 
-    if (alias) {
+    const client = await this.transaction();
+
+    try {
+      await client.query('BEGIN');
+
       /** Set alias session for RLS **/
       await client.query(setSessionAlias(alias));
-    }
 
-    if (!storeId) {
       /** Set email session for RLS to access the user_account table **/
       const { rows: placeholderUuidRows } = await client.query(
         `SELECT uuid_nil()`
@@ -116,15 +126,23 @@ export default class PostgresClient {
         getStoreIdByAlias()
       );
       store = storeRows[0] ?? {};
-    }
-    const id = store?.id ?? storeId;
-    if (id) {
-      /** Set store id session for RLS **/
-      await client.query(setSessionStoreId(id));
-    } else {
+      const id = store?.id;
+      if (!id) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      await client.query('COMMIT');
+
+      return id;
+    } catch (error: any) {
+      console.log(error);
       await client.query('ROLLBACK');
-      return { error: { message: `Store alias:"${alias}" not found` } };
+      const message = error?.message as string;
+      console.log(message);
+      return null;
+    } finally {
+      client.release();
     }
-    return { error: null, alias, storeId: id };
   }
 }

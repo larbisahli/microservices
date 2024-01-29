@@ -4,14 +4,14 @@ export interface CartRequest {
   alias?: string;
   storeLanguageId?: number;
   cuid?: string;
-  storeId?: string;
-  _storeId?: 'storeId';
+  suid?: string;
+  _suid?: 'suid';
 }
 
 export interface CartRequest__Output {
   alias: string;
   storeLanguageId: number;
   cuid: string;
-  storeId?: string;
-  _storeId: 'storeId';
+  suid?: string;
+  _suid: 'suid';
 }

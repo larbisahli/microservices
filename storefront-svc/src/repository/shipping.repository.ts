@@ -22,18 +22,14 @@ export default class ShippingRepository extends PostgresClient {
    * @param { ServerUnaryCall<ProductRequest, ProductResponse>} call
    * @returns {Promise<ProductInterface>}
    */
-  public getShippings = async ({
-    alias,
-    storeId,
-  }: {
-    alias: string;
-    storeId?: string;
-  }): Promise<{ shippings: Shipping[] | []; error: any }> => {
+  public getShippings = async (
+    storeId: string
+  ): Promise<{ shippings: Shipping[] | []; error: any }> => {
     const { getShippingZones, getZones, getShippingRates } =
       this.shippingQueries;
 
     /** Check if resource is in the cache store */
-    const resource = (await this.shippingCacheStore.getShippings(alias)) as {
+    const resource = (await this.shippingCacheStore.getShippings(storeId)) as {
       shippings: Shipping[] | [];
     };
 
@@ -46,7 +42,7 @@ export default class ShippingRepository extends PostgresClient {
     try {
       await client.query('BEGIN');
 
-      const store = await this.setupStoreSessions(client, { alias, storeId });
+      const store = await this.setupStoreSessions(client, storeId);
 
       if (store?.error) {
         return {
@@ -84,9 +80,9 @@ export default class ShippingRepository extends PostgresClient {
       }
 
       /** Set the resources in the cache store */
-      if (shippings && alias) {
+      if (shippings && storeId) {
         this.shippingCacheStore.setShippings({
-          store,
+          storeId,
           resource: shippings,
         });
       }

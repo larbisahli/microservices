@@ -14,10 +14,6 @@ const Product = new Schema(
       required: true,
       index: { unique: true }, // sha(alias:slug)
     },
-    alias: {
-      type: String,
-      required: true,
-    },
     storeId: {
       type: String,
       require: true,

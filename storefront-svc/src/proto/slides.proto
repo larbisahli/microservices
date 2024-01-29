@@ -38,7 +38,7 @@ message PromoBanner {
 message HeroSlidesRequest {
     required string alias = 1;
     required uint32 storeLanguageId = 2;
-    optional string storeId = 3;
+    optional string suid = 3;
   }
 
 message HeroSlidesResponse {
@@ -48,7 +48,7 @@ message HeroSlidesResponse {
 message PromoBannerRequest {
   required string alias = 1;
   required uint32 storeLanguageId = 2;
-  optional string storeId = 3;
+  optional string suid = 3;
 }
 
 message PromoBannerResponse {

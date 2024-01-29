@@ -8,7 +8,7 @@ message Stripe {
 
 message StipePaymentRequest {
     required string alias = 1;
-    optional string storeId = 3;
+    optional string suid = 3;
 }
 
 message StipePaymentResponse {

@@ -34,25 +34,28 @@ export class SliderCacheStore {
   }
 
   private getId = ({
-    alias,
+    storeId,
     key,
   }: {
-    alias: string;
+    storeId: string;
     key: ResourceNamesType | string;
   }) => {
-    return crypto.createHash('sha256').update(`${alias}:${key}`).digest('hex');
+    return crypto
+      .createHash('sha256')
+      .update(`${storeId}:${key}`)
+      .digest('hex');
   };
 
   public getResource = async ({
-    alias,
+    storeId,
     key,
   }: {
-    alias: string;
+    storeId: string;
     key: ResourceNamesType | string;
   }) => {
     try {
       const resource = await SliderCache.findOne({
-        key: { $eq: this.getId({ alias, key }) },
+        key: { $eq: this.getId({ storeId, key }) },
       });
 
       if (isEmpty(resource && resource.data)) {
@@ -71,11 +74,11 @@ export class SliderCacheStore {
   };
 
   public setResource = async ({
-    store,
+    storeId,
     key,
     resource,
   }: {
-    store: { alias: string; storeId: string };
+    storeId: string;
     key: ResourceNamesType | string;
     resource: any;
   }) => {
@@ -98,12 +101,9 @@ export class SliderCacheStore {
         precision: 2,
       });
 
-      const { alias, storeId } = store;
-
       const respond = await SliderCache.create({
-        key: this.getId({ alias, key }),
+        key: this.getId({ storeId, key }),
         data: buffer,
-        alias,
         name: key,
         storeId,
         size: `${value}${unit}`,
@@ -117,15 +117,15 @@ export class SliderCacheStore {
   };
 
   public invalidateResourceCache = async ({
-    alias,
+    storeId,
     key,
   }: {
-    alias: string;
+    storeId: string;
     key: ResourceNamesType;
   }) => {
     try {
       const respond = await SliderCache.deleteOne({
-        key: { $eq: this.getId({ alias, key }) },
+        key: { $eq: this.getId({ storeId, key }) },
       });
       console.log({ respond });
     } catch (error) {
