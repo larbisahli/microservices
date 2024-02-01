@@ -6,21 +6,21 @@ import type {
 } from '../checkout/FinalPrice';
 
 export interface Summary {
-  grandInclTotal?: _checkout_FinalPrice | null;
-  grandExclTotal?: _checkout_FinalPrice | null;
+  grandTotalInclTax?: _checkout_FinalPrice | null;
+  grandTotalExclTax?: _checkout_FinalPrice | null;
   subtotalInclTax?: _checkout_FinalPrice | null;
   subtotalExclTax?: _checkout_FinalPrice | null;
-  subtotalWithDiscount?: _checkout_FinalPrice | null;
+  totalDiscount?: _checkout_FinalPrice | null;
   totalShippingInclTax?: _checkout_FinalPrice | null;
   totalShippingExclTax?: _checkout_FinalPrice | null;
 }
 
 export interface Summary__Output {
-  grandInclTotal: _checkout_FinalPrice__Output | null;
-  grandExclTotal: _checkout_FinalPrice__Output | null;
+  grandTotalInclTax: _checkout_FinalPrice__Output | null;
+  grandTotalExclTax: _checkout_FinalPrice__Output | null;
   subtotalInclTax: _checkout_FinalPrice__Output | null;
   subtotalExclTax: _checkout_FinalPrice__Output | null;
-  subtotalWithDiscount: _checkout_FinalPrice__Output | null;
+  totalDiscount: _checkout_FinalPrice__Output | null;
   totalShippingInclTax: _checkout_FinalPrice__Output | null;
   totalShippingExclTax: _checkout_FinalPrice__Output | null;
 }

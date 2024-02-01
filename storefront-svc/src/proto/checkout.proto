@@ -59,11 +59,11 @@ message FinalPrice {
 }
 
 message Summary {
-    FinalPrice grandInclTotal = 1;
-    FinalPrice grandExclTotal = 2;
+    FinalPrice grandTotalInclTax = 1;
+    FinalPrice grandTotalExclTax = 2;
     FinalPrice subtotalInclTax = 3;
     FinalPrice subtotalExclTax = 4;
-    FinalPrice subtotalWithDiscount = 5;
+    FinalPrice totalDiscount = 5;
     FinalPrice totalShippingInclTax = 6;
     FinalPrice totalShippingExclTax = 7;
 }

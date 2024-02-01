@@ -197,41 +197,45 @@ export default class CheckoutHandler extends PostgresClient {
     );
     let subtotalInclTax = getCartItemsTotalInclTaxPrice(items, taxRate);
     let subtotalExclTax = getCartItemsTotalPriceExclTax(items);
-    let grandInclTotal = subtotalInclTax + shipmentInclTaxPrice;
-    let grandExclTotal = subtotalExclTax + shippingPriceExclTax;
-    let subtotalWithDiscount = 0;
+    let grandTotalInclTax = subtotalInclTax + shipmentInclTaxPrice;
+    let grandTotalExclTax = subtotalExclTax + shippingPriceExclTax;
+    let totalDiscount = 0;
 
     // *** DISCOUNT ***
     if (discount) {
       const discountValue = Number(discount?.discountValue ?? 0);
       const discountType = discount?.discountType;
       if (discountType === CouponDiscountsType.Fixed) {
-        subtotalWithDiscount = discountValue;
-        grandInclTotal -=
-          grandInclTotal >= discountValue ? discountValue : grandInclTotal;
-        grandExclTotal -=
-          grandExclTotal >= discountValue ? discountValue : grandExclTotal;
+        totalDiscount = discountValue;
+        grandTotalInclTax -=
+          grandTotalInclTax >= discountValue
+            ? discountValue
+            : grandTotalInclTax;
+        grandTotalExclTax -=
+          grandTotalExclTax >= discountValue
+            ? discountValue
+            : grandTotalExclTax;
       } else if (discountType === CouponDiscountsType.Percentage) {
         const value = roundTo3(
-          Number(grandExclTotal) * (Number(discountValue) / 100)
+          Number(grandTotalExclTax) * (Number(discountValue) / 100)
         );
-        subtotalWithDiscount = value;
-        grandInclTotal -= value;
-        grandExclTotal -= value;
+        totalDiscount = value;
+        grandTotalInclTax -= value;
+        grandTotalExclTax -= value;
       } else if (discountType === CouponDiscountsType.FreeShipping) {
-        grandInclTotal -= shipmentInclTaxPrice;
-        grandExclTotal -= shippingPriceExclTax;
+        grandTotalInclTax -= shipmentInclTaxPrice;
+        grandTotalExclTax -= shippingPriceExclTax;
         shipmentInclTaxPrice = 0;
         shippingPriceExclTax = 0;
       }
     }
 
     return {
-      grandInclTotal: {
-        value: roundTo3(grandInclTotal),
+      grandTotalInclTax: {
+        value: roundTo3(grandTotalInclTax),
       },
-      grandExclTotal: {
-        value: roundTo3(grandExclTotal),
+      grandTotalExclTax: {
+        value: roundTo3(grandTotalExclTax),
       },
       subtotalInclTax: {
         value: subtotalInclTax,
@@ -239,8 +243,8 @@ export default class CheckoutHandler extends PostgresClient {
       subtotalExclTax: {
         value: subtotalExclTax,
       },
-      subtotalWithDiscount: {
-        value: subtotalWithDiscount,
+      totalDiscount: {
+        value: totalDiscount,
       },
       totalShippingInclTax: {
         value: shipmentInclTaxPrice,
