@@ -1,0 +1,64 @@
+version: '3.8'
+services:
+  # mongodb:
+  #   container_name: mongo
+  #   image: mongo
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: 'test'
+  #   volumes:
+  #     - ./data:/data/db
+  #   ports:
+  #     - '27017:27017'
+  #   restart: always
+  # webserver:
+  #   image: nginx:mainline-alpine
+  #   container_name: webserver
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: 'test'
+      POSTGRES_PASSWORD: 'test'
+      POSTGRES_DB: 'development'
+      PGDATA: /var/lib/postgresql/data/
+    volumes:
+      - ./database:/var/lib/postgresql/data/
+    ports:
+      - '5432:5432'
+    restart: always
+
+  redis:
+    image: redis
+    container_name: redis
+    command: redis-server
+    ports:
+      - '6379:6379'
+    restart: always
+
+#   pgadmin:
+#     container_name: pgadmin
+#     image: dpage/pgadmin4
+#     environment:
+#       PGADMIN_DEFAULT_EMAIL: myecomhost@gmail.com
+#       PGADMIN_DEFAULT_PASSWORD: '1905'
+#       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: 'True'
+#     ports:
+#       - '5050:80'
+#     volumes:
+#       - pgadmin:/var/lib/pgadmin
+#     restart: unless-stopped
+
+# volumes:
+#   pgadmin:
+
+networks:
+  default:
+      name: backend
+      external: true
