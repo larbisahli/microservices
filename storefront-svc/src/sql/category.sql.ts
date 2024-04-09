@@ -85,7 +85,7 @@ export default class CategoryQueryString extends CommonQueryString {
     -- thumbnail
     ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
     FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = cate.media_id )) AS thumbnail
-    FROM category AS cate WHERE cate.store_id = current_setting('app.current_store_id')::uuid AND cate.include_in_homepage is TRUE ORDER BY cate.position ASC`;
+    FROM category AS cate WHERE cate.store_id = current_setting('app.current_store_id')::uuid AND cate.include_in_homepage is TRUE ORDER BY cate.position ASC LIMIT 10`;
     return {
       name: 'get-home-page-categories',
       text,
