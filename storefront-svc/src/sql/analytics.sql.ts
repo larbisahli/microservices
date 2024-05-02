@@ -24,7 +24,6 @@ export default class AnalyticsQueryString {
     ('delivery_time', current_setting('app.current_store_id')::uuid, 0),
     ('order', current_setting('app.current_store_id')::uuid, 0),
     ('sell', current_setting('app.current_store_id')::uuid, 0),
-    ('hero_slider', current_setting('app.current_store_id')::uuid, 0),
     ('notification', current_setting('app.current_store_id')::uuid, 0),
     ('store_language', current_setting('app.current_store_id')::uuid, 0),
     ('cart', current_setting('app.current_store_id')::uuid, 0);

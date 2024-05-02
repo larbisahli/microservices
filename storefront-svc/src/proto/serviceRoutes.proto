@@ -4,7 +4,6 @@ package ServiceRoutes;
 
 import "product.proto";
 import "category.proto";
-import "slides.proto";
 import "settings.proto";
 import "language.proto";
 import "page.proto";
@@ -12,6 +11,7 @@ import "payment.proto";
 import "cart.proto";
 import "checkout.proto";
 import "shipping.proto";
+import "layout.proto";
 
 service LanguageServiceRoutes {
   rpc getLanguage(LanguageRequest)                       returns (LanguageResponse);
@@ -21,11 +21,6 @@ service CategoryServiceRoutes {
   rpc getMenu(MenuRequest)                               returns (MenuResponse);
   rpc getHomePageCategories(HomePageCategoryRequest)     returns (HomePageCategoryResponse);
   rpc getCategory(CategoryRequest)                       returns (CategoryResponse);
-}
-
-service SliderServiceRoutes {
-  rpc getHeroSlides(HeroSlidesRequest)                   returns (HeroSlidesResponse);
-  rpc getPromoBanner(PromoBannerRequest)                 returns (PromoBannerResponse);
 }
 
 service ProductServiceRoutes {
@@ -54,4 +49,8 @@ service CheckoutServiceRoutes {
 
 service ShippingServiceRoutes {
   rpc getAvailableShippings(ShippingRequest)             returns (ShippingResponse);
+}
+
+service LayoutServiceRoutes {
+  rpc getPageLayout(LayoutRequest)                       returns (LayoutResponse);
 }

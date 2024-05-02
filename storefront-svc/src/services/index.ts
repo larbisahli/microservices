@@ -5,13 +5,11 @@ import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import { Service, Container } from 'typedi';
 import { ProtoGrpcType } from '@proto/generated/serviceRoutes';
-import SlideHandler from './slider';
 import ProductHandler from './product';
 import ConfigHandler from './config';
 import CategoryHandler from './category';
 import PageHandler from './page';
 // --------------- <TYPES> ---------------
-import { PromoBanner } from '@proto/generated/slides/PromoBanner';
 import { ConfigRequest } from '@proto/generated/settings/ConfigRequest';
 import { ConfigResponse } from '@proto/generated/settings/ConfigResponse';
 import { Settings } from '@proto/generated/settings/Settings';
@@ -31,11 +29,6 @@ import { Menu__Output } from '@proto/generated/category/Menu';
 import { CategoryRequest } from '@proto/generated/category/CategoryRequest';
 import { CategoryResponse } from '@proto/generated/category/CategoryResponse';
 import { Category, Category__Output } from '@proto/generated/category/Category';
-import { HeroSlidesRequest } from '@proto/generated/slides/HeroSlidesRequest';
-import { HeroSlidesResponse } from '@proto/generated/slides/HeroSlidesResponse';
-import { HeroSlide } from '@proto/generated/slides/HeroSlide';
-import { PromoBannerRequest } from '@proto/generated/slides/PromoBannerRequest';
-import { PromoBannerResponse } from '@proto/generated/slides/PromoBannerResponse';
 import { Language } from '@proto/generated/language/Language';
 import { LanguageRequest } from '@proto/generated/language/LanguageRequest';
 import { LanguageResponse } from '@proto/generated/language/LanguageResponse';
@@ -51,6 +44,10 @@ import { ShippingRequest } from '@proto/generated/shipping/ShippingRequest';
 import { ShippingResponse } from '@proto/generated/shipping/ShippingResponse';
 import { Shipping } from '@proto/generated/shipping/Shipping';
 import ShippingHandler from './shipping';
+import LayoutHandler from './layout';
+import { LayoutRequest } from '@proto/generated/layout/LayoutRequest';
+import { Layout } from '@proto/generated/layout/Layout';
+import { LayoutResponse } from '@proto/generated/layout/LayoutResponse';
 
 const PROTO_PATH = './dist/proto/serviceRoutes.proto';
 
@@ -78,12 +75,12 @@ const { ServiceRoutes } = grpc.loadPackageDefinition(
 export const {
   LanguageServiceRoutes,
   CategoryServiceRoutes,
-  SliderServiceRoutes,
   ProductServiceRoutes,
   ConfigServiceRoutes,
   PageServiceRoutes,
   CheckoutServiceRoutes,
   ShippingServiceRoutes,
+  LayoutServiceRoutes,
 } = ServiceRoutes;
 
 @Service()
@@ -91,7 +88,6 @@ class gRPC extends grpc.Server {
   /**
    * @param {ProductHandler} productHandler
    * @param {CategoryHandler} categoryHandler
-   * @param {SlideHandler} slideHandler
    * @param {ConfigHandler} configHandler
    * @param {PageHandler} pageHandler
    * @param {CheckoutHandler} checkoutHandler
@@ -100,12 +96,12 @@ class gRPC extends grpc.Server {
   constructor(
     protected productHandler: ProductHandler,
     protected categoryHandler: CategoryHandler,
-    protected slideHandler: SlideHandler,
     protected configHandler: ConfigHandler,
     protected pageHandler: PageHandler,
     protected checkoutHandler: CheckoutHandler,
     protected shippingHandler: ShippingHandler,
-    protected cartHandler: CartHandler
+    protected cartHandler: CartHandler,
+    protected layoutHandler: LayoutHandler
   ) {
     super();
 
@@ -125,11 +121,6 @@ class gRPC extends grpc.Server {
       getCategory: this.getCategory,
     });
 
-    this.addService(SliderServiceRoutes.service, {
-      getHeroSlides: this.getHeroSlides,
-      getPromoBanner: this.getPromoBanner,
-    });
-
     this.addService(ConfigServiceRoutes.service, {
       getConfig: this.getConfig,
     });
@@ -145,6 +136,10 @@ class gRPC extends grpc.Server {
 
     this.addService(ShippingServiceRoutes.service, {
       getAvailableShippings: this.getAvailableShippings,
+    });
+
+    this.addService(LayoutServiceRoutes.service, {
+      getPageLayout: this.getPageLayout,
     });
   }
 
@@ -298,38 +293,6 @@ class gRPC extends grpc.Server {
   };
 
   /**
-   * Store hero slider request handler.
-   * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {sliders: HeroBanner[]})} callback Response callback
-   */
-  protected getHeroSlides = async (
-    call: grpc.ServerUnaryCall<HeroSlidesRequest, HeroSlidesResponse>,
-    callback: grpc.sendUnaryData<{ sliders: HeroSlide[] | null }>
-  ) => {
-    const {
-      error,
-      response: { sliders },
-    } = await this.slideHandler.getHeroSlides(call);
-    callback(error, { sliders });
-  };
-
-  /**
-   * Store Promo slider request handler.
-   * @param {EventEmitter} call Call object for the handler to process
-   * @param {function(Error, {banner: PromoBanner})} callback Response callback
-   */
-  protected getPromoBanner = async (
-    call: grpc.ServerUnaryCall<PromoBannerRequest, PromoBannerResponse>,
-    callback: grpc.sendUnaryData<{ banner: PromoBanner | null }>
-  ) => {
-    const {
-      error,
-      response: { banner },
-    } = await this.slideHandler.getPromoSlider(call);
-    callback(error, { banner });
-  };
-
-  /**
    * Cart request handler.
    * @param {EventEmitter} call Call object for the handler to process
    * @param {function(Error, {cart: Cart | null})} callback Response callback
@@ -375,6 +338,22 @@ class gRPC extends grpc.Server {
       response: { shippings },
     } = await this.shippingHandler.getShippings(call);
     callback(error, { shippings });
+  };
+
+  /**
+   * Page CMS request handler.
+   * @param {EventEmitter} call Call object for the handler to process
+   * @param {function(Error, { shippings: Shipping[] | null })} callback Response callback
+   */
+  protected getPageLayout = async (
+    call: grpc.ServerUnaryCall<LayoutRequest, LayoutResponse>,
+    callback: grpc.sendUnaryData<{ layout: Layout | null }>
+  ) => {
+    const {
+      error,
+      response: { layout },
+    } = await this.layoutHandler.getPageLayout(call);
+    callback(error, { layout });
   };
 }
 

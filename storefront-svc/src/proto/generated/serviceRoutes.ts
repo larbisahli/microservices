@@ -18,6 +18,10 @@ import type {
   LanguageServiceRoutesDefinition as _ServiceRoutes_LanguageServiceRoutesDefinition,
 } from './ServiceRoutes/LanguageServiceRoutes';
 import type {
+  LayoutServiceRoutesClient as _ServiceRoutes_LayoutServiceRoutesClient,
+  LayoutServiceRoutesDefinition as _ServiceRoutes_LayoutServiceRoutesDefinition,
+} from './ServiceRoutes/LayoutServiceRoutes';
+import type {
   PageServiceRoutesClient as _ServiceRoutes_PageServiceRoutesClient,
   PageServiceRoutesDefinition as _ServiceRoutes_PageServiceRoutesDefinition,
 } from './ServiceRoutes/PageServiceRoutes';
@@ -33,10 +37,6 @@ import type {
   ShippingServiceRoutesClient as _ServiceRoutes_ShippingServiceRoutesClient,
   ShippingServiceRoutesDefinition as _ServiceRoutes_ShippingServiceRoutesDefinition,
 } from './ServiceRoutes/ShippingServiceRoutes';
-import type {
-  SliderServiceRoutesClient as _ServiceRoutes_SliderServiceRoutesClient,
-  SliderServiceRoutesDefinition as _ServiceRoutes_SliderServiceRoutesDefinition,
-} from './ServiceRoutes/SliderServiceRoutes';
 
 type SubtypeConstructor<
   Constructor extends new (...args: any) => any,
@@ -63,6 +63,10 @@ export interface ProtoGrpcType {
       typeof grpc.Client,
       _ServiceRoutes_LanguageServiceRoutesClient
     > & { service: _ServiceRoutes_LanguageServiceRoutesDefinition };
+    LayoutServiceRoutes: SubtypeConstructor<
+      typeof grpc.Client,
+      _ServiceRoutes_LayoutServiceRoutesClient
+    > & { service: _ServiceRoutes_LayoutServiceRoutesDefinition };
     PageServiceRoutes: SubtypeConstructor<
       typeof grpc.Client,
       _ServiceRoutes_PageServiceRoutesClient
@@ -79,10 +83,6 @@ export interface ProtoGrpcType {
       typeof grpc.Client,
       _ServiceRoutes_ShippingServiceRoutesClient
     > & { service: _ServiceRoutes_ShippingServiceRoutesDefinition };
-    SliderServiceRoutes: SubtypeConstructor<
-      typeof grpc.Client,
-      _ServiceRoutes_SliderServiceRoutesClient
-    > & { service: _ServiceRoutes_SliderServiceRoutesDefinition };
   };
   attribute: {
     Attribute: MessageTypeDefinition;
@@ -139,6 +139,12 @@ export interface ProtoGrpcType {
     LanguageResponse: MessageTypeDefinition;
     Translation: MessageTypeDefinition;
   };
+  layout: {
+    Layout: MessageTypeDefinition;
+    LayoutBlock: MessageTypeDefinition;
+    LayoutRequest: MessageTypeDefinition;
+    LayoutResponse: MessageTypeDefinition;
+  };
   media: {
     Image: MessageTypeDefinition;
   };
@@ -177,16 +183,6 @@ export interface ProtoGrpcType {
     Shipping: MessageTypeDefinition;
     ShippingRequest: MessageTypeDefinition;
     ShippingResponse: MessageTypeDefinition;
-  };
-  slides: {
-    HeroSlide: MessageTypeDefinition;
-    HeroSlideStyle: MessageTypeDefinition;
-    HeroSlidesRequest: MessageTypeDefinition;
-    HeroSlidesResponse: MessageTypeDefinition;
-    PromoBanner: MessageTypeDefinition;
-    PromoBannerRequest: MessageTypeDefinition;
-    PromoBannerResponse: MessageTypeDefinition;
-    Slider: MessageTypeDefinition;
   };
   tag: {
     Tag: MessageTypeDefinition;

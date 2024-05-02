@@ -74,16 +74,6 @@ export default class CategoryHandler extends PostgresClient {
       };
     }
 
-    if (!storeId) {
-      return {
-        error: {
-          code: Status.CANCELLED,
-          details: 'storeId is not defined',
-        },
-        response: { menu: [] },
-      };
-    }
-
     /** Check if resource is in the cache store */
     const resource = (await this.categoryCacheStore.getResource({
       storeId,

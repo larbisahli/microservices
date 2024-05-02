@@ -52,6 +52,16 @@ export default class CommonQueryString {
       values: [],
     };
   }
+
+  public getLanguageLocaleId(languageId: number) {
+    const text = `SELECT locale_id AS "localeId" FROM store_language WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
+
+    return {
+      name: 'get-store-language-code',
+      text,
+      values: [languageId],
+    };
+  }
 }
 
 const {

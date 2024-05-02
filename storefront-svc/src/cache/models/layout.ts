@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const SliderCache = new Schema(
+const LayoutCache = new Schema(
   {
     key: {
       type: String,
@@ -12,10 +12,17 @@ const SliderCache = new Schema(
     storeId: {
       type: String,
       require: true,
+      index: { unique: false },
     },
-    name: {
+    localeId: {
       type: String,
-      required: true,
+      require: true,
+      index: { unique: false },
+    },
+    page: {
+      type: String,
+      require: true,
+      index: { unique: false },
     },
     data: {
       type: Buffer,
@@ -30,7 +37,7 @@ const SliderCache = new Schema(
       default: Date.now,
     },
   },
-  { collection: 'Sliders' }
+  { collection: 'layout' }
 );
 
-export default mongoose.model('Sliders', SliderCache);
+export default mongoose.model('layout', LayoutCache);

@@ -450,37 +450,6 @@ export interface ManufacturerType extends SharedValues {
   description?: Nullable<CountryType>;
 }
 
-export interface HeroSlideType extends SharedValues {
-  id: Scalars['Int'];
-  url?: Nullable<Scalars['String']>;
-  thumbnail: ImageType[];
-  title: Scalars['String'];
-  description?: Nullable<Scalars['String']>;
-  btnLabel?: Scalars['String'];
-  align?: 'left' | 'center' | 'right';
-  styles?: {
-    textColor?: string;
-    btnBgc?: string;
-    btnTextColor?: string;
-  };
-  position: Scalars['Int'];
-  published: Scalars['Boolean'];
-}
-
-export interface PromoSlideType extends SharedValues {
-  id: Scalars['Int'];
-  animationSpeed: number;
-  delaySpeed: number;
-  backgroundColor: string;
-  direction: 'RLT' | 'LTR';
-  published?: Scalars['Boolean'];
-  status?: 'draft' | 'publish';
-  sliders?: {
-    content: string;
-    position?: Scalars['Int'];
-  }[];
-}
-
 export interface PaymentOrderType {
   items: {
     id: string;
@@ -554,6 +523,7 @@ export interface SettingsType {
   storeName?: string;
   storeEmail?: string;
   storeNumber?: string;
+  templateId?: string;
   addressLine1?: string;
   addressLine2?: string;
   currencies?: {
@@ -641,4 +611,57 @@ export interface PageType {
   metaTitle: string;
   metaDescription: string;
   ogMedia: ImageType[];
+}
+
+export interface LayoutModuleType {
+  name: Scalars['String'];
+  group: Scalars['String'];
+  pathname: Scalars['String'];
+  isDefault: Scalars['Boolean'];
+  thumbnail: ImageType;
+}
+
+export interface StoreTemplateType {
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  description: Scalars['String'];
+  publish: Scalars['Boolean'];
+}
+
+export interface StoreTemplateType {
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  description: Scalars['String'];
+  publish: Scalars['Boolean'];
+  thumbnail: ImageType[];
+  gallery: {
+    image: ImageType[];
+    position: Scalars['Int'];
+  }[];
+}
+
+export interface StoreLayoutType {
+  id: Scalars['String'];
+  name: Scalars['String'];
+}
+
+export interface StoreLayoutBlockType {
+  id: Scalars['String'];
+  identifier: Scalars['String'];
+}
+
+export interface StoreLayoutComponentType {
+  layoutBlockId?: Scalars['String'];
+  parentId: Scalars['String'];
+  componentId: Scalars['ID'];
+  moduleName: string;
+  position: Scalars['Int'];
+  data?: Buffer | Uint8Array | string;
+  children?: StoreLayoutComponentType[] | [];
+}
+
+export interface StoreLayoutComponentContentType {
+  id?: Scalars['ID'];
+  contentId: Scalars['ID'];
+  [key: string]: string | number | boolean | any;
 }

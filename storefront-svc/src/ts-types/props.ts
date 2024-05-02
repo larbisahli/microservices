@@ -2,13 +2,11 @@ import type {
   AttributesType,
   CategoryType,
   DeliveryTimeType,
-  HeroSlideType,
   LanguageProps,
   ManufacturerType,
   OrderStatusType,
   PageType,
   ProductType,
-  PromoSlideType,
   ShippingZoneType,
   TagType,
   TaxType,
@@ -23,10 +21,6 @@ export interface ManufacturerGQValuesProps
     LanguageProps {}
 export interface AttributeGQValuesProps extends AttributesType, LanguageProps {}
 export interface PageGQValuesProps extends PageType, LanguageProps {}
-export interface HeroSlideGQValuesProps extends HeroSlideType, LanguageProps {}
-export interface PromoSlideGQValuesProps
-  extends PromoSlideType,
-    LanguageProps {}
 export interface DeliveryTimeGQValuesProps
   extends DeliveryTimeType,
     LanguageProps {}

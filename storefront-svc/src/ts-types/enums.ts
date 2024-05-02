@@ -23,7 +23,6 @@ export enum RESOURCES {
   ORDER_STATUS = 'orderStatus',
   ORDER = 'order',
   ROLE = 'role',
-  SLIDERS = 'sliders',
   THEME = 'theme',
   STORE = 'store',
   MARKETPLACE = 'marketPlace',
@@ -74,4 +73,10 @@ enum CustomErrorCode {
   INVALID_CSRF_TOKEN = 'INVALID_CSRF_TOKEN',
   VALUE_IN_USE = 'VALUE_IN_USE',
   STORE_LINK_IN_USE = 'STORE_LINK_IN_USE',
+}
+
+export enum PageLayoutBlocks {
+  Header = 'jssHeader',
+  Main = 'jssMain',
+  Footer = 'jssFooter',
 }

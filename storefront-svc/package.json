@@ -14,7 +14,7 @@
     "nodemon": "cross-env NODE_ENV=development nodemon ./dist/server.js",
     "dev": "concurrently \"yarn:watch\" \"yarn:nodemon\"",
     "format": "prettier --write \"**/*.ts\"",
-    "generate-proto-types": "npx rimraf src/proto/generated && $(npm bin)/proto-loader-gen-types --longs=String --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=src/proto/generated src/proto/*.proto",
+    "generate-proto-types": "npx rimraf src/proto/generated && ./node_modules/.bin/proto-loader-gen-types --longs=String --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=src/proto/generated src/proto/*.proto",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org business-server --project node ./dist && sentry-cli sourcemaps upload --org business-server --project node ./dist"
   },
   "_moduleAliases": {

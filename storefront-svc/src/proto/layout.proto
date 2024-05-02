@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package layout;
+
+message Layout {
+    string templateId = 1;
+    string layoutId = 2;
+    string layoutName = 3;
+    LayoutBlock jssHeader = 4;
+    repeated LayoutBlock jssMain = 5;
+    LayoutBlock jssFooter = 6;
+}
+
+message LayoutBlock {
+    string componentId = 1;
+    string moduleName = 2;
+    uint32 position = 3;
+    bytes data = 4;
+    repeated LayoutBlock children = 5 [lazy = true];
+}
+
+message LayoutRequest {
+    required string alias = 1;
+    required uint32 storeLanguageId = 2;
+    optional string suid = 3;
+    optional string page = 4;
+}
+
+message LayoutResponse {
+    Layout layout = 1;
+}
