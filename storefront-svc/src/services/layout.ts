@@ -10,8 +10,6 @@ import { Status } from '@grpc/grpc-js/build/src/constants';
 import { CryptoUtils } from '@core';
 import { LayoutCacheStore } from '@cache/layout.store';
 import {
-  SettingsType,
-  StoreLayoutBlockType,
   StoreLayoutComponentContentType,
   StoreLayoutComponentType,
   StoreLayoutType,
@@ -21,7 +19,7 @@ import { groupBy } from 'underscore';
 import { Layout } from '@proto/generated/layout/Layout';
 import { LayoutRequest } from '@proto/generated/layout/LayoutRequest';
 import { LayoutResponse } from '@proto/generated/layout/LayoutResponse';
-import language from '@cache/models/language';
+import { PoolClient } from 'pg';
 
 @Service()
 export default class LayoutHandler extends PostgresClient {
@@ -38,6 +36,125 @@ export default class LayoutHandler extends PostgresClient {
   }
 
   /**
+   * @param {any} call
+   * @returns {Promise<{ layout: StoreLayoutComponentType[] }>}
+   */
+  public getPageCommonLayout = async ({
+    client,
+    storeLanguageId,
+    templateId,
+    store,
+  }: {
+    client: PoolClient;
+    storeLanguageId: number;
+    templateId: string;
+    store: { storeId: string };
+  }): Promise<{ [PageLayoutBlocks.Main]: StoreLayoutComponentType[] }> => {
+    const { storeId } = store;
+    /** Check if resource is in the cache store */
+
+    const resource = (await this.layoutCacheStore.getPageLayout(
+      storeId,
+      templateId,
+      storeLanguageId,
+      null,
+      true
+    )) as { layout: { [PageLayoutBlocks.Main]: StoreLayoutComponentType[] } };
+
+    if (resource) {
+      return resource.layout;
+    }
+
+    try {
+      // ** ***** JSS-COMMON *****
+      const { rows: commonLayoutRows } = await client.query<StoreLayoutType>(
+        this.layoutQueryString.getCommonLayout(templateId)
+      );
+
+      const { id: commonLayoutId } = commonLayoutRows[0];
+
+      const { rows: commonLayoutComponents } =
+        await client.query<StoreLayoutComponentType>(
+          this.layoutQueryString.getLayoutComponents(commonLayoutId, true)
+        );
+
+      console.log({ commonLayoutComponents });
+
+      let components: StoreLayoutComponentType[] = [];
+
+      for await (const component of commonLayoutComponents) {
+        const { componentId, moduleName, parentId, position, moduleGroup } =
+          component;
+
+        const { rows: mainLayoutComponentContent } =
+          await client.query<StoreLayoutComponentContentType>(
+            this.layoutQueryString.getPageLayoutComponentContent(
+              componentId!,
+              storeLanguageId
+            )
+          );
+
+        const { id: mainContentId, data } = mainLayoutComponentContent[0] ?? {};
+
+        const MainData = mainContentId
+          ? { contentId: mainContentId, ...data }
+          : {};
+
+        components.push({
+          parentId,
+          componentId,
+          moduleName,
+          position,
+          moduleGroup,
+          data: Buffer.from(JSON.stringify(MainData), 'utf-8').toString(
+            'base64'
+          ),
+        });
+      }
+
+      const grouped = groupBy<StoreLayoutComponentType[]>(
+        components,
+        (component) => component.parentId
+      );
+
+      function childrenOf(
+        parentId: string | number
+      ): StoreLayoutComponentType[] {
+        return (grouped[parentId] || []).map((component) => ({
+          ...component,
+          children: childrenOf(component.componentId),
+        }));
+      }
+
+      const commonLayout = childrenOf('null');
+
+      const { rows: languageRows } = await client.query<{ localeId: string }>(
+        this.layoutQueryString.getLanguageLocaleId(storeLanguageId)
+      );
+
+      const { localeId } = languageRows[0];
+
+      const resource = { [PageLayoutBlocks.Main]: commonLayout };
+
+      /** Set the resources in the cache store */
+      if (resource && store.storeId) {
+        // this.layoutCacheStore.setPageLayout({
+        //   storeId,
+        //   templateId,
+        //   storeLanguageId,
+        //   localeId,
+        //   resource,
+        //   isCommon: true,
+        // });
+      }
+
+      return resource;
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
+  /**
    * @param { ServerUnaryCall<LayoutRequest, LayoutRequest>} call
    * @returns {Promise<{ layout: Layout }>}
    */
@@ -47,11 +164,16 @@ export default class LayoutHandler extends PostgresClient {
     error: ServerErrorResponse | Partial<StatusObject> | null;
     response: { layout: Layout | null };
   }> => {
-    const { alias, storeLanguageId, suid, page } = call.request;
+    const {
+      alias,
+      storeLanguageId,
+      suid,
+      page,
+      templateId,
+      isCustom = false,
+    } = call.request;
 
-    console.log({ alias, storeLanguageId, suid, page });
-
-    if (!alias || !storeLanguageId) {
+    if (!alias || !storeLanguageId || !templateId) {
       return {
         error: {
           code: Status.CANCELLED,
@@ -91,8 +213,10 @@ export default class LayoutHandler extends PostgresClient {
     /** Check if resource is in the cache store */
     const resource = (await this.layoutCacheStore.getPageLayout(
       storeId,
+      templateId,
+      storeLanguageId,
       page,
-      storeLanguageId
+      false
     )) as { layout: Layout | null };
 
     if (resource) {
@@ -116,183 +240,49 @@ export default class LayoutHandler extends PostgresClient {
         };
       }
 
-      const { rows: settingsRows } = await client.query<SettingsType>(
-        this.layoutQueryString.getStoreTemplateId()
-      );
-
-      const { templateId } = settingsRows[0];
-
-      if (!templateId) {
-        return {
-          error: {
-            code: Status.CANCELLED,
-            details: 'templateId not defined',
-          },
-          response: { layout: null },
-        };
-      }
-
       const { rows: layoutRows } = await client.query<StoreLayoutType>(
-        this.layoutQueryString.getPageLayout(templateId, page)
+        this.layoutQueryString.getPageLayout(templateId, page, isCustom)
       );
 
-      const { id: layoutId, name: layoutName } = layoutRows[0];
+      const { id: layoutId, name: layoutName, title } = layoutRows[0];
 
       let layout = {
         templateId,
         layoutId,
         layoutName,
+        title,
       } as { [key: string]: any };
 
+      const getCommonComponents = await this.getPageCommonLayout({
+        client,
+        storeLanguageId,
+        templateId,
+        store,
+      });
+
+      const commonComponents = getCommonComponents[PageLayoutBlocks.Main];
+
       // ** ***** JSS-HEADER *****
-      const { rows: headerLayoutBlockRows } =
-        await client.query<StoreLayoutBlockType>(
-          this.layoutQueryString.GetPageLayoutBlocks(
-            layoutId,
-            PageLayoutBlocks.Header
-          )
-        );
-
-      const { id: headerLayoutBlockId } = headerLayoutBlockRows[0];
-
-      const { rows: headerLayoutComponents } =
-        await client.query<StoreLayoutComponentType>(
-          this.layoutQueryString.getPageLayoutComponents(headerLayoutBlockId)
-        );
-
-      layout[PageLayoutBlocks.Header] = {
-        children: [],
-        data: {},
-      };
-
-      for await (const component of headerLayoutComponents) {
-        const { componentId, moduleName, parentId, position } = component;
-
-        const { rows: headerLayoutComponentContent } =
-          await client.query<StoreLayoutComponentContentType>(
-            this.layoutQueryString.getPageLayoutComponentContent(
-              componentId!,
-              storeLanguageId
-            )
-          );
-
-        const { id: headerContentId, data } =
-          headerLayoutComponentContent[0] ?? {};
-
-        let headerData = {};
-        if (data) {
-          headerData = Buffer.from(
-            JSON.stringify(
-              headerContentId ? { contentId: headerContentId, ...data } : {}
-            ),
-            'utf-8'
-          ).toString('base64');
-        }
-
-        if (!parentId) {
-          layout[PageLayoutBlocks.Header] = {
-            ...layout[PageLayoutBlocks.Header],
-            layoutBlockId: headerLayoutBlockId,
-            componentId,
-            moduleName,
-            position,
-            data: headerData,
-          };
-        } else {
-          layout[PageLayoutBlocks.Header].children.push({
-            layoutBlockId: headerLayoutBlockId,
-            componentId,
-            moduleName,
-            position,
-            data: headerData,
-          });
-        }
-      }
+      layout[PageLayoutBlocks.Header] = commonComponents.find(
+        (component) => component.moduleGroup === 'Header'
+      );
 
       //** ***** JSS-FOOTER *****
-      const { rows: footerLayoutBlockRows } =
-        await client.query<StoreLayoutBlockType>(
-          this.layoutQueryString.GetPageLayoutBlocks(
-            layoutId,
-            PageLayoutBlocks.Footer
-          )
-        );
-
-      const { id: footerLayoutBlockId } = footerLayoutBlockRows[0];
-
-      const { rows: footerLayoutComponents } =
-        await client.query<StoreLayoutComponentType>(
-          this.layoutQueryString.getPageLayoutComponents(footerLayoutBlockId)
-        );
-
-      layout[PageLayoutBlocks.Footer] = {
-        children: [],
-        data: {},
-      };
-      for await (const component of footerLayoutComponents) {
-        const { componentId, moduleName, parentId, position } = component;
-
-        const { rows: footerLayoutComponentContent } =
-          await client.query<StoreLayoutComponentContentType>(
-            this.layoutQueryString.getPageLayoutComponentContent(
-              componentId!,
-              storeLanguageId
-            )
-          );
-
-        const { id: footerContentId, data } =
-          footerLayoutComponentContent[0] ?? {};
-
-        let footerData = {};
-        if (data) {
-          footerData = Buffer.from(
-            JSON.stringify(
-              footerContentId ? { contentId: footerContentId, ...data } : {}
-            ),
-            'utf-8'
-          ).toString('base64');
-        }
-
-        if (!parentId) {
-          layout[PageLayoutBlocks.Footer] = {
-            ...layout[PageLayoutBlocks.Footer],
-            layoutBlockId: footerLayoutBlockId,
-            componentId,
-            moduleName,
-            position,
-            data: footerData,
-          };
-        } else {
-          layout[PageLayoutBlocks.Footer].children.push({
-            layoutBlockId: footerLayoutBlockId,
-            componentId,
-            moduleName,
-            position,
-            data: footerData,
-          });
-        }
-      }
+      layout[PageLayoutBlocks.Footer] = commonComponents.find(
+        (component) => component.moduleGroup === 'Footer'
+      );
 
       //** ***** JSS-MAIN *****
-      const { rows: mainLayoutBlockRows } =
-        await client.query<StoreLayoutBlockType>(
-          this.layoutQueryString.GetPageLayoutBlocks(
-            layoutId,
-            PageLayoutBlocks.Main
-          )
-        );
-
-      const { id: mainLayoutBlockId } = mainLayoutBlockRows[0];
-
       const { rows: mainLayoutComponents } =
         await client.query<StoreLayoutComponentType>(
-          this.layoutQueryString.getPageLayoutComponents(mainLayoutBlockId)
+          this.layoutQueryString.getLayoutComponents(layoutId, false)
         );
 
       let main: StoreLayoutComponentType[] = [];
 
       for await (const component of mainLayoutComponents) {
-        const { componentId, moduleName, parentId, position } = component;
+        const { componentId, moduleName, parentId, position, moduleGroup } =
+          component;
 
         const { rows: mainLayoutComponentContent } =
           await client.query<StoreLayoutComponentContentType>(
@@ -309,10 +299,10 @@ export default class LayoutHandler extends PostgresClient {
           : {};
 
         main.push({
-          layoutBlockId: mainLayoutBlockId,
           parentId,
           componentId,
           moduleName,
+          moduleGroup,
           position,
           data: Buffer.from(JSON.stringify(MainData), 'utf-8').toString(
             'base64'
@@ -334,7 +324,16 @@ export default class LayoutHandler extends PostgresClient {
         }));
       }
 
-      layout[PageLayoutBlocks.Main] = childrenOf('null');
+      const filteredCommonComponents = commonComponents.filter(
+        (component) =>
+          component.moduleGroup !== 'Header' &&
+          component.moduleGroup !== 'Footer'
+      );
+
+      layout[PageLayoutBlocks.Main] = [
+        ...childrenOf('null'),
+        ...filteredCommonComponents,
+      ];
 
       const { rows: languageRows } = await client.query<{ localeId: string }>(
         this.layoutQueryString.getLanguageLocaleId(storeLanguageId)
@@ -344,13 +343,15 @@ export default class LayoutHandler extends PostgresClient {
 
       /** Set the resources in the cache store */
       if (layout && storeId) {
-        this.layoutCacheStore.setPageLayout({
-          storeId,
-          page,
-          storeLanguageId,
-          localeId,
-          resource: layout,
-        });
+        // this.layoutCacheStore.setPageLayout({
+        //   storeId,
+        //   templateId,
+        //   page,
+        //   storeLanguageId,
+        //   localeId,
+        //   resource: layout,
+        //   isCommon: false
+        // });
       }
 
       await client.query('COMMIT');

@@ -2,6 +2,8 @@
  * This package helps us encode and decode resources to a binary blob (Uint8Array)
  */
 import { Layout } from '@proto/generated/layout/Layout';
+import { PageLayoutBlocks } from '@ts-types/enums';
+import { StoreLayoutComponentType } from '@ts-types/interfaces';
 import protobuf from 'protobufjs';
 import { Service } from 'typedi';
 
@@ -41,7 +43,7 @@ export default class LayoutPackage extends protobuf.Root {
    * @returns {Promise<{ buffer: Uint8Array; error?: unknown }>}
    */
   public encode = (
-    layout: Layout
+    layout: Layout | { [PageLayoutBlocks.Main]: StoreLayoutComponentType[] }
   ): Promise<{ buffer: Uint8Array; error?: unknown }> => {
     return new Promise((resolve, reject) => {
       try {

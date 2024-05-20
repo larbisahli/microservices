@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const LayoutCache = new Schema(
+const CommonLayoutCache = new Schema(
   {
     key: {
       type: String,
@@ -15,11 +15,6 @@ const LayoutCache = new Schema(
       index: { unique: false },
     },
     localeId: {
-      type: String,
-      require: true,
-      index: { unique: false },
-    },
-    page: {
       type: String,
       require: true,
       index: { unique: false },
@@ -41,7 +36,7 @@ const LayoutCache = new Schema(
       default: Date.now,
     },
   },
-  { collection: 'layout' }
+  { collection: 'common-layout' }
 );
 
-export default mongoose.model('layout', LayoutCache);
+export default mongoose.model('common-layout', CommonLayoutCache);

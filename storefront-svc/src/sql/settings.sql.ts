@@ -20,7 +20,7 @@ export default class SettingsQueryString {
     'metaTags', meta_tags, 'ogTitle', og_title,
     'ogDescription', og_description, 'ogImage', ARRAY((SELECT json_build_object('id', photo.id, 'image', photo.image_path, 'placeholder', photo.placeholder_path)
     FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = og_media_id )),
-    'twitterHandle', twitter_handle)) AS "seo" FROM store_settings WHERE store_id = current_setting('app.current_store_id')::uuid`;
+    'twitterHandle', twitter_handle)) AS "seo", store_template_id AS "templateId" FROM store_settings WHERE store_id = current_setting('app.current_store_id')::uuid`;
 
     return {
       name: 'get-settings',

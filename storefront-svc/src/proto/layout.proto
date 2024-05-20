@@ -6,24 +6,28 @@ message Layout {
     string templateId = 1;
     string layoutId = 2;
     string layoutName = 3;
-    LayoutBlock jssHeader = 4;
-    repeated LayoutBlock jssMain = 5;
-    LayoutBlock jssFooter = 6;
+    string title = 4;
+    LayoutBlock jssHeader = 5;
+    repeated LayoutBlock jssMain = 6;
+    LayoutBlock jssFooter = 7;
 }
 
 message LayoutBlock {
     string componentId = 1;
     string moduleName = 2;
-    uint32 position = 3;
-    bytes data = 4;
-    repeated LayoutBlock children = 5 [lazy = true];
+    string moduleGroup = 3;
+    uint32 position = 4;
+    bytes data = 5;
+    repeated LayoutBlock children = 6 [lazy = true];
 }
 
 message LayoutRequest {
     required string alias = 1;
     required uint32 storeLanguageId = 2;
     optional string suid = 3;
-    optional string page = 4;
+    required string page = 4;
+    required bool isCustom = 5;
+    required string templateId = 6;
 }
 
 message LayoutResponse {

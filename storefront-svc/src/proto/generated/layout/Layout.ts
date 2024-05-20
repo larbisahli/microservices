@@ -9,6 +9,7 @@ export interface Layout {
   templateId?: string;
   layoutId?: string;
   layoutName?: string;
+  title?: string;
   jssHeader?: _layout_LayoutBlock | null;
   jssMain?: _layout_LayoutBlock[];
   jssFooter?: _layout_LayoutBlock | null;
@@ -18,6 +19,7 @@ export interface Layout__Output {
   templateId: string;
   layoutId: string;
   layoutName: string;
+  title: string;
   jssHeader: _layout_LayoutBlock__Output | null;
   jssMain: _layout_LayoutBlock__Output[];
   jssFooter: _layout_LayoutBlock__Output | null;

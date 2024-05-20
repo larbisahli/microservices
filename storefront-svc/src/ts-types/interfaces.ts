@@ -643,18 +643,14 @@ export interface StoreTemplateType {
 export interface StoreLayoutType {
   id: Scalars['String'];
   name: Scalars['String'];
-}
-
-export interface StoreLayoutBlockType {
-  id: Scalars['String'];
-  identifier: Scalars['String'];
+  title: Scalars['String'];
 }
 
 export interface StoreLayoutComponentType {
-  layoutBlockId?: Scalars['String'];
   parentId: Scalars['String'];
   componentId: Scalars['ID'];
   moduleName: string;
+  moduleGroup?: string;
   position: Scalars['Int'];
   data?: Buffer | Uint8Array | string;
   children?: StoreLayoutComponentType[] | [];

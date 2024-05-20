@@ -49,6 +49,7 @@ export interface Settings {
   alias?: string;
   storeId?: string;
   tax?: _tax_Tax | null;
+  templateId?: string;
 }
 
 export interface Settings__Output {
@@ -71,4 +72,5 @@ export interface Settings__Output {
   alias: string;
   storeId: string;
   tax: _tax_Tax__Output | null;
+  templateId: string;
 }

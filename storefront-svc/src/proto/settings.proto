@@ -27,6 +27,7 @@ message Settings {
     required string alias = 17;
     required string storeId = 18;
     Tax tax = 19;
+    string templateId = 20;
 }
 
 message ConfigRequest {
