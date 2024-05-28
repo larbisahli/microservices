@@ -36,7 +36,7 @@ export default class LayoutQueryString extends CommonQueryString {
 
   public getLayoutComponents(layoutId: string, isCommon: boolean) {
     if (isCommon) {
-      const text = `SELECT alc.id AS "componentId", alc.parent_id AS "parentId", alc.module_name AS "moduleName",
+      const text = `SELECT alc.id AS "componentId", alc.parent_id AS "parentId", alc.module_name AS "moduleName", styles,
       alc.position, (SELECT sm.module_group AS "moduleGroup" FROM store_module AS sm WHERE sm.module_name = alc.module_name), alc.has_children AS "hasChildren" FROM store_layout_component alc WHERE alc.store_id = current_setting('app.current_store_id')::uuid AND alc.common_layout_id = $1`;
       return {
         name: 'get-common-layout-components',
@@ -44,7 +44,7 @@ export default class LayoutQueryString extends CommonQueryString {
         values: [layoutId],
       };
     } else {
-      const text = `SELECT alc.id AS "componentId", alc.parent_id AS "parentId", alc.module_name AS "moduleName",
+      const text = `SELECT alc.id AS "componentId", alc.parent_id AS "parentId", alc.module_name AS "moduleName", styles,
       alc.position, alc.has_children AS "hasChildren", (SELECT sm.module_group AS "moduleGroup" FROM store_module AS sm WHERE sm.module_name = alc.module_name) FROM store_layout_component alc WHERE alc.store_id = current_setting('app.current_store_id')::uuid AND alc.layout_id = $1 AND alc.is_visible IS TRUE`;
       return {
         name: 'get-layout-components',

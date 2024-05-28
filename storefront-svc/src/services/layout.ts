@@ -78,13 +78,17 @@ export default class LayoutHandler extends PostgresClient {
           this.layoutQueryString.getLayoutComponents(commonLayoutId, true)
         );
 
-      console.log({ commonLayoutComponents });
-
       let components: StoreLayoutComponentType[] = [];
 
       for await (const component of commonLayoutComponents) {
-        const { componentId, moduleName, parentId, position, moduleGroup } =
-          component;
+        const {
+          componentId,
+          moduleName,
+          parentId,
+          position,
+          moduleGroup,
+          styles,
+        } = component;
 
         const { rows: mainLayoutComponentContent } =
           await client.query<StoreLayoutComponentContentType>(
@@ -106,6 +110,9 @@ export default class LayoutHandler extends PostgresClient {
           moduleName,
           position,
           moduleGroup,
+          styles: Buffer.from(JSON.stringify(styles), 'utf-8').toString(
+            'base64'
+          ),
           data: Buffer.from(JSON.stringify(MainData), 'utf-8').toString(
             'base64'
           ),
@@ -281,8 +288,14 @@ export default class LayoutHandler extends PostgresClient {
       let main: StoreLayoutComponentType[] = [];
 
       for await (const component of mainLayoutComponents) {
-        const { componentId, moduleName, parentId, position, moduleGroup } =
-          component;
+        const {
+          componentId,
+          moduleName,
+          parentId,
+          position,
+          moduleGroup,
+          styles,
+        } = component;
 
         const { rows: mainLayoutComponentContent } =
           await client.query<StoreLayoutComponentContentType>(
@@ -304,6 +317,9 @@ export default class LayoutHandler extends PostgresClient {
           moduleName,
           moduleGroup,
           position,
+          styles: Buffer.from(JSON.stringify(styles), 'utf-8').toString(
+            'base64'
+          ),
           data: Buffer.from(JSON.stringify(MainData), 'utf-8').toString(
             'base64'
           ),

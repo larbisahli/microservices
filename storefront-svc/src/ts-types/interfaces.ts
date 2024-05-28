@@ -653,6 +653,7 @@ export interface StoreLayoutComponentType {
   moduleGroup?: string;
   position: Scalars['Int'];
   data?: Buffer | Uint8Array | string;
+  styles?: Buffer | Uint8Array | string;
   children?: StoreLayoutComponentType[] | [];
 }
 

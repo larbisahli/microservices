@@ -18,7 +18,8 @@ message LayoutBlock {
     string moduleGroup = 3;
     uint32 position = 4;
     bytes data = 5;
-    repeated LayoutBlock children = 6 [lazy = true];
+    bytes styles = 6;
+    repeated LayoutBlock children = 7 [lazy = true];
 }
 
 message LayoutRequest {

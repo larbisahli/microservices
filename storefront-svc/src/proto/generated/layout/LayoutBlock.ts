@@ -11,6 +11,7 @@ export interface LayoutBlock {
   moduleGroup?: string;
   position?: number;
   data?: Buffer | Uint8Array | string;
+  styles?: Buffer | Uint8Array | string;
   children?: _layout_LayoutBlock[];
 }
 
@@ -20,5 +21,6 @@ export interface LayoutBlock__Output {
   moduleGroup: string;
   position: number;
   data: Buffer;
+  styles: Buffer;
   children: _layout_LayoutBlock__Output[];
 }
