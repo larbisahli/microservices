@@ -251,6 +251,8 @@ export default class LayoutHandler extends PostgresClient {
         this.layoutQueryString.getPageLayout(templateId, page, isCustom)
       );
 
+      console.log('====>', { layoutRows });
+
       const { id: layoutId, name: layoutName, title } = layoutRows[0];
 
       let layout = {
