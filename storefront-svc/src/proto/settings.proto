@@ -20,14 +20,13 @@ message Settings {
     Currency defaultCurrency = 10;
     repeated Language locales = 11;
     GoogleAnalytics google = 12;
-    repeated Social socials = 13;
-    uint32 maxCheckoutQuantity = 14;
-    uint32 maxCheckoutAmount = 15;
-    Seo seo = 16;
-    required string alias = 17;
-    required string storeId = 18;
+    uint32 maxCheckoutQuantity = 13;
+    uint32 maxCheckoutAmount = 14;
+    Seo seo = 15;
+    required string alias = 16;
+    required string storeId = 17;
+    string templateId = 18;
     Tax tax = 19;
-    string templateId = 20;
 }
 
 message ConfigRequest {

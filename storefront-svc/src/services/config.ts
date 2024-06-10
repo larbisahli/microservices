@@ -49,6 +49,8 @@ export default class ConfigHandler extends PostgresClient {
   }> => {
     const { alias, suid } = call.request;
 
+    console.log('??????????', { alias, suid });
+
     if (!alias) {
       return {
         error: {

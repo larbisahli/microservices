@@ -7,6 +7,7 @@ import type {
 
 export interface Layout {
   templateId?: string;
+  settings?: Buffer | Uint8Array | string;
   layoutId?: string;
   layoutName?: string;
   title?: string;
@@ -17,6 +18,7 @@ export interface Layout {
 
 export interface Layout__Output {
   templateId: string;
+  settings: Buffer;
   layoutId: string;
   layoutName: string;
   title: string;

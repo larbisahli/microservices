@@ -251,7 +251,12 @@ export default class LayoutHandler extends PostgresClient {
         this.layoutQueryString.getPageLayout(templateId, page, isCustom)
       );
 
-      console.log('====>', { layoutRows });
+      const { rows: themeRows } = await client.query<{
+        themeSettings: any;
+        published: boolean;
+      }>(this.layoutQueryString.getStoreThemeInfo(templateId));
+
+      const { themeSettings } = themeRows[0];
 
       const { id: layoutId, name: layoutName, title } = layoutRows[0];
 
@@ -260,6 +265,10 @@ export default class LayoutHandler extends PostgresClient {
         layoutId,
         layoutName,
         title,
+        // Encode the object to a base64 string
+        settings: Buffer.from(JSON.stringify(themeSettings), 'utf-8').toString(
+          'base64'
+        ),
       } as { [key: string]: any };
 
       const getCommonComponents = await this.getPageCommonLayout({

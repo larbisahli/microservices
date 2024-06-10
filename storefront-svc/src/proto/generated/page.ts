@@ -15,7 +15,6 @@ export interface ProtoGrpcType {
     GoogleAnalytics: MessageTypeDefinition;
     Icon: MessageTypeDefinition;
     Seo: MessageTypeDefinition;
-    Social: MessageTypeDefinition;
     Unit: MessageTypeDefinition;
   };
   google: {

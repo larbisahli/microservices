@@ -25,6 +25,15 @@ export default class LayoutQueryString extends CommonQueryString {
     };
   }
 
+  public getStoreThemeInfo(templateId: string) {
+    const text = `SELECT theme_settings AS "themeSettings", publish FROM store_template WHERE store_id = current_setting('app.current_store_id')::uuid AND id = $1`;
+    return {
+      name: 'get-store-theme-settings',
+      text,
+      values: [templateId],
+    };
+  }
+
   public getCommonLayout(templateId: string) {
     const text = `SELECT id FROM store_common_layout WHERE store_id = current_setting('app.current_store_id')::uuid AND template_id = $1`;
     return {

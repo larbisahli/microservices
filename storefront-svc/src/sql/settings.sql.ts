@@ -11,7 +11,7 @@ export default class SettingsQueryString {
     FROM media AS photo WHERE photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = favicon_media_id )) AS favicon,
     ARRAY((SELECT json_build_object('id', lang.id, 'name', lang.name, 'localeId', lang.locale_id, 'isDefault', lang.is_default)
     FROM store_language AS lang WHERE lang.store_id = current_setting('app.current_store_id')::uuid AND lang.active is TRUE )) AS locales,
-    currencies, default_currency AS "defaultCurrency", socials, google, store_name AS "storeName", store_email AS "storeEmail",
+    currencies, default_currency AS "defaultCurrency", google, store_name AS "storeName", store_email AS "storeEmail",
     store_number AS "storeNumber", address_line1 AS "addressLine1", address_line2 AS "addressLine2",
     max_checkout_quantity AS "maxCheckoutQuantity", max_checkout_amount AS "maxCheckoutAmount", store_id AS "storeId",
     (SELECT json_build_object('name', tax.name, 'rate', tax.rate, 'countries', tax.countries) FROM store_tax AS tax WHERE tax.store_id = current_setting('app.current_store_id')::uuid AND tax.id = tax_id) as tax,
@@ -80,54 +80,6 @@ export default class SettingsQueryString {
       name: 'get-photo-by-id',
       text,
       values: [id],
-    };
-  }
-
-  public updateStoreSettings(...args: SettingsType[keyof SettingsType][]) {
-    const text = `UPDATE store_settings SET logo_media_id = $1, favicon_media_id = $2, currencies = $3,
-    meta_title = $4, meta_description = $5, meta_tags = $6, og_title = $7,
-    og_description = $8, og_media_id = $9, twitter_handle = $10, socials = $11::JSON, max_checkout_quantity = $12,
-    store_email = $13, store_name = $14, store_number = $15, google = $16, address_line1 = $17,
-    address_line2 = $18, max_checkout_amount = $19 WHERE store_id = current_setting('app.current_store_id')::uuid RETURNING id`;
-
-    return {
-      text,
-      values: [...args],
-    };
-  }
-
-  public setDefaultSettings(
-    phoneNumber: string,
-    email: string,
-    storeName: string,
-    currencies: string,
-    systemCurrency: CurrencyType
-  ) {
-    const text = `INSERT INTO store_settings (
-      store_id, store_number, store_email, store_name, tax,
-      max_checkout_quantity, max_checkout_amount, currencies, system_currency, socials
-      )
-    VALUES (
-      current_setting('app.current_store_id')::uuid,
-      $1, $2, $3, 0, 10, 9999, $4, $5,
-      '[
-      {
-        "url": "https://www.facebook.com/",
-        "icon": {"value": "FacebookIcon"}
-      },
-      {
-        "url": "https://twitter.com/",
-        "icon": {"value": "TwitterIcon"}
-      },
-      {
-        "url": "https://www.instagram.com/",
-        "icon": {"value": "InstagramIcon"}
-      }
-    ]')`;
-
-    return {
-      text,
-      values: [phoneNumber, email, storeName, currencies, systemCurrency],
     };
   }
 }

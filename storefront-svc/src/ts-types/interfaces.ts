@@ -544,13 +544,6 @@ export interface SettingsType {
     code: string;
     name_plural: string;
   };
-  socials?: {
-    url: string;
-    icon: {
-      value: string;
-      label: string;
-    };
-  };
   maxCheckoutQuantity?: number;
   maxCheckoutAmount?: number;
   webmanifest?: WebmanifestType;

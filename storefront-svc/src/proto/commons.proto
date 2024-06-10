@@ -19,12 +19,6 @@ message Icon {
     string value = 1;
 }
 
-message Social {
-    string url = 1;
-    Icon icon = 2;
-}
-
-
 message Unit {
     string unit = 1;
 }

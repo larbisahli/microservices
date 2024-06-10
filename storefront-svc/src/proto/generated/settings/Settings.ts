@@ -17,10 +17,6 @@ import type {
   GoogleAnalytics__Output as _commons_GoogleAnalytics__Output,
 } from '../commons/GoogleAnalytics';
 import type {
-  Social as _commons_Social,
-  Social__Output as _commons_Social__Output,
-} from '../commons/Social';
-import type {
   Seo as _commons_Seo,
   Seo__Output as _commons_Seo__Output,
 } from '../commons/Seo';
@@ -42,14 +38,13 @@ export interface Settings {
   defaultCurrency?: _commons_Currency | null;
   locales?: _language_Language[];
   google?: _commons_GoogleAnalytics | null;
-  socials?: _commons_Social[];
   maxCheckoutQuantity?: number;
   maxCheckoutAmount?: number;
   seo?: _commons_Seo | null;
   alias?: string;
   storeId?: string;
-  tax?: _tax_Tax | null;
   templateId?: string;
+  tax?: _tax_Tax | null;
 }
 
 export interface Settings__Output {
@@ -65,12 +60,11 @@ export interface Settings__Output {
   defaultCurrency: _commons_Currency__Output | null;
   locales: _language_Language__Output[];
   google: _commons_GoogleAnalytics__Output | null;
-  socials: _commons_Social__Output[];
   maxCheckoutQuantity: number;
   maxCheckoutAmount: number;
   seo: _commons_Seo__Output | null;
   alias: string;
   storeId: string;
-  tax: _tax_Tax__Output | null;
   templateId: string;
+  tax: _tax_Tax__Output | null;
 }
