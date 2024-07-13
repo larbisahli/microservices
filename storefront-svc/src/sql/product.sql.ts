@@ -479,7 +479,7 @@ export default class ProductQueryString extends CommonQueryString {
     ARRAY((SELECT json_build_object('image', photo.image_path, 'placeholder', photo.placeholder_path) FROM media AS photo WHERE
     photo.store_id = current_setting('app.current_store_id')::uuid AND photo.id = (SELECT media_id FROM product_media AS gal
     WHERE gal.store_id = current_setting('app.current_store_id')::uuid AND gal.product_id = pd.id AND gal.is_thumbnail = true))) AS thumbnail
-    FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.include_in_homepage IS TRUE AND pd.published IS TRUE`;
+    FROM product AS pd WHERE pd.store_id = current_setting('app.current_store_id')::uuid AND pd.published IS TRUE`;
 
     return {
       name: 'get-popular-products',

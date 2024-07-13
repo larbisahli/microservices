@@ -116,7 +116,6 @@ export interface CategoryType extends SharedValues {
   name: Scalars['String'];
   description: Nullable<Scalars['String']>;
   active: Scalars['Boolean'];
-  includeInMenu: Scalars['Boolean'];
   level: Scalars['Int'];
   position: Scalars['Int'];
   thumbnail: ImageType[];

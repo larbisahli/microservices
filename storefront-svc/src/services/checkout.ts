@@ -217,7 +217,7 @@ export default class CheckoutHandler extends PostgresClient {
             : grandTotalExclTax;
       } else if (discountType === CouponDiscountsType.Percentage) {
         const value = roundTo3(
-          Number(grandTotalExclTax) * (Number(discountValue) / 100)
+          Number(grandTotalInclTax) * (Number(discountValue) / 100)
         );
         totalDiscount = value;
         grandTotalInclTax -= value;
