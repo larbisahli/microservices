@@ -48,6 +48,10 @@ import LayoutHandler from './layout';
 import { LayoutRequest } from '@proto/generated/layout/LayoutRequest';
 import { Layout } from '@proto/generated/layout/Layout';
 import { LayoutResponse } from '@proto/generated/layout/LayoutResponse';
+import PaymentHandler from './payment';
+import { PaymentRequest } from '@proto/generated/payment/PaymentRequest';
+import { PaymentResponse } from '@proto/generated/payment/PaymentResponse';
+import { Payment } from '@proto/generated/payment/Payment';
 
 const PROTO_PATH = './dist/proto/serviceRoutes.proto';
 
@@ -80,6 +84,7 @@ export const {
   PageServiceRoutes,
   CheckoutServiceRoutes,
   ShippingServiceRoutes,
+  PaymentServiceRoutes,
   LayoutServiceRoutes,
 } = ServiceRoutes;
 
@@ -100,6 +105,7 @@ class gRPC extends grpc.Server {
     protected pageHandler: PageHandler,
     protected checkoutHandler: CheckoutHandler,
     protected shippingHandler: ShippingHandler,
+    protected paymentHandler: PaymentHandler,
     protected cartHandler: CartHandler,
     protected layoutHandler: LayoutHandler
   ) {
@@ -136,6 +142,10 @@ class gRPC extends grpc.Server {
 
     this.addService(ShippingServiceRoutes.service, {
       getAvailableShippings: this.getAvailableShippings,
+    });
+
+    this.addService(PaymentServiceRoutes.service, {
+      getAvailablePayments: this.getAvailablePayments,
     });
 
     this.addService(LayoutServiceRoutes.service, {
@@ -338,6 +348,22 @@ class gRPC extends grpc.Server {
       response: { shippings },
     } = await this.shippingHandler.getShippings(call);
     callback(error, { shippings });
+  };
+
+  /**
+   * Available Payments request handler.
+   * @param {EventEmitter} call Call object for the handler to process
+   * @param {function(Error, { payments: Shipping[] | null })} callback Response callback
+   */
+  protected getAvailablePayments = async (
+    call: grpc.ServerUnaryCall<PaymentRequest, PaymentResponse>,
+    callback: grpc.sendUnaryData<{ payments: Payment[] | [] }>
+  ) => {
+    const {
+      error,
+      response: { payments },
+    } = await this.paymentHandler.getPayments(call);
+    callback(error, { payments });
   };
 
   /**

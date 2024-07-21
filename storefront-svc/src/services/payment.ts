@@ -1,4 +1,3 @@
-import PostgresClient from '@database';
 import {
   ServerErrorResponse,
   ServerUnaryCall,
@@ -6,29 +5,34 @@ import {
 } from '@grpc/grpc-js';
 import { Service } from 'typedi';
 import { Status } from '@grpc/grpc-js/build/src/constants';
-import { StipePaymentRequest } from '@proto/generated/payment/StipePaymentRequest';
-import { StipePaymentResponse } from '@proto/generated/payment/StipePaymentResponse';
-import { Stripe as StripeRpcType } from '@proto/generated/payment/Stripe';
+import PostgresClient from '@database';
 import { CryptoUtils } from '@core';
+import PaymentRepository from '@repository/payment.repository';
+import { PaymentRequest } from '@proto/generated/payment/PaymentRequest';
+import { PaymentResponse } from '@proto/generated/payment/PaymentResponse';
+import { Payment } from '@proto/generated/payment/Payment';
 
 @Service()
-export default class ConfigHandler extends PostgresClient {
+export default class PaymentHandler extends PostgresClient {
   /**
-   * @param {SettingsQueries} settingsQueries
+   * @param {PaymentRepository} paymentRepository
    */
-  constructor(protected cryptoUtils: CryptoUtils) {
+  constructor(
+    protected paymentRepository: PaymentRepository,
+    protected cryptoUtils: CryptoUtils
+  ) {
     super();
   }
 
   /**
-   * @param { ServerUnaryCall<StipePaymentRequest, StipePaymentResponse>} call
-   * @returns {Promise<Settings__Output>}
+   * @param { ServerUnaryCall<PaymentRequest, PaymentResponse>} call
+   * @returns {Promise<{payment: Payment}>}
    */
-  public getStripeClientSecret = async (
-    call: ServerUnaryCall<StipePaymentRequest, StipePaymentResponse>
+  public getPayments = async (
+    call: ServerUnaryCall<PaymentRequest, PaymentResponse>
   ): Promise<{
     error: ServerErrorResponse | Partial<StatusObject> | null;
-    response: { results: StripeRpcType | null };
+    response: { payments: Payment[] | [] };
   }> => {
     const { alias, suid } = call.request;
 
@@ -38,7 +42,7 @@ export default class ConfigHandler extends PostgresClient {
           code: Status.CANCELLED,
           details: 'Store identifier is not defined',
         },
-        response: { results: null },
+        response: { payments: [] },
       };
     }
 
@@ -55,12 +59,27 @@ export default class ConfigHandler extends PostgresClient {
           code: Status.CANCELLED,
           details: 'store identifier is not defined',
         },
-        response: { results: null },
+        response: { payments: [] },
       };
     }
 
     try {
-      return { response: { results: {} }, error: null };
+      /** Check if resource is in the cache store */
+      const { payments, error } = await this.paymentRepository.getPayments(
+        storeId
+      );
+
+      if (error) {
+        return {
+          error: {
+            code: Status.FAILED_PRECONDITION,
+            details: error.message,
+          },
+          response: { payments: [] },
+        };
+      }
+
+      return { response: { payments }, error: null };
     } catch (error: any) {
       const message = error?.message as string;
       return {
@@ -68,7 +87,7 @@ export default class ConfigHandler extends PostgresClient {
           code: Status.FAILED_PRECONDITION,
           details: message,
         },
-        response: { results: null },
+        response: { payments: [] },
       };
     }
   };

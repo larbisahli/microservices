@@ -10,8 +10,8 @@ type SubtypeConstructor<
 
 export interface ProtoGrpcType {
   payment: {
-    StipePaymentRequest: MessageTypeDefinition;
-    StipePaymentResponse: MessageTypeDefinition;
-    Stripe: MessageTypeDefinition;
+    Payment: MessageTypeDefinition;
+    PaymentRequest: MessageTypeDefinition;
+    PaymentResponse: MessageTypeDefinition;
   };
 }

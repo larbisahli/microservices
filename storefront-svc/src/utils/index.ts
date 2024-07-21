@@ -16,3 +16,6 @@ export const roundToTwoPlaces = (number: number, showDecimalZeros = false) => {
     ? numberWithDecimalZeroes
     : parseFloat(numberWithDecimalZeroes);
 };
+
+export const base64EncoderBuffer = (data: any) =>
+  Buffer.from(JSON.stringify(data), 'utf-8').toString('base64');

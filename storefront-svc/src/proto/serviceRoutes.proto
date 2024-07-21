@@ -38,10 +38,6 @@ service ConfigServiceRoutes {
   rpc getConfig(ConfigRequest)                           returns (ConfigResponse);
 }
 
-service PaymentServiceRoutes {
-  rpc getStripeClientSecret(StipePaymentRequest)         returns (StipePaymentResponse);
-}
-
 service CheckoutServiceRoutes {
   rpc getClientCart(CartRequest)                         returns (CartResponse);
   rpc getClientCheckout(CheckoutRequest)                 returns (CheckoutResponse);
@@ -49,6 +45,10 @@ service CheckoutServiceRoutes {
 
 service ShippingServiceRoutes {
   rpc getAvailableShippings(ShippingRequest)             returns (ShippingResponse);
+}
+
+service PaymentServiceRoutes {
+  rpc getAvailablePayments(PaymentRequest)               returns (PaymentResponse);
 }
 
 service LayoutServiceRoutes {

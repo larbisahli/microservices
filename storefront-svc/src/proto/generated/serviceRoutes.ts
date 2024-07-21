@@ -153,9 +153,9 @@ export interface ProtoGrpcType {
     PageResponse: MessageTypeDefinition;
   };
   payment: {
-    StipePaymentRequest: MessageTypeDefinition;
-    StipePaymentResponse: MessageTypeDefinition;
-    Stripe: MessageTypeDefinition;
+    Payment: MessageTypeDefinition;
+    PaymentRequest: MessageTypeDefinition;
+    PaymentResponse: MessageTypeDefinition;
   };
   product: {
     CategoryProductsRequest: MessageTypeDefinition;

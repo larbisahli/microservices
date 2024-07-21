@@ -3,70 +3,70 @@
 import type * as grpc from '@grpc/grpc-js';
 import type { MethodDefinition } from '@grpc/proto-loader';
 import type {
-  StipePaymentRequest as _payment_StipePaymentRequest,
-  StipePaymentRequest__Output as _payment_StipePaymentRequest__Output,
-} from '../payment/StipePaymentRequest';
+  PaymentRequest as _payment_PaymentRequest,
+  PaymentRequest__Output as _payment_PaymentRequest__Output,
+} from '../payment/PaymentRequest';
 import type {
-  StipePaymentResponse as _payment_StipePaymentResponse,
-  StipePaymentResponse__Output as _payment_StipePaymentResponse__Output,
-} from '../payment/StipePaymentResponse';
+  PaymentResponse as _payment_PaymentResponse,
+  PaymentResponse__Output as _payment_PaymentResponse__Output,
+} from '../payment/PaymentResponse';
 
 export interface PaymentServiceRoutesClient extends grpc.Client {
-  getStripeClientSecret(
-    argument: _payment_StipePaymentRequest,
+  getAvailablePayments(
+    argument: _payment_PaymentRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_payment_StipePaymentResponse__Output>
+    callback: grpc.requestCallback<_payment_PaymentResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStripeClientSecret(
-    argument: _payment_StipePaymentRequest,
+  getAvailablePayments(
+    argument: _payment_PaymentRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_payment_StipePaymentResponse__Output>
+    callback: grpc.requestCallback<_payment_PaymentResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStripeClientSecret(
-    argument: _payment_StipePaymentRequest,
+  getAvailablePayments(
+    argument: _payment_PaymentRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_payment_StipePaymentResponse__Output>
+    callback: grpc.requestCallback<_payment_PaymentResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStripeClientSecret(
-    argument: _payment_StipePaymentRequest,
-    callback: grpc.requestCallback<_payment_StipePaymentResponse__Output>
+  getAvailablePayments(
+    argument: _payment_PaymentRequest,
+    callback: grpc.requestCallback<_payment_PaymentResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStripeClientSecret(
-    argument: _payment_StipePaymentRequest,
+  getAvailablePayments(
+    argument: _payment_PaymentRequest,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_payment_StipePaymentResponse__Output>
+    callback: grpc.requestCallback<_payment_PaymentResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStripeClientSecret(
-    argument: _payment_StipePaymentRequest,
+  getAvailablePayments(
+    argument: _payment_PaymentRequest,
     metadata: grpc.Metadata,
-    callback: grpc.requestCallback<_payment_StipePaymentResponse__Output>
+    callback: grpc.requestCallback<_payment_PaymentResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStripeClientSecret(
-    argument: _payment_StipePaymentRequest,
+  getAvailablePayments(
+    argument: _payment_PaymentRequest,
     options: grpc.CallOptions,
-    callback: grpc.requestCallback<_payment_StipePaymentResponse__Output>
+    callback: grpc.requestCallback<_payment_PaymentResponse__Output>
   ): grpc.ClientUnaryCall;
-  getStripeClientSecret(
-    argument: _payment_StipePaymentRequest,
-    callback: grpc.requestCallback<_payment_StipePaymentResponse__Output>
+  getAvailablePayments(
+    argument: _payment_PaymentRequest,
+    callback: grpc.requestCallback<_payment_PaymentResponse__Output>
   ): grpc.ClientUnaryCall;
 }
 
 export interface PaymentServiceRoutesHandlers
   extends grpc.UntypedServiceImplementation {
-  getStripeClientSecret: grpc.handleUnaryCall<
-    _payment_StipePaymentRequest__Output,
-    _payment_StipePaymentResponse
+  getAvailablePayments: grpc.handleUnaryCall<
+    _payment_PaymentRequest__Output,
+    _payment_PaymentResponse
   >;
 }
 
 export interface PaymentServiceRoutesDefinition extends grpc.ServiceDefinition {
-  getStripeClientSecret: MethodDefinition<
-    _payment_StipePaymentRequest,
-    _payment_StipePaymentResponse,
-    _payment_StipePaymentRequest__Output,
-    _payment_StipePaymentResponse__Output
+  getAvailablePayments: MethodDefinition<
+    _payment_PaymentRequest,
+    _payment_PaymentResponse,
+    _payment_PaymentRequest__Output,
+    _payment_PaymentResponse__Output
   >;
 }

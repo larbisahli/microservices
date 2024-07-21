@@ -20,3 +20,4 @@ export { default as AnalyticsQueries } from './analytics.sql';
 export { default as DeliveryTimeQueries } from './deliveryTime.sql';
 export { default as LanguageQueries } from './language.sql';
 export { default as LayoutQueryString } from './layout.sql';
+export { default as PaymentQueryString } from './payment.sql';

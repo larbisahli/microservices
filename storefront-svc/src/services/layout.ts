@@ -20,6 +20,7 @@ import { Layout } from '@proto/generated/layout/Layout';
 import { LayoutRequest } from '@proto/generated/layout/LayoutRequest';
 import { LayoutResponse } from '@proto/generated/layout/LayoutResponse';
 import { PoolClient } from 'pg';
+import { base64EncoderBuffer } from '@utils/index';
 
 @Service()
 export default class LayoutHandler extends PostgresClient {
@@ -110,12 +111,8 @@ export default class LayoutHandler extends PostgresClient {
           moduleName,
           position,
           moduleGroup,
-          styles: Buffer.from(JSON.stringify(styles), 'utf-8').toString(
-            'base64'
-          ),
-          data: Buffer.from(JSON.stringify(MainData), 'utf-8').toString(
-            'base64'
-          ),
+          styles: base64EncoderBuffer(styles),
+          data: base64EncoderBuffer(MainData),
         });
       }
 
@@ -266,9 +263,7 @@ export default class LayoutHandler extends PostgresClient {
         layoutName,
         title,
         // Encode the object to a base64 string
-        settings: Buffer.from(JSON.stringify(themeSettings), 'utf-8').toString(
-          'base64'
-        ),
+        settings: base64EncoderBuffer(themeSettings),
       } as { [key: string]: any };
 
       const getCommonComponents = await this.getPageCommonLayout({
@@ -328,12 +323,8 @@ export default class LayoutHandler extends PostgresClient {
           moduleName,
           moduleGroup,
           position,
-          styles: Buffer.from(JSON.stringify(styles), 'utf-8').toString(
-            'base64'
-          ),
-          data: Buffer.from(JSON.stringify(MainData), 'utf-8').toString(
-            'base64'
-          ),
+          styles: base64EncoderBuffer(styles),
+          data: base64EncoderBuffer(MainData),
         });
       }
 
